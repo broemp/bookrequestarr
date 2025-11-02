@@ -19,17 +19,41 @@ A modern, self-hosted web application for managing book requests. Similar to Ove
 
 ## 📸 Screenshots
 
-<!-- TODO: Add screenshots here -->
-*Screenshots coming soon...*
+> **Note**: Screenshots are captured and available in the repository. The following images showcase the main features of Bookrequestarr.
 
 ### Dashboard
-*Overview of your book requests and statistics*
+![Dashboard](static/screenshots/dashboard.png)
 
-### Search
-*Search for books with a beautiful, responsive interface*
+*Overview of your book requests, trending books, and statistics at a glance. The dashboard shows popular books from Hardcover's trending list and provides quick stats on your request status.*
+
+### Search Books
+![Search Books](static/screenshots/search.png)
+
+*Search for books with a clean, responsive interface. The search page includes filters to exclude collections, unreleased books, and non-ebook formats.*
+
+![Search Results](static/screenshots/search-results.png)
+
+*Browse search results with beautiful cover images and metadata. Each book displays its title, author, and publication year.*
+
+### Book Details
+![Book Details](static/screenshots/book-details.png)
+
+*View detailed book information including summary, genres, ratings, and request options. The modal provides all the information you need to make an informed request.*
+
+### My Requests
+![My Requests](static/screenshots/my-requests.png)
+
+*Track all your book requests and their current status. Filter by status (pending, approved, completed, rejected) to easily manage your requests.*
 
 ### Admin Panel
-*Manage requests, users, and application settings*
+![Admin Requests](static/screenshots/admin-requests.png)
+
+*Manage all user requests with approve, reject, and complete actions. Admins can see who requested each book and when, with quick action buttons for workflow management.*
+
+### Settings
+![Settings](static/screenshots/settings.png)
+
+*Manage your account preferences including preferred language for book requests. View your account information synced from your OIDC provider.*
 
 ## 🚀 Quick Start
 
@@ -151,6 +175,7 @@ HARDCOVER_API_KEY=your-api-key
 - **[Configuration Guide](docs/CONFIGURATION.md)** - Detailed configuration options and OIDC setup
 - **[Deployment Guide](docs/DEPLOYMENT.md)** - Docker deployment and production setup
 - **[Development Guide](docs/DEVELOPMENT.md)** - Local development and contribution guidelines
+- **[Roadmap](ROADMAP.md)** - Future features and development plans
 - **[Cursor AI Guide](docs/CURSOR_GUIDE.md)** - Information for AI assistants working on this codebase
 
 ## 🔧 Development
@@ -216,21 +241,27 @@ This project is licensed under the MIT License.
 
 ## 🐛 Known Issues & Roadmap
 
-### Planned Features
+### 🗺️ Roadmap
 
-- [ ] Audiobook support
-- [ ] Integration with download tools (z-library, Anna's Archive)
-- [ ] Advanced filtering for new releases (by genre, publisher)
-- [ ] Email notifications
-- [ ] Request comments and discussion
-- [ ] Book series tracking
-- [ ] Reading lists and collections
-- [ ] Multi-language UI support
+For a comprehensive view of planned features and development priorities, see the **[Roadmap](ROADMAP.md)**.
+
+**Highlights of upcoming features:**
+- 🎧 Audiobook support
+- 📥 Integration with download tools (Z-Library, Anna's Archive)
+- 💬 Request comments and discussion
+- 📚 Book series tracking
+- 📋 Reading lists and collections
+- 🌍 Multi-language UI support
+- 📧 Enhanced notifications (email, customizable templates)
+- 🤖 Automated request fulfillment
 
 ### Known Issues
 
 - SQLite doesn't support multiple concurrent writers (single instance only)
 - Some Hardcover API fields may change without notice
+- Large book cover images can slow down initial page loads
+
+See the [Roadmap](ROADMAP.md) for a complete list of known issues and planned fixes.
 
 ## 📞 Support
 
