@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { requests, books } from '$lib/server/db/schema';
 import { eq, inArray } from 'drizzle-orm';
+import { logger } from '$lib/server/logger';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	// Require authentication
@@ -50,7 +51,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		return json({ requestedBooks: bookLanguageMap });
 	} catch (error) {
-		console.error('Error checking requested books:', error);
+		logger.error('Error checking requested books', error instanceof Error ? error : undefined);
 		return json({ error: 'Failed to check requested books' }, { status: 500 });
 	}
 };

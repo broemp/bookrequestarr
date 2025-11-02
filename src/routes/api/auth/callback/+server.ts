@@ -2,6 +2,9 @@ import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getOIDCClient, getOIDCEndpoints, findOrCreateUser, createSession, isInGroup } from '$lib/server/auth';
 import { env } from '$env/dynamic/private';
+import { logger } from '$lib/server/logger';
+import { applyRateLimit } from '$lib/server/rateLimitMiddleware';
+import { RATE_LIMITS } from '$lib/server/rateLimit';
 
 interface OIDCUserInfo {
 	sub: string;
@@ -11,7 +14,15 @@ interface OIDCUserInfo {
 	groups?: string[];
 }
 
-export const GET: RequestHandler = async ({ url, cookies }) => {
+export const GET: RequestHandler = async (event) => {
+	const { url, cookies } = event;
+
+	// Apply rate limiting
+	const rateLimitResponse = applyRateLimit(event, RATE_LIMITS.AUTH);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	const code = url.searchParams.get('code');
 	const state = url.searchParams.get('state');
 	const storedState = cookies.get('oauth_state');
@@ -19,7 +30,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 	// Validate state and code verifier
 	if (!code || !state || !storedState || state !== storedState || !codeVerifier) {
-		console.error('Invalid OAuth state or missing code verifier');
+		logger.warn('Invalid OAuth state or missing code verifier', { hasCode: !!code, hasState: !!state, stateMatch: state === storedState });
 		throw redirect(302, '/login?error=invalid_state');
 	}
 
@@ -80,7 +91,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		if (error instanceof Response || (error && typeof error === 'object' && 'status' in error && 'location' in error)) {
 			throw error;
 		}
-		console.error('Error in OAuth callback:', error);
+		logger.error('Error in OAuth callback', error instanceof Error ? error : undefined);
 		redirect(302, '/login?error=auth_failed');
 	}
 };

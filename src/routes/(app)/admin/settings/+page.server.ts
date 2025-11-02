@@ -4,6 +4,7 @@ import { settings, users, requests } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { getCacheStats, cleanupExpiredCache, clearAllCache } from '$lib/server/cache';
+import { logger } from '$lib/server/logger';
 
 export const load: PageServerLoad = async () => {
 	// Get all settings
@@ -80,7 +81,7 @@ export const actions: Actions = {
 
 			return { success: true };
 		} catch (error) {
-			console.error('Error updating settings:', error);
+			logger.error('Error updating settings', error instanceof Error ? error : undefined);
 			return fail(500, { error: 'Failed to update settings' });
 		}
 	},
@@ -90,7 +91,7 @@ export const actions: Actions = {
 			const deletedCount = await cleanupExpiredCache();
 			return { success: true, message: `Cleaned up ${deletedCount} expired cache entries` };
 		} catch (error) {
-			console.error('Error cleaning up cache:', error);
+			logger.error('Error cleaning up cache', error instanceof Error ? error : undefined);
 			return fail(500, { error: 'Failed to cleanup cache' });
 		}
 	},
@@ -100,7 +101,7 @@ export const actions: Actions = {
 			await clearAllCache();
 			return { success: true, message: 'All cache entries cleared' };
 		} catch (error) {
-			console.error('Error clearing cache:', error);
+			logger.error('Error clearing cache', error instanceof Error ? error : undefined);
 			return fail(500, { error: 'Failed to clear cache' });
 		}
 	}

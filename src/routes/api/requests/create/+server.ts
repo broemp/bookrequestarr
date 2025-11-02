@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import { requests, books, users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { sendNotification, formatRequestNotification } from '$lib/server/notifications';
+import { logger } from '$lib/server/logger';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	// Require authentication
@@ -18,7 +19,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const language = formData.get('language') as string;
 		const specialNotes = formData.get('specialNotes') as string;
 
-		console.log('Creating request with bookId:', bookId, 'hardcoverId:', hardcoverId);
+		logger.debug('Creating book request', { bookId, hardcoverId, userId: locals.user.id });
 
 		if (!bookId && !hardcoverId) {
 			return new Response('Book ID or Hardcover ID is required', { status: 400 });
@@ -31,33 +32,32 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 		
 		if (!book && hardcoverId) {
-			console.log('Book not found by dbId, trying hardcoverId:', hardcoverId);
+			logger.debug('Book not found by dbId, trying hardcoverId', { hardcoverId });
 			[book] = await db.select().from(books).where(eq(books.hardcoverId, hardcoverId)).limit(1);
 		}
 
 		if (!book) {
-			console.error('Book not found in database with ID:', bookId, 'or hardcoverId:', hardcoverId);
+			logger.warn('Book not found in database', { bookId, hardcoverId });
 			return new Response('Book not found', { status: 404 });
 		}
 
-		console.log('Found book:', { id: book.id, hardcoverId: book.hardcoverId, title: book.title });
-		console.log('Creating request for userId:', locals.user.id, 'bookId:', book.id);
+		logger.debug('Found book for request', { bookId: book.id, hardcoverId: book.hardcoverId, title: book.title });
 
 		// Verify the user exists
 		const [userExists] = await db.select({ id: users.id }).from(users).where(eq(users.id, locals.user.id)).limit(1);
 		if (!userExists) {
-			console.error('User not found in database:', locals.user.id);
+			logger.error('User not found in database', undefined, { userId: locals.user.id });
 			return new Response('User not found', { status: 404 });
 		}
 
 		// Verify the book exists
 		const [bookExists] = await db.select({ id: books.id }).from(books).where(eq(books.id, book.id)).limit(1);
 		if (!bookExists) {
-			console.error('Book ID does not exist in books table:', book.id);
+			logger.error('Book ID does not exist in books table', undefined, { bookId: book.id });
 			return new Response('Book ID invalid', { status: 404 });
 		}
 
-		console.log('Both user and book verified, creating request...');
+		logger.debug('User and book verified, creating request');
 
 		// Check if user already has a request for this book in the same language
 		const { and } = await import('drizzle-orm');
@@ -75,7 +75,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		if (duplicateRequest) {
 			const langMsg = language ? ` in ${language}` : '';
-			console.log(`Book already requested${langMsg}`);
+			logger.info('Book already requested', { bookId: book.id, language, userId: locals.user.id });
 			return new Response(`This book has already been requested${langMsg}`, { status: 409 });
 		}
 
@@ -88,17 +88,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				specialNotes: specialNotes || null,
 				status: 'pending'
 			});
-			console.log('Request created successfully!');
+			logger.info('Book request created successfully', { bookId: book.id, userId: locals.user.id, language });
 		} catch (insertError: any) {
-			console.error('Failed to insert request:', insertError);
-			console.error('Error code:', insertError.code);
-			console.error('Error message:', insertError.message);
-			console.error('Attempted to insert:', {
+			logger.error('Failed to insert book request', insertError, {
 				userId: locals.user.id,
 				bookId: book.id,
 				language: language || null,
-				specialNotes: specialNotes || null,
-				status: 'pending'
+				errorCode: insertError.code
 			});
 			throw insertError;
 		}
@@ -121,7 +117,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		if (error && typeof error === 'object' && 'status' in error && 'location' in error) {
 			throw error;
 		}
-		console.error('Error creating request:', error);
+		logger.error('Error creating book request', error instanceof Error ? error : undefined, { userId: locals.user?.id });
 		return new Response('Failed to create request', { status: 500 });
 	}
 };

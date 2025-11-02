@@ -3,6 +3,7 @@ import { db } from '$lib/server/db';
 import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
+import { logger } from '$lib/server/logger';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) {
@@ -69,7 +70,7 @@ export const actions: Actions = {
 
 			return { success: true };
 		} catch (error) {
-			console.error('Error updating preferences:', error);
+			logger.error('Error updating preferences', error instanceof Error ? error : undefined, { userId: locals.user?.id });
 			return fail(500, { error: 'Failed to update preferences' });
 		}
 	}

@@ -1,11 +1,22 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { searchBooks } from '$lib/server/hardcover';
+import { logger } from '$lib/server/logger';
+import { applyRateLimit } from '$lib/server/rateLimitMiddleware';
+import { RATE_LIMITS } from '$lib/server/rateLimit';
 
-export const GET: RequestHandler = async ({ url, locals }) => {
+export const GET: RequestHandler = async (event) => {
+	const { url, locals } = event;
+
 	// Require authentication
 	if (!locals.user) {
 		return json({ error: 'Unauthorized' }, { status: 401 });
+	}
+
+	// Apply rate limiting
+	const rateLimitResponse = applyRateLimit(event, RATE_LIMITS.SEARCH);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
 	}
 
 	const query = url.searchParams.get('q');
@@ -20,7 +31,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		const results = await searchBooks(query, limit);
 		return json(results);
 	} catch (error) {
-		console.error('Error searching books:', error);
+		logger.error('Error searching books', error instanceof Error ? error : undefined, { query, limit });
 		return json({ error: 'Search failed' }, { status: 500 });
 	}
 };

@@ -157,11 +157,9 @@ Bookrequestarr supports multiple notification backends. Configure the ones you w
 ### Traefik
 
 ```yaml
-version: '3.8'
-
 services:
   bookrequestarr:
-    image: bookrequestarr:latest
+    image: ghcr.io/broemp/bookrequestarr:latest
     container_name: bookrequestarr
     restart: unless-stopped
     environment:

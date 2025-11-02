@@ -42,7 +42,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			dbId: cachedBook.id // Add database ID for request creation
 		});
 	} catch (error) {
-		console.error('Error fetching book details:', error);
+		const { logger } = await import('$lib/server/logger');
+		logger.error('Error fetching book details', error instanceof Error ? error : undefined, { hardcoverId: params.id });
 		return json({ error: 'Failed to fetch book details' }, { status: 500 });
 	}
 };

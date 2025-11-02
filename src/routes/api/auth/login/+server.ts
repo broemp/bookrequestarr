@@ -2,8 +2,19 @@ import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getOIDCClient, getOIDCEndpoints, generateToken } from '$lib/server/auth';
 import { generateCodeVerifier, CodeChallengeMethod } from 'arctic';
+import { logger } from '$lib/server/logger';
+import { applyRateLimit } from '$lib/server/rateLimitMiddleware';
+import { RATE_LIMITS } from '$lib/server/rateLimit';
 
-export const GET: RequestHandler = async ({ cookies, url }) => {
+export const GET: RequestHandler = async (event) => {
+	const { cookies, url } = event;
+
+	// Apply rate limiting
+	const rateLimitResponse = applyRateLimit(event, RATE_LIMITS.AUTH);
+	if (rateLimitResponse) {
+		return rateLimitResponse;
+	}
+
 	try {
 		const client = getOIDCClient();
 		const endpoints = getOIDCEndpoints();
@@ -43,7 +54,7 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
 		if (error instanceof Response || (error && typeof error === 'object' && 'status' in error && 'location' in error)) {
 			throw error;
 		}
-		console.error('Error initiating OIDC login:', error);
+		logger.error('Error initiating OIDC login', error instanceof Error ? error : undefined);
 		redirect(302, '/login?error=auth_failed');
 	}
 };

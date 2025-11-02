@@ -4,6 +4,11 @@ import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
 import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
+import { logger } from '$lib/server/logger';
+import { validateEnvOrExit } from '$lib/server/envValidation';
+
+// Validate environment variables at startup
+validateEnvOrExit();
 
 // Track if dev user has been created
 let devUserCreated = false;
@@ -28,7 +33,7 @@ async function ensureDevUser() {
 			role: 'admin',
 			preferredLanguage: 'English'
 		});
-		console.log('Created dev admin user');
+		logger.info('Created dev admin user');
 	}
 	
 	devUserCreated = true;

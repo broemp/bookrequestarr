@@ -16,13 +16,14 @@ DISABLE_AUTH=true
 2. Run the application:
 
 ```bash
-npm run db:migrate
 npm run dev
 ```
 
 3. Open your browser to `http://localhost:5173`
 
 You'll be automatically logged in as an admin user.
+
+**Note:** The database and migrations are now automatically created and applied on first startup. You no longer need to run `npm run db:migrate` manually unless you're developing new migrations.
 
 ### ⚠️ Important Security Notes
 
@@ -40,12 +41,15 @@ When you modify the schema:
 # Generate migration
 npm run db:generate
 
-# Apply migration
+# Migrations are automatically applied on next app startup
+# Or manually apply migration
 npm run db:migrate
 
 # Or push directly (development only)
 npm run db:push
 ```
+
+**Note:** The application automatically runs pending migrations on startup, so you typically don't need to run `npm run db:migrate` manually.
 
 ### 2. Code Quality
 

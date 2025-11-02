@@ -36,7 +36,33 @@ Open your browser to `http://localhost:3000`
 
 ## Docker Deployment
 
-### Build and Run
+### Using Pre-built Images (Recommended)
+
+Pull and run the latest image from GitHub Container Registry:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/broemp/bookrequestarr:latest
+
+# Run the container
+docker run -d \
+  --name bookrequestarr \
+  -p 3000:3000 \
+  -v $(pwd)/data:/app/data \
+  -e DATABASE_URL=/app/data/bookrequestarr.db \
+  -e OIDC_ISSUER=https://your-oidc-provider.com \
+  -e OIDC_CLIENT_ID=your-client-id \
+  -e OIDC_CLIENT_SECRET=your-client-secret \
+  -e OIDC_REDIRECT_URI=https://your-domain.com/api/auth/callback \
+  -e JWT_SECRET=$(openssl rand -base64 32) \
+  -e PUBLIC_APP_URL=https://your-domain.com \
+  -e HARDCOVER_API_KEY=your-api-key \
+  ghcr.io/broemp/bookrequestarr:latest
+```
+
+### Build from Source
+
+If you prefer to build the image yourself:
 
 ```bash
 # Build the image
@@ -155,12 +181,36 @@ docker compose logs -f bookrequestarr
 
 ### Updating the Application
 
+#### Using Docker Compose
+
 ```bash
 # Pull latest image
 docker compose pull
 
 # Restart with new image
 docker compose up -d
+
+# Remove old images
+docker image prune -f
+```
+
+#### Using Docker directly
+
+```bash
+# Pull latest image
+docker pull ghcr.io/broemp/bookrequestarr:latest
+
+# Stop and remove old container
+docker stop bookrequestarr
+docker rm bookrequestarr
+
+# Run new container with same configuration
+docker run -d \
+  --name bookrequestarr \
+  -p 3000:3000 \
+  -v $(pwd)/data:/app/data \
+  [... your environment variables ...] \
+  ghcr.io/broemp/bookrequestarr:latest
 
 # Remove old images
 docker image prune -f

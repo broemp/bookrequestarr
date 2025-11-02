@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getBooksBySeries } from '$lib/server/hardcover';
+import { logger } from '$lib/server/logger';
 
 export const GET: RequestHandler = async ({ params }) => {
 	const seriesId = params.id;
@@ -13,7 +14,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		const books = await getBooksBySeries(seriesId);
 		return json(books);
 	} catch (error) {
-		console.error('Error fetching series books:', error);
+		logger.error('Error fetching series books', error instanceof Error ? error : undefined, { seriesId });
 		return json({ error: 'Failed to fetch series books' }, { status: 500 });
 	}
 };

@@ -3,6 +3,7 @@ import { db } from '$lib/server/db';
 import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
+import { logger } from '$lib/server/logger';
 
 export const load: PageServerLoad = async () => {
 	// Get all users
@@ -53,7 +54,7 @@ export const actions: Actions = {
 
 			return { success: true };
 		} catch (error) {
-			console.error('Error creating user:', error);
+			logger.error('Error creating user', error instanceof Error ? error : undefined, { email, username });
 			return fail(500, { error: 'Failed to create user' });
 		}
 	},
@@ -77,7 +78,7 @@ export const actions: Actions = {
 
 			return { success: true };
 		} catch (error) {
-			console.error('Error promoting user:', error);
+			logger.error('Error promoting user', error instanceof Error ? error : undefined, { userId });
 			return fail(500, { error: 'Failed to promote user' });
 		}
 	}

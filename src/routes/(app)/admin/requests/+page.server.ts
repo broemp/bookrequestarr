@@ -4,6 +4,7 @@ import { requests, books, users, bookAuthors, authors } from '$lib/server/db/sch
 import { eq, desc, sql } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { sendNotification, formatRequestUpdateNotification } from '$lib/server/notifications';
+import { logger } from '$lib/server/logger';
 
 export const load: PageServerLoad = async () => {
 	// Get all requests with book and user details
@@ -101,7 +102,7 @@ export const actions: Actions = {
 
 			return { success: true };
 		} catch (error) {
-			console.error('Error updating request status:', error);
+			logger.error('Error updating request status', error instanceof Error ? error : undefined, { requestId });
 			return fail(500, { error: 'Failed to update request status' });
 		}
 	}

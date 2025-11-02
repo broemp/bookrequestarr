@@ -83,6 +83,12 @@ docker run -d \
   -v ./data:/app/data \
   -e DATABASE_URL=/app/data/bookrequestarr.db \
   -e HARDCOVER_API_KEY=your_api_key \
+  -e OIDC_ISSUER=https://your-oidc-provider.com \
+  -e OIDC_CLIENT_ID=your_client_id \
+  -e OIDC_CLIENT_SECRET=your_client_secret \
+  -e OIDC_REDIRECT_URI=http://localhost:3000/api/auth/callback \
+  -e JWT_SECRET=your_secure_random_string \
+  -e PUBLIC_APP_URL=http://localhost:3000 \
   ghcr.io/broemp/bookrequestarr:latest
 ```
 
@@ -127,17 +133,13 @@ docker run -d \
    # Edit .env with your configuration
    ```
 
-3. **Run database migrations**
-
-   ```bash
-   npm run db:migrate
-   ```
-
-4. **Start development server**
+3. **Start development server**
 
    ```bash
    npm run dev
    ```
+
+   **Note:** The database and all migrations are automatically created and applied on first startup. No manual migration steps required!
 
 #### Quick Development Mode (No OIDC Setup)
 
