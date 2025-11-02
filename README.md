@@ -77,8 +77,13 @@ docker pull ghcr.io/broemp/bookrequestarr:latest
 Then use it in your `docker-compose.yml` or run directly:
 
 ```bash
+# Create data directory
+mkdir -p data
+
+# Run container as current user to avoid permission issues
 docker run -d \
   --name bookrequestarr \
+  --user "$(id -u):$(id -g)" \
   -p 3000:3000 \
   -v ./data:/app/data \
   -e DATABASE_URL=/app/data/bookrequestarr.db \
@@ -111,12 +116,19 @@ docker run -d \
 3. **Start the application**
 
    ```bash
+   # Option A: Use the helper script (recommended)
+   ./start.sh
+   
+   # Option B: Start manually
+   export UID=$(id -u) GID=$(id -g)
    docker compose up -d
    ```
 
 4. **Access the application**
    
    Navigate to `http://localhost:3000`
+
+**Note:** The application runs as your current user to avoid permission issues. The database and data directory are created automatically with the correct permissions.
 
 ### Local Development
 

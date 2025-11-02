@@ -48,7 +48,10 @@ services:
       - DISABLE_AUTH=${DISABLE_AUTH:-false}
 
     volumes:
-      - bookrequestarr-data:/app/data
+      - ./data:/app/data
+    
+    # Run as the current user to avoid permission issues
+    user: "${UID:-1000}:${GID:-1000}"
 
     healthcheck:
       test:
@@ -72,7 +75,3 @@ services:
       - CHOWN
       - SETUID
       - SETGID
-
-volumes:
-  bookrequestarr-data:
-    driver: local

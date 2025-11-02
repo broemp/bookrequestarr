@@ -28,11 +28,18 @@ PUBLIC_APP_URL=http://localhost:3000
 
 4. **Start the application:**
 ```bash
+# Option A: Use the helper script (recommended)
+./start.sh
+
+# Option B: Start manually
+export UID=$(id -u) GID=$(id -g)
 docker compose up -d
 ```
 
 5. **Access the application:**
 Open your browser to `http://localhost:3000`
+
+**Note:** The application runs as your current user (UID:GID) to avoid permission issues with the data directory.
 
 ## Docker Deployment
 
@@ -44,9 +51,13 @@ Pull and run the latest image from GitHub Container Registry:
 # Pull the latest image
 docker pull ghcr.io/broemp/bookrequestarr:latest
 
+# Create data directory
+mkdir -p data
+
 # Run the container
 docker run -d \
   --name bookrequestarr \
+  --user "$(id -u):$(id -g)" \
   -p 3000:3000 \
   -v $(pwd)/data:/app/data \
   -e DATABASE_URL=/app/data/bookrequestarr.db \
@@ -68,9 +79,13 @@ If you prefer to build the image yourself:
 # Build the image
 docker build -t bookrequestarr .
 
+# Create data directory
+mkdir -p data
+
 # Run the container
 docker run -d \
   --name bookrequestarr \
+  --user "$(id -u):$(id -g)" \
   -p 3000:3000 \
   -v $(pwd)/data:/app/data \
   -e DATABASE_URL=/app/data/bookrequestarr.db \
