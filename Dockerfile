@@ -27,11 +27,8 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-# Install runtime dependencies for native modules
-RUN apk add --no-cache \
-    tini \
-    && addgroup -g 1001 -S nodejs \
-    && adduser -S nodejs -u 1001
+# Install runtime dependencies
+RUN apk add --no-cache tini
 
 # Copy package files
 COPY package.json package-lock.json ./
@@ -39,7 +36,7 @@ COPY package.json package-lock.json ./
 # Copy production node_modules from builder
 COPY --from=builder /app/node_modules ./node_modules
 
-# Copy entrypoint script (before switching to nodejs user)
+# Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
@@ -48,12 +45,8 @@ COPY --from=builder /app/build ./build
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
-# Create data directory for SQLite database
-RUN mkdir -p /app/data && \
-    chown -R nodejs:nodejs /app
-
-# Switch to non-root user
-USER nodejs
+# Note: No USER directive - user is set via docker-compose or --user flag
+# This allows the container to run as the host user, avoiding permission issues
 
 # Expose port
 EXPOSE 3000
