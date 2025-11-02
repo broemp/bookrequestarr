@@ -39,6 +39,10 @@ COPY package.json package-lock.json ./
 # Copy production node_modules from builder
 COPY --from=builder /app/node_modules ./node_modules
 
+# Copy entrypoint script (before switching to nodejs user)
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Copy built application from builder
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/drizzle ./drizzle
@@ -63,8 +67,8 @@ ENV NODE_ENV=production \
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Use tini to handle signals properly
-ENTRYPOINT ["/sbin/tini", "--"]
+# Use tini to handle signals properly and run entrypoint script
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
 
 # Start the application
 CMD ["node", "build"]

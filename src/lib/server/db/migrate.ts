@@ -1,19 +1,38 @@
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import Database from 'better-sqlite3';
-import { existsSync, mkdirSync, readdirSync } from 'fs';
-import { dirname, join } from 'path';
+import { existsSync, mkdirSync, readdirSync, accessSync, constants } from 'fs';
+import { dirname, join, resolve } from 'path';
 import { logger } from '../logger';
 
 /**
- * Ensures the database directory exists
+ * Ensures the database directory exists and is writable
  */
 function ensureDatabaseDirectory(dbPath: string): void {
 	const dir = dirname(dbPath);
-	if (!existsSync(dir)) {
-		logger.info(`Creating database directory: ${dir}`);
-		mkdirSync(dir, { recursive: true });
+	
+	// Resolve to absolute path
+	const absoluteDir = resolve(dir);
+	
+	if (!existsSync(absoluteDir)) {
+		logger.info(`Creating database directory: ${absoluteDir}`);
+		try {
+			mkdirSync(absoluteDir, { recursive: true, mode: 0o755 });
+		} catch (error) {
+			logger.error(`Failed to create database directory: ${absoluteDir}`, error);
+			throw new Error(`Cannot create database directory: ${error instanceof Error ? error.message : String(error)}`);
+		}
 	}
+	
+	// Verify directory is writable
+	try {
+		accessSync(absoluteDir, constants.W_OK | constants.R_OK);
+	} catch (error) {
+		logger.error(`Database directory is not writable: ${absoluteDir}`, error);
+		throw new Error(`Database directory is not writable: ${absoluteDir}. Please check permissions.`);
+	}
+	
+	logger.info(`Database directory verified: ${absoluteDir}`);
 }
 
 /**
@@ -43,19 +62,29 @@ function hasMigrations(migrationsPath: string): boolean {
  * This should be called once at application startup
  */
 export async function initializeDatabase(dbPath: string): Promise<void> {
-	const isNewDatabase = !databaseExists(dbPath);
+	// Resolve to absolute path
+	const absoluteDbPath = resolve(dbPath);
+	const isNewDatabase = !databaseExists(absoluteDbPath);
 	
 	if (isNewDatabase) {
-		logger.info('Database file not found, creating new database');
+		logger.info(`Database file not found, creating new database at: ${absoluteDbPath}`);
 	} else {
-		logger.info('Database file found, checking for pending migrations');
+		logger.info(`Database file found at: ${absoluteDbPath}, checking for pending migrations`);
 	}
 
-	// Ensure the database directory exists
-	ensureDatabaseDirectory(dbPath);
+	// Ensure the database directory exists and is writable
+	ensureDatabaseDirectory(absoluteDbPath);
 
 	// Create database connection
-	const client = new Database(dbPath);
+	let client: Database.Database;
+	try {
+		client = new Database(absoluteDbPath);
+		logger.info('Database connection established successfully');
+	} catch (error) {
+		logger.error(`Failed to open database at ${absoluteDbPath}`, error);
+		throw new Error(`Cannot open database: ${error instanceof Error ? error.message : String(error)}`);
+	}
+	
 	const db = drizzle(client);
 
 	// Determine migrations path (relative to project root)
