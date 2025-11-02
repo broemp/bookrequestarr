@@ -66,6 +66,28 @@ A modern, self-hosted web application for managing book requests. Similar to Ove
 
 ### Docker Deployment (Recommended)
 
+#### Option 1: Using Pre-built Images (Easiest)
+
+Pull the latest image from GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/broemp/bookrequestarr:latest
+```
+
+Then use it in your `docker-compose.yml` or run directly:
+
+```bash
+docker run -d \
+  --name bookrequestarr \
+  -p 3000:3000 \
+  -v ./data:/app/data \
+  -e DATABASE_URL=/app/data/bookrequestarr.db \
+  -e HARDCOVER_API_KEY=your_api_key \
+  ghcr.io/broemp/bookrequestarr:latest
+```
+
+#### Option 2: Build from Source
+
 1. **Clone the repository**
 
    ```bash
@@ -138,6 +160,16 @@ See the [Configuration Guide](docs/CONFIGURATION.md) for detailed setup instruct
 - Environment variables reference
 - Security best practices
 
+### GitHub Actions & CI/CD
+
+The project includes automated Docker builds via GitHub Actions. See the [GitHub Actions Setup Guide](docs/GITHUB_ACTIONS_SETUP.md) for:
+
+- Repository settings configuration
+- Workflow permissions setup
+- Container registry access
+- Attestation verification
+- Troubleshooting common issues
+
 ### Required Environment Variables
 
 ```env
@@ -175,7 +207,7 @@ HARDCOVER_API_KEY=your-api-key
 - **[Configuration Guide](docs/CONFIGURATION.md)** - Detailed configuration options and OIDC setup
 - **[Deployment Guide](docs/DEPLOYMENT.md)** - Docker deployment and production setup
 - **[Development Guide](docs/DEVELOPMENT.md)** - Local development and contribution guidelines
-- **[Roadmap](ROADMAP.md)** - Future features and development plans
+- **[Roadmap](docs/ROADMAP.md)** - Future features and development plans
 - **[Cursor AI Guide](docs/CURSOR_GUIDE.md)** - Information for AI assistants working on this codebase
 
 ## 🔧 Development
@@ -243,7 +275,7 @@ This project is licensed under the MIT License.
 
 ### 🗺️ Roadmap
 
-For a comprehensive view of planned features and development priorities, see the **[Roadmap](ROADMAP.md)**.
+For a comprehensive view of planned features and development priorities, see the **[Roadmap](docs/ROADMAP.md)**.
 
 **Highlights of upcoming features:**
 - 🎧 Audiobook support
@@ -261,7 +293,7 @@ For a comprehensive view of planned features and development priorities, see the
 - Some Hardcover API fields may change without notice
 - Large book cover images can slow down initial page loads
 
-See the [Roadmap](ROADMAP.md) for a complete list of known issues and planned fixes.
+See the [Roadmap](docs/ROADMAP.md) for a complete list of known issues and planned fixes.
 
 ## 📞 Support
 

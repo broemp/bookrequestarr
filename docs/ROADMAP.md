@@ -58,26 +58,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Notification for request status changes (approved, completed, rejected)
 - [ ] Admin notification aggregation (daily digest option)
 
-### Milestone 4: Request Comments and Discussion
-
-#### Comment System
-- [ ] Add comment system to requests
-- [ ] Allow users to add notes/updates to their requests
-- [ ] Admin comments visible to requesters
-- [ ] Email notifications for new comments
-- [ ] Comment history and threading
-
-### Milestone 5: Reading Lists and Collections
-
-#### List Management
-- [ ] User-created reading lists
-- [ ] Public/private list visibility
-- [ ] Share lists with other users
-- [ ] "Request all books in list" bulk action
-- [ ] Curated lists by admins
-- [ ] Import/export lists
-
-### Milestone 6: Enhanced Admin Features
+### Milestone 4: Enhanced Admin Features
 
 #### Admin Tools
 - [ ] Bulk request actions (approve/reject multiple)
@@ -87,7 +68,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Custom request statuses
 - [ ] Request due dates and SLA tracking
 
-### Milestone 7: Download Tool Integration
+### Milestone 5: Download Tool Integration
 
 #### Download Automation
 - [ ] Z-Library integration for automatic downloads
@@ -97,7 +78,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Download status tracking
 - [ ] Automatic format conversion (epub, mobi, pdf)
 
-### Milestone 8: E-Reader Integration
+### Milestone 6: E-Reader Integration
 
 #### E-Reader Support
 - [ ] Send to Kindle support
@@ -105,7 +86,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Direct email delivery to e-readers
 - [ ] Cloud storage integration (Google Drive, Dropbox)
 
-### Milestone 9: External Service Integration
+### Milestone 7: External Service Integration
 
 #### Service Integrations
 - [ ] Goodreads import/sync
@@ -114,7 +95,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] OpenLibrary fallback for metadata
 - [ ] ISBN lookup services
 
-### Milestone 10: Multi-language UI Support
+### Milestone 8: Multi-language UI Support
 
 #### Internationalization
 - [ ] Internationalization (i18n) framework
@@ -122,7 +103,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Community translation contributions
 - [ ] Language-specific book recommendations
 
-### Milestone 11: Advanced Dashboard
+### Milestone 9: Advanced Dashboard
 
 #### Dashboard Features
 - [ ] Customizable dashboard widgets
@@ -132,7 +113,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Genre-based recommendations
 - [ ] "Books like this" suggestions
 
-### Milestone 12: Mobile App
+### Milestone 10: Mobile App
 
 #### Mobile Experience
 - [ ] Progressive Web App (PWA) enhancements
@@ -141,7 +122,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Offline mode for browsing requests
 - [ ] Barcode scanner for ISBN lookup
 
-### Milestone 13: Automated Request Fulfillment
+### Milestone 11: Automated Request Fulfillment
 
 #### Automation Features
 - [ ] Automatic download queue management
@@ -151,7 +132,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Failed download retry logic
 - [ ] Success/failure reporting
 
-### Milestone 14: Advanced User Management
+### Milestone 12: Advanced User Management
 
 #### User Management
 - [ ] User roles and permissions system
@@ -160,7 +141,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Request approval workflows
 - [ ] Delegated admin permissions
 
-### Milestone 15: Analytics and Reporting
+### Milestone 13: Analytics and Reporting
 
 #### Reporting Features
 - [ ] Request trends and statistics
@@ -170,17 +151,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Genre popularity analysis
 - [ ] Export reports (CSV, PDF)
 
-### Milestone 16: Social Features
-
-#### Community Features
-- [ ] User profiles and bios
-- [ ] Follow other users
-- [ ] Book reviews and ratings
-- [ ] Discussion forums
-- [ ] Book clubs and reading groups
-- [ ] Activity feed
-
-### Milestone 17: Database Enhancements
+### Milestone 14: Database Enhancements
 
 #### Database Improvements
 - [ ] PostgreSQL support (for multi-instance deployments)
@@ -189,7 +160,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Database backup and restore tools
 - [ ] Read replicas support
 
-### Milestone 18: Performance and Scalability
+### Milestone 15: Performance and Scalability
 
 #### Performance Improvements
 - [ ] Redis caching layer
@@ -199,7 +170,7 @@ Bookrequestarr is currently in **active development** with core functionality im
 - [ ] Horizontal scaling support
 - [ ] Load balancing configuration
 
-### Milestone 19: Security Enhancements
+### Milestone 16: Security Enhancements
 
 #### Security Features
 - [ ] Two-factor authentication (2FA)
@@ -217,12 +188,8 @@ These features are under consideration but not yet committed to the roadmap:
 - **Automatic Genre Detection**: AI-based genre classification for books without metadata
 - **Voice Search**: Voice-activated book search
 - **Reading Progress Tracking**: Sync with e-readers to track reading progress
-- **Book Lending System**: Share books between users with time limits
 - **Subscription Management**: Track and manage book subscription services
 - **Price Tracking**: Monitor book prices across platforms
-- **Wishlist Sharing**: Share wishlists with friends/family
-- **Gift Requests**: Allow users to request books as gifts for others
-- **Reading Challenges**: Create and participate in reading challenges
 
 ## 🤝 Contributing to the Roadmap
 

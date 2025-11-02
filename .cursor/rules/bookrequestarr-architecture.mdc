@@ -68,10 +68,27 @@ bookrequestarr/
 │   │   └── +layout.svelte    # Root layout
 │   ├── hooks.server.ts       # SvelteKit server hooks (auth, dev user)
 │   └── app.css               # Global styles
+├── docs/                     # Documentation (ALL docs go here)
+│   ├── CONFIGURATION.md      # Environment variables and OIDC setup
+│   ├── DEPLOYMENT.md         # Docker and production deployment
+│   ├── DEVELOPMENT.md        # Local development setup
+│   ├── CURSOR_GUIDE.md       # Comprehensive guide for AI assistants
+│   └── ROADMAP.md            # Feature roadmap and future plans
 ├── drizzle/                  # Database migrations
 ├── data/                     # SQLite database file
-└── static/                   # Static assets
+├── static/                   # Static assets
+└── README.md                 # Main user-facing documentation
 ```
+
+## Documentation Guidelines
+
+**IMPORTANT**: All documentation files MUST be placed in the `docs/` folder, except for `README.md` which stays in the root as the main entry point.
+
+- **User Documentation**: `README.md` (root), `docs/CONFIGURATION.md`, `docs/DEPLOYMENT.md`
+- **Developer Documentation**: `docs/DEVELOPMENT.md`, `docs/CURSOR_GUIDE.md`
+- **Project Planning**: `docs/ROADMAP.md`
+- **Never** create documentation files in the root directory (except README.md)
+- **Always** check if documentation already exists before creating new files
 
 ## Database Schema
 

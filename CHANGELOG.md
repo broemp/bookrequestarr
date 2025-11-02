@@ -76,7 +76,7 @@ Bookrequestarr is a self-hosted book request management system, similar to Overs
 - No download automation yet
 - English UI only
 
-See the [Roadmap](ROADMAP.md) for planned features and improvements.
+See the [Roadmap](docs/ROADMAP.md) for planned features and improvements.
 
 ---
 
@@ -97,5 +97,5 @@ See the [Roadmap](ROADMAP.md) for planned features and improvements.
 
 ---
 
-*For upcoming features and development plans, see [ROADMAP.md](ROADMAP.md)*
+*For upcoming features and development plans, see [ROADMAP.md](docs/ROADMAP.md)*
 
