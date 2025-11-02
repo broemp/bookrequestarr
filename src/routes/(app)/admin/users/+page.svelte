@@ -1,0 +1,156 @@
+<script lang="ts">
+	import type { PageData } from './$types';
+	import Card from '$lib/components/ui/card.svelte';
+	import Badge from '$lib/components/ui/badge.svelte';
+	import Button from '$lib/components/ui/button.svelte';
+	import Input from '$lib/components/ui/input.svelte';
+	import { User, Mail, Calendar, Shield, UserPlus } from 'lucide-svelte';
+	import { formatDistance } from 'date-fns';
+	import { enhance } from '$app/forms';
+
+	let { data }: { data: PageData } = $props();
+
+	let showCreateModal = $state(false);
+</script>
+
+<svelte:head>
+	<title>Admin: Users - Bookrequestarr</title>
+</svelte:head>
+
+<div class="space-y-6">
+	<div class="flex items-center justify-between">
+		<div>
+			<h1 class="mb-2 text-3xl font-bold">Manage Users</h1>
+			<p class="text-muted-foreground">View and manage user accounts</p>
+		</div>
+		<Button
+			onclick={() => {
+				showCreateModal = true;
+			}}
+		>
+			<UserPlus class="mr-2 h-4 w-4" />
+			Create User
+		</Button>
+	</div>
+
+	<!-- Users list -->
+	<div class="space-y-4">
+		{#each data.users as user}
+			<Card class="p-4">
+				<div class="flex items-start justify-between gap-4">
+					<div class="flex min-w-0 flex-1 items-start gap-4">
+						<div
+							class="bg-primary text-primary-foreground flex h-12 w-12 items-center justify-center rounded-full text-lg font-semibold"
+						>
+							{user.displayName.charAt(0).toUpperCase()}
+						</div>
+
+						<div class="min-w-0 flex-1">
+							<div class="mb-1 flex items-center gap-2">
+								<h3 class="truncate text-lg font-semibold">{user.displayName}</h3>
+								<Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+									{user.role}
+								</Badge>
+							</div>
+
+							<div class="text-muted-foreground space-y-1 text-sm">
+								<div class="flex items-center gap-2">
+									<Mail class="h-4 w-4" />
+									<span class="truncate">{user.email}</span>
+								</div>
+								<div class="flex items-center gap-2">
+									<User class="h-4 w-4" />
+									<span>@{user.username}</span>
+								</div>
+								<div class="flex items-center gap-2">
+									<Calendar class="h-4 w-4" />
+									<span>
+										Joined {formatDistance(new Date(user.createdAt), new Date(), {
+											addSuffix: true
+										})}
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="flex gap-2">
+						{#if user.role === 'user'}
+							<form method="POST" action="?/promoteUser" use:enhance>
+								<input type="hidden" name="userId" value={user.id} />
+								<Button type="submit" size="sm" variant="outline">
+									<Shield class="mr-2 h-4 w-4" />
+									Promote to Admin
+								</Button>
+							</form>
+						{/if}
+					</div>
+				</div>
+			</Card>
+		{/each}
+	</div>
+</div>
+
+<!-- Create user modal -->
+{#if showCreateModal}
+	<button
+		class="bg-background/80 fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+		onclick={() => {
+			showCreateModal = false;
+		}}
+		aria-label="Close modal"
+	>
+		<div
+			class="w-full max-w-md"
+			onclick={(e: MouseEvent) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+		>
+			<Card class="p-6">
+				<h2 class="mb-4 text-2xl font-bold">Create New User</h2>
+
+				<form method="POST" action="?/createUser" use:enhance class="space-y-4">
+					<div>
+						<label for="email" class="mb-2 block text-sm font-medium">Email</label>
+						<Input id="email" name="email" type="email" required placeholder="user@example.com" />
+					</div>
+
+					<div>
+						<label for="username" class="mb-2 block text-sm font-medium">Username</label>
+						<Input id="username" name="username" required placeholder="username" />
+					</div>
+
+					<div>
+						<label for="displayName" class="mb-2 block text-sm font-medium">Display Name</label>
+						<Input id="displayName" name="displayName" required placeholder="John Doe" />
+					</div>
+
+					<div>
+						<label for="role" class="mb-2 block text-sm font-medium">Role</label>
+						<select
+							id="role"
+							name="role"
+							class="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+						>
+							<option value="user">User</option>
+							<option value="admin">Admin</option>
+						</select>
+					</div>
+
+					<div class="flex gap-3">
+						<Button type="submit" class="flex-1">Create User</Button>
+						<Button
+							type="button"
+							variant="outline"
+							onclick={() => {
+								showCreateModal = false;
+							}}
+						>
+							Cancel
+						</Button>
+					</div>
+				</form>
+			</Card>
+		</div>
+	</button>
+{/if}

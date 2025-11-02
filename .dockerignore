@@ -1,0 +1,47 @@
+node_modules
+.svelte-kit
+build
+.env
+.env.*
+!.env.example
+data
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.log
+.git
+.gitignore
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Documentation (not needed in container)
+README.md
+DOCKER.md
+*.md
+!package.json
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Testing
+coverage
+.nyc_output
+test
+tests
+**/*.test.ts
+**/*.test.js
+**/*.spec.ts
+**/*.spec.js
+
+# Misc
+.DS_Store
+Thumbs.db
+.turbo
+docker-compose*.yml
+Dockerfile*
+

@@ -1,0 +1,131 @@
+# Bookrequestarr - Cursor AI Rules
+
+## Project Overview
+Bookrequestarr is a book request management system built with SvelteKit 2, Svelte 5, TypeScript, and Tailwind CSS 4. It integrates with the Hardcover API for book metadata and supports OIDC authentication.
+
+## Documentation Location
+- **Main README**: `/README.md` - User-facing documentation
+- **Configuration Guide**: `/docs/CONFIGURATION.md` - Environment variables and OIDC setup
+- **Deployment Guide**: `/docs/DEPLOYMENT.md` - Docker and production deployment
+- **Development Guide**: `/docs/DEVELOPMENT.md` - Local development setup
+- **Cursor AI Guide**: `/docs/CURSOR_GUIDE.md` - Comprehensive guide for AI assistants (READ THIS FIRST!)
+
+## Quick Reference
+
+### Technology Stack
+- **Frontend**: SvelteKit 2 with Svelte 5 (runes: `$state`, `$derived`, `$effect`, `$props`)
+- **Styling**: Tailwind CSS 4 with custom HSL color variables
+- **Backend**: SvelteKit API routes, SQLite with Drizzle ORM
+- **Auth**: OIDC with Arctic library, JWT in httpOnly cookies
+- **External API**: Hardcover GraphQL API
+
+### Key Files
+- `src/lib/server/db/schema.ts` - Database schema
+- `src/lib/server/hardcover.ts` - Hardcover API client
+- `src/lib/server/auth.ts` - Authentication utilities
+- `src/hooks.server.ts` - Server hooks (auth middleware)
+- `src/routes/(app)/` - Protected application routes
+- `src/routes/api/` - API endpoints
+
+### Code Style Guidelines
+1. **Prioritize readability, simplicity, and maintainability** (Go-style)
+2. Use **TypeScript strict mode** - avoid `any` types
+3. Use **Svelte 5 runes** for state management
+4. **Explicit error handling** with try-catch blocks
+5. **Structured logging** with context (IDs, operation types)
+6. Format code with **Prettier** before committing
+
+### Development Patterns
+
+#### API Endpoints
+```typescript
+// src/routes/api/feature/+server.ts
+import { json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+export const GET: RequestHandler = async ({ locals }) => {
+  if (!locals.user) {
+    return json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  // Your logic here
+  return json({ data: result });
+};
+```
+
+#### Svelte 5 Components
+```svelte
+<script lang="ts">
+  import type { PageData } from './$types';
+  let { data }: { data: PageData } = $props();
+  
+  let state = $state(initialValue);
+  let derived = $derived(state * 2);
+  
+  $effect(() => {
+    // Side effects
+  });
+</script>
+```
+
+#### Database Changes
+1. Update `src/lib/server/db/schema.ts`
+2. Run `npm run db:generate` to create migration
+3. Run `npm run db:migrate` to apply migration
+4. Update types in `src/lib/types/`
+
+### Important Notes
+- **Authentication**: Use `locals.user` for auth checks (set in `hooks.server.ts`)
+- **Hardcover API**: Always use introspection to verify field availability
+- **Caching**: API responses cached for 7 days by default
+- **Logging**: Use structured logging, don't log sensitive data
+- **Dev Mode**: Set `DISABLE_AUTH=true` for development (NEVER in production!)
+
+### Common Tasks
+- **Add new page**: Create in `src/routes/(app)/yourpage/+page.svelte`
+- **Add API endpoint**: Create in `src/routes/api/yourapi/+server.ts`
+- **Add DB table**: Update schema → generate migration → apply migration
+- **Add book field**: Update type → GraphQL query → cacheBook() → UI
+
+### Testing Commands
+- `npm run dev` - Start dev server
+- `npm run check` - Type checking
+- `npm run lint` - Linting
+- `npm run format` - Format code
+- `npm run db:studio` - Open database GUI
+
+## When Working on This Project
+1. **READ** `/docs/CURSOR_GUIDE.md` for comprehensive information
+2. **CHECK** existing patterns before implementing new features
+3. **FOLLOW** the established code style and conventions
+4. **TEST** changes with `npm run check` before committing
+5. **UPDATE** documentation when adding new features
+
+## Tracing and Monitoring
+- Trace all incoming requests and propagate context
+- Use middleware to instrument HTTP endpoints automatically
+- Annotate slow, critical, or error-prone paths with custom spans
+- Monitor: request latency, throughput, error rate, resource usage
+- Avoid excessive cardinality in labels and traces
+
+## Concurrency
+- Ensure safe use of goroutines (N/A for this Node.js project)
+- Implement proper async/await patterns in TypeScript
+- Use proper error handling in async operations
+
+## Key Conventions
+1. Prioritize **readability, simplicity, and maintainability**
+2. Design for **change**: isolate business logic, minimize framework lock-in
+3. Emphasize clear **boundaries** and **dependency inversion**
+4. Ensure all behavior is **observable, testable, and documented**
+5. **Automate workflows** for testing, building, and deployment
+
+## Unit Tests
+When writing unit tests, always use a table-driven test structure for test cases.
+
+## Resources
+- SvelteKit Docs: https://kit.svelte.dev/docs
+- Svelte 5 Runes: https://svelte.dev/docs/svelte/what-are-runes
+- Drizzle ORM: https://orm.drizzle.team/docs/overview
+- Hardcover API: https://hardcover.app/api
+- Tailwind CSS: https://tailwindcss.com/docs
+

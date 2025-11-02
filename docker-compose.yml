@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  bookrequestarr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      cache_from:
+        - ghcr.io/${GITHUB_REPOSITORY:-yourusername/bookrequestarr}:latest
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: ghcr.io/${GITHUB_REPOSITORY:-yourusername/bookrequestarr}:${IMAGE_TAG:-latest}
+    container_name: bookrequestarr
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      # Database
+      - DATABASE_URL=/app/data/bookrequestarr.db
+
+      # OIDC Configuration
+      - OIDC_ISSUER=${OIDC_ISSUER}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_REDIRECT_URI=${OIDC_REDIRECT_URI:-http://localhost:3000/api/auth/callback}
+      - OIDC_ADMIN_GROUP=${OIDC_ADMIN_GROUP:-bookrequestarr_admin}
+      - OIDC_USER_GROUP=${OIDC_USER_GROUP:-bookrequestarr}
+
+      # JWT Secret
+      - JWT_SECRET=${JWT_SECRET}
+
+      # Hardcover API
+      - HARDCOVER_API_KEY=${HARDCOVER_API_KEY}
+      - HARDCOVER_API_URL=${HARDCOVER_API_URL:-https://api.hardcover.app/v1/graphql}
+
+      # Notification Backends
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+
+      # Application
+      - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
+      - NODE_ENV=production
+      - PORT=3000
+      - API_CACHE_TTL_DAYS=${API_CACHE_TTL_DAYS:-7}
+
+      # Development (set to true to disable auth)
+      - DISABLE_AUTH=${DISABLE_AUTH:-false}
+
+    volumes:
+      - bookrequestarr-data:/app/data
+
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+
+volumes:
+  bookrequestarr-data:
+    driver: local
