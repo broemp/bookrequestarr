@@ -1,15 +1,6 @@
-version: '3.8'
-
 services:
   bookrequestarr:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      cache_from:
-        - ghcr.io/${GITHUB_REPOSITORY:-yourusername/bookrequestarr}:latest
-      args:
-        BUILDKIT_INLINE_CACHE: 1
-    image: ghcr.io/${GITHUB_REPOSITORY:-yourusername/bookrequestarr}:${IMAGE_TAG:-latest}
+    image: ghcr.io/broemp/gremlinprinter:latest
     container_name: bookrequestarr
     restart: unless-stopped
     ports:
