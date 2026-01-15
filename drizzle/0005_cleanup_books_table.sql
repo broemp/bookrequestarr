@@ -16,8 +16,7 @@ CREATE TABLE books_new (
 	rating TEXT,
 	rating_count INTEGER,
 	cached_at INTEGER DEFAULT (unixepoch()) NOT NULL
-);
-
+);--> statement-breakpoint
 -- Copy data from old table to new table
 INSERT INTO books_new (
 	id, hardcover_id, title, description, cover_image, 
@@ -28,14 +27,11 @@ SELECT
 	id, hardcover_id, title, description, cover_image,
 	isbn_13, isbn_10, publish_date, pages, publisher,
 	rating, rating_count, cached_at
-FROM books;
-
+FROM books;--> statement-breakpoint
 -- Drop old table
-DROP TABLE books;
-
+DROP TABLE books;--> statement-breakpoint
 -- Rename new table to books
-ALTER TABLE books_new RENAME TO books;
-
+ALTER TABLE books_new RENAME TO books;--> statement-breakpoint
 -- Recreate the unique index
 CREATE UNIQUE INDEX books_hardcover_id_unique ON books (hardcover_id);
 
