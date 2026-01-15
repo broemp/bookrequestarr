@@ -7,7 +7,6 @@ import { getCachedResponse, setCachedResponse } from './cache';
 import { logger } from './logger';
 
 const HARDCOVER_API_URL = env.HARDCOVER_API_URL || 'https://api.hardcover.app/v1/graphql';
-const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours (for book metadata cache)
 
 /**
  * Execute a GraphQL query against Hardcover API with caching
@@ -347,7 +346,6 @@ async function cacheBookTags(bookId: string, taggings: any[] | undefined) {
 
 		const hardcoverTagId = String(tagging.tag.id);
 		const tagName = tagging.tag.tag; // The tag name is in the 'tag' field
-		const tagSlug = tagging.tag.slug;
 		const tagCategory = tagging.tag.tag_category?.category || null;
 
 		// Check if tag exists
@@ -424,21 +422,18 @@ export async function getBooksBySeries(seriesId: string): Promise<BookSearchResu
 	`;
 
 	try {
-		const data = await graphqlQuery<{ 
-			book_series: Array<{ 
-				position?: number; 
+		const data = await graphqlQuery<{
+			book_series: Array<{
+				position?: number;
 				book: {
 					id: string;
 					default_physical_edition?: {
 						book_id?: string;
 						book?: HardcoverBook;
-					}
-				}
-			}> 
-		}>(
-			query,
-			{ seriesId: parseInt(seriesId) }
-		);
+					};
+				};
+			}>;
+		}>(query, { seriesId: parseInt(seriesId) });
 
 		if (!data.book_series || data.book_series.length === 0) {
 			logger.info('No books found in series', { seriesId });
@@ -453,7 +448,7 @@ export async function getBooksBySeries(seriesId: string): Promise<BookSearchResu
 
 		for (const bs of data.book_series) {
 			const defaultEdition = bs.book.default_physical_edition?.book;
-			
+
 			if (!defaultEdition) {
 				logger.debug('Skipping book_series entry without default_physical_edition', {
 					originalBookId: bs.book.id,
@@ -484,7 +479,10 @@ export async function getBooksBySeries(seriesId: string): Promise<BookSearchResu
 			});
 		}
 
-		logger.info(`Series query completed: ${uniqueBooks.length} unique books found from ${data.book_series.length} total entries`, { seriesId });
+		logger.info(
+			`Series query completed: ${uniqueBooks.length} unique books found from ${data.book_series.length} total entries`,
+			{ seriesId }
+		);
 		return uniqueBooks;
 	} catch (error) {
 		logger.error('Error fetching books by series', error, { seriesId });
@@ -528,12 +526,12 @@ export async function getTrendingBooks(limit = 20): Promise<BookSearchResult[]> 
 		const today = new Date();
 		const thirtyDaysAgo = new Date();
 		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-		
+
 		const fromDate = thirtyDaysAgo.toISOString().split('T')[0];
 		const toDate = today.toISOString().split('T')[0];
 
 		// First, get the trending book IDs
-		const trendingData = await graphqlQuery<{ books_trending: { ids: number[] } }>(trendingQuery, { 
+		const trendingData = await graphqlQuery<{ books_trending: { ids: number[] } }>(trendingQuery, {
 			from: fromDate,
 			to: toDate,
 			limit,
@@ -541,14 +539,14 @@ export async function getTrendingBooks(limit = 20): Promise<BookSearchResult[]> 
 		});
 
 		const bookIds = trendingData.books_trending.ids;
-		
+
 		if (!bookIds || bookIds.length === 0) {
 			logger.info('No trending books found');
 			return [];
 		}
 
 		// Then, fetch the full book details
-		const booksData = await graphqlQuery<{ books: HardcoverBook[] }>(booksQuery, { 
+		const booksData = await graphqlQuery<{ books: HardcoverBook[] }>(booksQuery, {
 			ids: bookIds
 		});
 
@@ -573,10 +571,15 @@ export async function getTrendingBooks(limit = 20): Promise<BookSearchResult[]> 
  * Get new releases from Hardcover API
  */
 export async function getNewReleases(limit = 20): Promise<BookSearchResult[]> {
+	// Calculate date 6 months ago for filtering new releases
+	const sixMonthsAgo = new Date();
+	sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+	const minReleaseDate = sixMonthsAgo.toISOString().split('T')[0];
+
 	const query = `
-		query GetNewReleases($limit: Int!) {
+		query GetNewReleases($limit: Int!, $minDate: date!) {
 			books(
-				where: { release_date: { _gte: "2024-01-01" } }
+				where: { release_date: { _gte: $minDate } }
 				order_by: { release_date: desc }
 				limit: $limit
 			) {
@@ -597,7 +600,10 @@ export async function getNewReleases(limit = 20): Promise<BookSearchResult[]> {
 	`;
 
 	try {
-		const data = await graphqlQuery<{ books: HardcoverBook[] }>(query, { limit });
+		const data = await graphqlQuery<{ books: HardcoverBook[] }>(query, {
+			limit,
+			minDate: minReleaseDate
+		});
 
 		const books = data.books.map((book) => ({
 			id: book.id,
@@ -615,4 +621,3 @@ export async function getNewReleases(limit = 20): Promise<BookSearchResult[]> {
 		return [];
 	}
 }
-

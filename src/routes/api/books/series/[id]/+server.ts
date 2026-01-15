@@ -14,8 +14,9 @@ export const GET: RequestHandler = async ({ params }) => {
 		const books = await getBooksBySeries(seriesId);
 		return json(books);
 	} catch (error) {
-		logger.error('Error fetching series books', error instanceof Error ? error : undefined, { seriesId });
+		logger.error('Error fetching series books', error instanceof Error ? error : undefined, {
+			seriesId
+		});
 		return json({ error: 'Failed to fetch series books' }, { status: 500 });
 	}
 };
-

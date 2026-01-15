@@ -12,6 +12,8 @@ A modern, self-hosted web application for managing book requests. Similar to Ove
 - 👥 **User Management** - Admin panel for managing users and permissions
 - 📊 **Dashboard** - Overview of requests, statistics, and new releases
 - 🔔 **Notifications** - Discord and Telegram notifications for new requests
+- 📥 **Automatic Downloads** - Download books from Anna's Archive when requests are approved
+- 📚 **Calibre-Web Automated Integration** - Seamless integration with Calibre-Web Automated for automatic book ingestion
 - 🎨 **Modern UI** - Clean, dark theme with responsive design
 - 🐳 **Docker Ready** - Easy deployment with Docker and Docker Compose
 - 🔄 **Reverse Proxy Support** - Works seamlessly behind Traefik, Nginx, or Caddy
@@ -22,38 +24,44 @@ A modern, self-hosted web application for managing book requests. Similar to Ove
 > **Note**: Screenshots are captured and available in the repository. The following images showcase the main features of Bookrequestarr.
 
 ### Dashboard
+
 ![Dashboard](static/screenshots/dashboard.png)
 
-*Overview of your book requests, trending books, and statistics at a glance. The dashboard shows popular books from Hardcover's trending list and provides quick stats on your request status.*
+_Overview of your book requests, trending books, and statistics at a glance. The dashboard shows popular books from Hardcover's trending list and provides quick stats on your request status._
 
 ### Search Books
+
 ![Search Books](static/screenshots/search.png)
 
-*Search for books with a clean, responsive interface. The search page includes filters to exclude collections, unreleased books, and non-ebook formats.*
+_Search for books with a clean, responsive interface. The search page includes filters to exclude collections, unreleased books, and non-ebook formats._
 
 ![Search Results](static/screenshots/search-results.png)
 
-*Browse search results with beautiful cover images and metadata. Each book displays its title, author, and publication year.*
+_Browse search results with beautiful cover images and metadata. Each book displays its title, author, and publication year._
 
 ### Book Details
+
 ![Book Details](static/screenshots/book-details.png)
 
-*View detailed book information including summary, genres, ratings, and request options. The modal provides all the information you need to make an informed request.*
+_View detailed book information including summary, genres, ratings, and request options. The modal provides all the information you need to make an informed request._
 
 ### My Requests
+
 ![My Requests](static/screenshots/my-requests.png)
 
-*Track all your book requests and their current status. Filter by status (pending, approved, completed, rejected) to easily manage your requests.*
+_Track all your book requests and their current status. Filter by status (pending, approved, completed, rejected) to easily manage your requests._
 
 ### Admin Panel
+
 ![Admin Requests](static/screenshots/admin-requests.png)
 
-*Manage all user requests with approve, reject, and complete actions. Admins can see who requested each book and when, with quick action buttons for workflow management.*
+_Manage all user requests with approve, reject, and complete actions. Admins can see who requested each book and when, with quick action buttons for workflow management._
 
 ### Settings
+
 ![Settings](static/screenshots/settings.png)
 
-*Manage your account preferences including preferred language for book requests. View your account information synced from your OIDC provider.*
+_Manage your account preferences including preferred language for book requests. View your account information synced from your OIDC provider._
 
 ## 🚀 Quick Start
 
@@ -118,14 +126,14 @@ docker run -d \
    ```bash
    # Option A: Use the helper script (recommended)
    ./start.sh
-   
+
    # Option B: Start manually
    export UID=$(id -u) GID=$(id -g)
    docker compose up -d
    ```
 
 4. **Access the application**
-   
+
    Navigate to `http://localhost:3000`
 
 **Note:** The application runs as your current user to avoid permission issues. The database and data directory are created automatically with the correct permissions.
@@ -292,6 +300,7 @@ This project is licensed under the MIT License.
 For a comprehensive view of planned features and development priorities, see the **[Roadmap](docs/ROADMAP.md)**.
 
 **Highlights of upcoming features:**
+
 - 🎧 Audiobook support
 - 📥 Integration with download tools (Z-Library, Anna's Archive)
 - 💬 Request comments and discussion

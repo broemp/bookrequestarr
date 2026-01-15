@@ -51,7 +51,10 @@ export const GET: RequestHandler = async (event) => {
 		redirect(302, authUrl.toString());
 	} catch (error) {
 		// Re-throw SvelteKit redirects and responses
-		if (error instanceof Response || (error && typeof error === 'object' && 'status' in error && 'location' in error)) {
+		if (
+			error instanceof Response ||
+			(error && typeof error === 'object' && 'status' in error && 'location' in error)
+		) {
 			throw error;
 		}
 		logger.error('Error initiating OIDC login', error instanceof Error ? error : undefined);

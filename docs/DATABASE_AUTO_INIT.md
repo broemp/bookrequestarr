@@ -85,6 +85,7 @@ The database will be created automatically in the location specified by `DATABAS
 ### After Schema Changes
 
 1. Generate a new migration:
+
    ```bash
    npm run db:generate
    ```
@@ -287,6 +288,7 @@ docker compose logs -f bookrequestarr | grep -i migration
 **Symptom:** Schema changes not reflected in database
 
 **Check:**
+
 1. Is the migration file in `drizzle/`?
 2. Did you restart the application?
 3. Check startup logs for errors
@@ -296,6 +298,7 @@ docker compose logs -f bookrequestarr | grep -i migration
 **Symptom:** Application takes a long time to start
 
 **Possible causes:**
+
 - Large database requiring schema changes
 - Network storage (use local storage for SQLite)
 - Multiple migrations being applied
@@ -307,6 +310,7 @@ docker compose logs -f bookrequestarr | grep -i migration
 **Symptom:** `SQLITE_CORRUPT: database disk image is malformed`
 
 **Solution:**
+
 1. Restore from backup
 2. Or try SQLite recovery:
    ```bash
@@ -361,4 +365,3 @@ Potential improvements for the future:
 - [Development Guide](DEVELOPMENT.md) - Local development workflow
 - [Deployment Guide](DEPLOYMENT.md) - Production deployment
 - [Configuration Guide](CONFIGURATION.md) - Environment variables
-

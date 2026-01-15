@@ -16,6 +16,9 @@ export const users = sqliteTable('users', {
 		.default('user'),
 	oidcSub: text('oidc_sub').unique(),
 	preferredLanguage: text('preferred_language').default('English'),
+	autoDownloadEnabled: integer('auto_download_enabled', { mode: 'boolean' })
+		.notNull()
+		.default(false),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.default(sql`(unixepoch())`),
@@ -125,7 +128,9 @@ export const requests = sqliteTable('requests', {
 	bookId: text('book_id')
 		.notNull()
 		.references(() => books.id, { onDelete: 'cascade' }),
-	status: text('status', { enum: ['pending', 'approved', 'rejected', 'completed'] })
+	status: text('status', {
+		enum: ['pending', 'approved', 'rejected', 'completed', 'download_problem']
+	})
 		.notNull()
 		.default('pending'),
 	language: text('language'),
@@ -209,6 +214,47 @@ export const apiCache = sqliteTable('api_cache', {
 	requestData: text('request_data').notNull(), // Original request (query + variables)
 	responseData: text('response_data').notNull(), // API response as JSON
 	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.default(sql`(unixepoch())`)
+});
+
+/**
+ * Downloads table - tracks book downloads from Anna's Archive
+ */
+export const downloads = sqliteTable('downloads', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	requestId: text('request_id')
+		.notNull()
+		.references(() => requests.id, { onDelete: 'cascade' }),
+	annasArchiveMd5: text('annas_archive_md5').notNull(),
+	searchMethod: text('search_method', { enum: ['isbn', 'title_author', 'manual'] }).notNull(),
+	fileType: text('file_type').notNull(), // e.g., 'epub', 'pdf', 'mobi'
+	filePath: text('file_path'),
+	fileSize: integer('file_size'), // bytes
+	downloadStatus: text('download_status', {
+		enum: ['pending', 'downloading', 'completed', 'failed']
+	})
+		.notNull()
+		.default('pending'),
+	errorMessage: text('error_message'),
+	downloadedAt: integer('downloaded_at', { mode: 'timestamp' }),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.default(sql`(unixepoch())`)
+});
+
+/**
+ * Download stats table - tracks daily download counts for rate limiting
+ */
+export const downloadStats = sqliteTable('download_stats', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	date: text('date').notNull().unique(), // YYYY-MM-DD format
+	downloadCount: integer('download_count').notNull().default(0),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.default(sql`(unixepoch())`)

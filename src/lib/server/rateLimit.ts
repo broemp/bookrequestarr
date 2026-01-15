@@ -10,14 +10,17 @@ interface RateLimitEntry {
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
 // Cleanup old entries every 5 minutes
-setInterval(() => {
-	const now = Date.now();
-	for (const [key, entry] of rateLimitStore.entries()) {
-		if (entry.resetAt < now) {
-			rateLimitStore.delete(key);
+setInterval(
+	() => {
+		const now = Date.now();
+		for (const [key, entry] of rateLimitStore.entries()) {
+			if (entry.resetAt < now) {
+				rateLimitStore.delete(key);
+			}
 		}
-	}
-}, 5 * 60 * 1000);
+	},
+	5 * 60 * 1000
+);
 
 export interface RateLimitConfig {
 	/**
@@ -52,7 +55,10 @@ export function checkRateLimit(
 	if (!entry || entry.resetAt < now) {
 		const resetAt = now + config.windowMs;
 		rateLimitStore.set(key, { count: 1, resetAt });
-		logger.debug('Rate limit check - new window', { identifier: key, remaining: config.maxRequests - 1 });
+		logger.debug('Rate limit check - new window', {
+			identifier: key,
+			remaining: config.maxRequests - 1
+		});
 		return {
 			allowed: true,
 			remaining: config.maxRequests - 1,
@@ -63,7 +69,11 @@ export function checkRateLimit(
 	// Entry exists and is valid
 	if (entry.count < config.maxRequests) {
 		entry.count++;
-		logger.debug('Rate limit check - within limit', { identifier: key, count: entry.count, remaining: config.maxRequests - entry.count });
+		logger.debug('Rate limit check - within limit', {
+			identifier: key,
+			count: entry.count,
+			remaining: config.maxRequests - entry.count
+		});
 		return {
 			allowed: true,
 			remaining: config.maxRequests - entry.count,
@@ -72,7 +82,11 @@ export function checkRateLimit(
 	}
 
 	// Rate limit exceeded
-	logger.warn('Rate limit exceeded', { identifier: key, count: entry.count, maxRequests: config.maxRequests });
+	logger.warn('Rate limit exceeded', {
+		identifier: key,
+		count: entry.count,
+		maxRequests: config.maxRequests
+	});
 	return {
 		allowed: false,
 		remaining: 0,
@@ -114,9 +128,9 @@ export function getRateLimitStatus(
 
 // Predefined rate limit configurations
 export const RATE_LIMITS = {
-	// Auth endpoints: 5 attempts per 15 minutes
+	// Auth endpoints: 20 attempts per 15 minutes (increased for development)
 	AUTH: {
-		maxRequests: 5,
+		maxRequests: 20,
 		windowMs: 15 * 60 * 1000,
 		keyPrefix: 'auth'
 	},
@@ -133,4 +147,3 @@ export const RATE_LIMITS = {
 		keyPrefix: 'search'
 	}
 } as const;
-

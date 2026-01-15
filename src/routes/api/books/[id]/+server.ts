@@ -28,14 +28,19 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			.limit(1);
 
 		if (!cachedBook) {
-			logger.warn('Book was fetched but not found in cache, returning without dbId', { hardcoverId: params.id });
+			logger.warn('Book was fetched but not found in cache, returning without dbId', {
+				hardcoverId: params.id
+			});
 			return json({
 				...bookDetails,
 				dbId: null // No database ID available
 			});
 		}
 
-		logger.info('Book details retrieved with dbId', { hardcoverId: params.id, dbId: cachedBook.id });
+		logger.info('Book details retrieved with dbId', {
+			hardcoverId: params.id,
+			dbId: cachedBook.id
+		});
 
 		return json({
 			...bookDetails,
@@ -43,7 +48,9 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		});
 	} catch (error) {
 		const { logger } = await import('$lib/server/logger');
-		logger.error('Error fetching book details', error instanceof Error ? error : undefined, { hardcoverId: params.id });
+		logger.error('Error fetching book details', error instanceof Error ? error : undefined, {
+			hardcoverId: params.id
+		});
 		return json({ error: 'Failed to fetch book details' }, { status: 500 });
 	}
 };

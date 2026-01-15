@@ -27,7 +27,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		logger.info('Book re-cached successfully', { hardcoverId, title: book.title });
 
-		return json({ 
+		return json({
 			success: true,
 			message: `Book "${book.title}" re-cached successfully`
 		});
@@ -36,9 +36,3 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Failed to re-cache book' }, { status: 500 });
 	}
 };
-
-
-
-
-
-

@@ -1,12 +1,33 @@
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
-import { requests, books, users, bookAuthors, authors } from '$lib/server/db/schema';
+import {
+	requests,
+	books,
+	users,
+	bookAuthors,
+	authors,
+	downloads,
+	settings
+} from '$lib/server/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { sendNotification, formatRequestUpdateNotification } from '$lib/server/notifications';
 import { logger } from '$lib/server/logger';
+import { initiateDownload } from '$lib/server/downloader';
+import { isApiKeyConfigured } from '$lib/server/annasarchive';
 
 export const load: PageServerLoad = async () => {
+	// Check if Anna's Archive is enabled (API key is configured)
+	const annasArchiveEnabled = await isApiKeyConfigured();
+
+	const [calibreBaseUrlSetting] = await db
+		.select()
+		.from(settings)
+		.where(eq(settings.key, 'calibre_base_url'))
+		.limit(1);
+
+	const calibreBaseUrl = calibreBaseUrlSetting?.value || null;
+
 	// Get all requests with book and user details
 	const allRequests = await db
 		.select({
@@ -48,8 +69,27 @@ export const load: PageServerLoad = async () => {
 		.innerJoin(users, eq(requests.userId, users.id))
 		.orderBy(desc(requests.createdAt));
 
+	// Get download info for each request
+	const requestsWithDownloads = await Promise.all(
+		allRequests.map(async (request) => {
+			const [download] = await db
+				.select()
+				.from(downloads)
+				.where(eq(downloads.requestId, request.id))
+				.orderBy(desc(downloads.createdAt))
+				.limit(1);
+
+			return {
+				...request,
+				download: download || null
+			};
+		})
+	);
+
 	return {
-		requests: allRequests
+		requests: requestsWithDownloads,
+		annasArchiveEnabled,
+		calibreBaseUrl
 	};
 };
 
@@ -77,6 +117,20 @@ export const actions: Actions = {
 				})
 				.where(eq(requests.id, requestId));
 
+			// If status is approved, check if auto-download should be triggered
+			if (status === 'approved') {
+				const shouldAutoDownload = await checkAutoDownload(requestId);
+				if (shouldAutoDownload) {
+					logger.info('Triggering auto-download for approved request', { requestId });
+					// Trigger download asynchronously (don't wait for it)
+					initiateDownload(requestId).catch((error) => {
+						logger.error('Auto-download failed', error instanceof Error ? error : undefined, {
+							requestId
+						});
+					});
+				}
+			}
+
 			// Get request details for notification
 			const [requestDetails] = await db
 				.select({
@@ -102,8 +156,84 @@ export const actions: Actions = {
 
 			return { success: true };
 		} catch (error) {
-			logger.error('Error updating request status', error instanceof Error ? error : undefined, { requestId });
+			logger.error('Error updating request status', error instanceof Error ? error : undefined, {
+				requestId
+			});
 			return fail(500, { error: 'Failed to update request status' });
 		}
 	}
 };
+
+/**
+ * Check if auto-download should be triggered for a request
+ */
+async function checkAutoDownload(requestId: string): Promise<boolean> {
+	try {
+		// Check if Anna's Archive is enabled
+		const [annasArchiveEnabledSetting] = await db
+			.select()
+			.from(settings)
+			.where(eq(settings.key, 'annas_archive_enabled'))
+			.limit(1);
+
+		if (annasArchiveEnabledSetting?.value !== 'true') {
+			return false;
+		}
+
+		// Check if API key is configured
+		const apiKeyConfigured = await isApiKeyConfigured();
+		if (!apiKeyConfigured) {
+			return false;
+		}
+
+		// Get auto-download mode
+		const [autoModeSetting] = await db
+			.select()
+			.from(settings)
+			.where(eq(settings.key, 'download_auto_mode'))
+			.limit(1);
+
+		const autoMode = autoModeSetting?.value || 'disabled';
+
+		if (autoMode === 'disabled') {
+			return false;
+		}
+
+		if (autoMode === 'all_users') {
+			return true;
+		}
+
+		if (autoMode === 'selected_users') {
+			// Get the user for this request
+			const [request] = await db
+				.select({
+					userId: requests.userId
+				})
+				.from(requests)
+				.where(eq(requests.id, requestId))
+				.limit(1);
+
+			if (!request) {
+				return false;
+			}
+
+			// Check if user has auto-download enabled
+			const [user] = await db
+				.select({
+					autoDownloadEnabled: users.autoDownloadEnabled
+				})
+				.from(users)
+				.where(eq(users.id, request.userId))
+				.limit(1);
+
+			return user?.autoDownloadEnabled === true;
+		}
+
+		return false;
+	} catch (error) {
+		logger.error('Error checking auto-download', error instanceof Error ? error : undefined, {
+			requestId
+		});
+		return false;
+	}
+}

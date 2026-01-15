@@ -17,13 +17,13 @@ let initPromise: Promise<void> | null = null;
  */
 async function ensureInitialized(): Promise<void> {
 	if (initialized) return;
-	
+
 	// If initialization is in progress, wait for it
 	if (initPromise) {
 		await initPromise;
 		return;
 	}
-	
+
 	// Start initialization
 	initPromise = (async () => {
 		try {
@@ -37,7 +37,7 @@ async function ensureInitialized(): Promise<void> {
 			initPromise = null;
 		}
 	})();
-	
+
 	await initPromise;
 }
 

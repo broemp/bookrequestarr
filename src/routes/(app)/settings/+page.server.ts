@@ -70,7 +70,9 @@ export const actions: Actions = {
 
 			return { success: true };
 		} catch (error) {
-			logger.error('Error updating preferences', error instanceof Error ? error : undefined, { userId: locals.user?.id });
+			logger.error('Error updating preferences', error instanceof Error ? error : undefined, {
+				userId: locals.user?.id
+			});
 			return fail(500, { error: 'Failed to update preferences' });
 		}
 	}

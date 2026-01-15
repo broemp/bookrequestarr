@@ -22,6 +22,34 @@
       "when": 1760805436089,
       "tag": "0002_melted_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1730556960000,
+      "tag": "0003_add_tags_and_ratings",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1729299060000,
+      "tag": "0004_add_authors_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1729301880000,
+      "tag": "0005_cleanup_books_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1730981280000,
+      "tag": "0006_add_downloads_tables",
+      "breakpoints": true
     }
   ]
 }

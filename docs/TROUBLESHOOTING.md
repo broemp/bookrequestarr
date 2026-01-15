@@ -5,6 +5,7 @@
 ### Database File Cannot Be Created (Docker)
 
 **Symptom:**
+
 ```
 [ERROR] Failed to initialize database {"error":"unable to open database file"}
 [ERROR] Critical: Database initialization failed on startup
@@ -52,7 +53,7 @@ Update your `docker-compose.yml`:
 
 ```yaml
 volumes:
-  - ./data:/app/data  # Use bind mount instead of named volume
+  - ./data:/app/data # Use bind mount instead of named volume
 ```
 
 Then create the directory with correct permissions:
@@ -67,6 +68,7 @@ docker compose up -d
 ### Database Directory Not Writable
 
 **Symptom:**
+
 ```
 [ERROR] Database directory is not writable: /app/data
 ```
@@ -76,6 +78,7 @@ docker compose up -d
 **Solution:**
 
 For Docker:
+
 ```bash
 # Fix permissions on the volume
 docker compose down
@@ -86,6 +89,7 @@ docker compose up -d
 ```
 
 For local development:
+
 ```bash
 # Fix permissions on the data directory
 chmod 755 data/
@@ -94,6 +98,7 @@ chmod 755 data/
 ### Database Locked Error
 
 **Symptom:**
+
 ```
 [ERROR] SQLITE_BUSY: database is locked
 ```
@@ -120,6 +125,7 @@ docker compose up -d
 ### Migration Failed
 
 **Symptom:**
+
 ```
 [ERROR] Failed to run database migrations
 [ERROR] SQLITE_ERROR: near "...": syntax error
@@ -130,28 +136,31 @@ docker compose up -d
 **Solution:**
 
 1. **Check migration files:**
+
    ```bash
    ls -la drizzle/*.sql
    cat drizzle/0000_*.sql  # Check for corruption
    ```
 
 2. **Restore from backup:**
+
    ```bash
    # If you have a backup
    cp data/bookrequestarr.db.backup data/bookrequestarr.db
    ```
 
 3. **Regenerate migrations (development only):**
+
    ```bash
    # Backup current database
    cp data/bookrequestarr.db data/bookrequestarr.db.backup
-   
+
    # Remove corrupted migrations
    rm -rf drizzle/
-   
+
    # Regenerate
    npm run db:generate
-   
+
    # Test
    npm run dev
    ```
@@ -159,6 +168,7 @@ docker compose up -d
 ### Database Corruption
 
 **Symptom:**
+
 ```
 [ERROR] SQLITE_CORRUPT: database disk image is malformed
 ```
@@ -168,30 +178,33 @@ docker compose up -d
 **Solution:**
 
 1. **Restore from backup:**
+
    ```bash
    cp data/bookrequestarr.db.backup data/bookrequestarr.db
    ```
 
 2. **Attempt recovery:**
+
    ```bash
    # Install sqlite3
    sudo apt-get install sqlite3  # Debian/Ubuntu
    # OR
    brew install sqlite3  # macOS
-   
+
    # Attempt recovery
    sqlite3 data/bookrequestarr.db ".recover" | sqlite3 data/recovered.db
-   
+
    # If successful, replace the corrupted database
    mv data/bookrequestarr.db data/bookrequestarr.db.corrupted
    mv data/recovered.db data/bookrequestarr.db
    ```
 
 3. **Start fresh (last resort):**
+
    ```bash
    # Backup the corrupted database
    mv data/bookrequestarr.db data/bookrequestarr.db.corrupted
-   
+
    # Start the application - it will create a new database
    docker compose up -d
    ```
@@ -207,6 +220,7 @@ docker compose up -d
 **Solution:**
 
 1. **Check OIDC configuration:**
+
    ```bash
    # Verify environment variables
    docker compose exec bookrequestarr env | grep OIDC
@@ -217,6 +231,7 @@ docker compose up -d
    - Check your OIDC provider's user management
 
 3. **Check JWT secret:**
+
    ```bash
    # Ensure JWT_SECRET is set and consistent
    echo $JWT_SECRET
@@ -255,6 +270,7 @@ docker compose up -d
 ### Hardcover API Errors
 
 **Symptom:**
+
 ```
 [ERROR] Hardcover API request failed
 ```
@@ -264,6 +280,7 @@ docker compose up -d
 **Solution:**
 
 1. **Verify API key:**
+
    ```bash
    docker compose exec bookrequestarr env | grep HARDCOVER_API_KEY
    ```
@@ -277,7 +294,7 @@ docker compose up -d
    - Increase cache TTL to reduce API calls:
      ```yaml
      environment:
-       - API_CACHE_TTL_DAYS=14  # Increase from default 7
+       - API_CACHE_TTL_DAYS=14 # Increase from default 7
      ```
 
 ### Search Not Working
@@ -289,11 +306,13 @@ docker compose up -d
 **Solution:**
 
 1. **Check logs:**
+
    ```bash
    docker compose logs -f bookrequestarr | grep -i "hardcover\|search"
    ```
 
 2. **Test API key manually:**
+
    ```bash
    curl -X POST https://api.hardcover.app/v1/graphql \
      -H "Authorization: Bearer YOUR_API_KEY" \
@@ -302,11 +321,12 @@ docker compose up -d
    ```
 
 3. **Clear API cache:**
+
    ```bash
    # Connect to database
    docker compose exec bookrequestarr sh
    sqlite3 /app/data/bookrequestarr.db
-   
+
    # Clear cache
    DELETE FROM api_cache;
    .exit
@@ -319,6 +339,7 @@ docker compose up -d
 **Symptom:** Application takes a long time to start.
 
 **Possible Causes:**
+
 - Large database requiring migrations
 - Network storage (slow I/O)
 - Many pending migrations
@@ -326,6 +347,7 @@ docker compose up -d
 **Solution:**
 
 1. **Check startup logs:**
+
    ```bash
    docker compose logs bookrequestarr | grep -i "migration\|database"
    ```
@@ -335,10 +357,11 @@ docker compose up -d
    - For Docker, use local volumes or bind mounts
 
 3. **Optimize database:**
+
    ```bash
    # Connect to database
    sqlite3 data/bookrequestarr.db
-   
+
    # Run optimization
    VACUUM;
    ANALYZE;
@@ -354,6 +377,7 @@ docker compose up -d
 **Solution:**
 
 1. **Increase cache TTL:**
+
    ```yaml
    environment:
      - API_CACHE_TTL_DAYS=14
@@ -379,15 +403,17 @@ docker compose up -d
 **Solution:**
 
 1. **Check logs:**
+
    ```bash
    docker compose logs bookrequestarr
    ```
 
 2. **Verify required environment variables:**
+
    ```bash
    # Check .env file
    cat .env
-   
+
    # Required variables:
    # - DATABASE_URL
    # - HARDCOVER_API_KEY
@@ -410,11 +436,13 @@ docker compose up -d
 **Solution:**
 
 1. **Check application logs:**
+
    ```bash
    docker compose logs -f bookrequestarr
    ```
 
 2. **Test health endpoint manually:**
+
    ```bash
    docker compose exec bookrequestarr wget -O- http://localhost:3000/health
    ```
@@ -440,6 +468,7 @@ See "Database File Cannot Be Created" section above.
 ### Build Fails with Native Module Error
 
 **Symptom:**
+
 ```
 Error: Cannot find module 'better-sqlite3'
 ```
@@ -460,6 +489,7 @@ docker compose build --no-cache
 ### TypeScript Errors
 
 **Symptom:**
+
 ```
 Error: Type 'X' is not assignable to type 'Y'
 ```
@@ -545,21 +575,25 @@ If you're still experiencing issues:
 ## Common Mistakes
 
 ### ❌ Using `docker-compose` (deprecated)
+
 ```bash
 docker-compose up  # OLD, deprecated
 ```
 
 ### ✅ Use `docker compose` (new)
+
 ```bash
 docker compose up  # NEW, correct
 ```
 
 ### ❌ Forgetting to set required environment variables
+
 ```bash
 docker compose up  # Missing HARDCOVER_API_KEY
 ```
 
 ### ✅ Always use .env file or environment variables
+
 ```bash
 cp .env.example .env
 # Edit .env with your values
@@ -567,26 +601,29 @@ docker compose up
 ```
 
 ### ❌ Running as root in production
+
 ```yaml
-user: root  # DON'T DO THIS
+user: root # DON'T DO THIS
 ```
 
 ### ✅ Use the default nodejs user
+
 ```yaml
 # No user override needed - Dockerfile sets it correctly
 ```
 
 ### ❌ Using `DISABLE_AUTH=true` in production
+
 ```yaml
 environment:
-  - DISABLE_AUTH=true  # NEVER IN PRODUCTION!
+  - DISABLE_AUTH=true # NEVER IN PRODUCTION!
 ```
 
 ### ✅ Always use OIDC in production
+
 ```yaml
 environment:
   - OIDC_ISSUER=https://your-provider.com
   - OIDC_CLIENT_ID=your_client_id
   # etc.
 ```
-

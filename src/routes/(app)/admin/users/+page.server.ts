@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
-import { users } from '$lib/server/db/schema';
+import { users, settings } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { logger } from '$lib/server/logger';
@@ -9,8 +9,18 @@ export const load: PageServerLoad = async () => {
 	// Get all users
 	const allUsers = await db.select().from(users);
 
+	// Get download auto mode setting
+	const [autoModeSetting] = await db
+		.select()
+		.from(settings)
+		.where(eq(settings.key, 'download_auto_mode'))
+		.limit(1);
+
+	const downloadAutoMode = autoModeSetting?.value || 'disabled';
+
 	return {
-		users: allUsers
+		users: allUsers,
+		downloadAutoMode
 	};
 };
 
@@ -54,7 +64,10 @@ export const actions: Actions = {
 
 			return { success: true };
 		} catch (error) {
-			logger.error('Error creating user', error instanceof Error ? error : undefined, { email, username });
+			logger.error('Error creating user', error instanceof Error ? error : undefined, {
+				email,
+				username
+			});
 			return fail(500, { error: 'Failed to create user' });
 		}
 	},
@@ -80,6 +93,34 @@ export const actions: Actions = {
 		} catch (error) {
 			logger.error('Error promoting user', error instanceof Error ? error : undefined, { userId });
 			return fail(500, { error: 'Failed to promote user' });
+		}
+	},
+
+	toggleAutoDownload: async ({ request }) => {
+		const formData = await request.formData();
+		const userId = formData.get('userId') as string;
+		const enabled = formData.get('enabled') === 'true';
+
+		if (!userId) {
+			return fail(400, { error: 'Missing user ID' });
+		}
+
+		try {
+			await db
+				.update(users)
+				.set({
+					autoDownloadEnabled: enabled,
+					updatedAt: new Date()
+				})
+				.where(eq(users.id, userId));
+
+			return { success: true };
+		} catch (error) {
+			logger.error('Error toggling auto-download', error instanceof Error ? error : undefined, {
+				userId,
+				enabled
+			});
+			return fail(500, { error: 'Failed to toggle auto-download' });
 		}
 	}
 };

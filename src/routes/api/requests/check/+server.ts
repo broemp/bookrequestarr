@@ -38,7 +38,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Map back to hardcover IDs with languages
 		const bookLanguageMap: Record<string, string[]> = {};
-		
+
 		for (const req of requestedBooks) {
 			const book = booksInDb.find((b) => b.id === req.bookId);
 			if (book) {
@@ -55,4 +55,3 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Failed to check requested books' }, { status: 500 });
 	}
 };
-

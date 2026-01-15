@@ -8,18 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Comprehensive roadmap document outlining future development
 - Screenshots section in README with detailed feature showcases
 
 ### Changed
+
 - Updated README with better organization and roadmap references
 
 ### Fixed
+
 - N/A
 
 ## [0.1.0] - 2025-11-02
 
 ### Added
+
 - Initial release of Bookrequestarr
 - OIDC authentication with group-based authorization
 - Book search using Hardcover API
@@ -45,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings page for user preferences
 
 ### Technical Details
+
 - Built with SvelteKit 2 and Svelte 5 (runes)
 - TypeScript for type safety
 - shadcn-svelte UI components
@@ -63,6 +68,7 @@ This is the first public release of Bookrequestarr! 🎉
 Bookrequestarr is a self-hosted book request management system, similar to Overseerr for movies and TV shows. It allows users to search for and request books, while administrators can manage these requests efficiently.
 
 **Key Features:**
+
 - Search for books using the Hardcover API
 - Request books with language preferences
 - Admin approval workflow
@@ -71,6 +77,7 @@ Bookrequestarr is a self-hosted book request management system, similar to Overs
 - Docker-ready deployment
 
 **Known Limitations:**
+
 - SQLite only (single instance)
 - No audiobook-specific support yet
 - No download automation yet
@@ -97,5 +104,4 @@ See the [Roadmap](docs/ROADMAP.md) for planned features and improvements.
 
 ---
 
-*For upcoming features and development plans, see [ROADMAP.md](docs/ROADMAP.md)*
-
+_For upcoming features and development plans, see [ROADMAP.md](docs/ROADMAP.md)_

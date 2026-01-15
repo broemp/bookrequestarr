@@ -31,7 +31,10 @@ export const GET: RequestHandler = async (event) => {
 		const results = await searchBooks(query, limit);
 		return json(results);
 	} catch (error) {
-		logger.error('Error searching books', error instanceof Error ? error : undefined, { query, limit });
+		logger.error('Error searching books', error instanceof Error ? error : undefined, {
+			query,
+			limit
+		});
 		return json({ error: 'Search failed' }, { status: 500 });
 	}
 };

@@ -36,6 +36,40 @@ export function getOIDCEndpoints() {
 }
 
 /**
+ * Validate the OAuth callback parameters
+ */
+export function validateCallbackParams(params: {
+	code: string | null;
+	state: string | null;
+	storedState: string | undefined;
+	codeVerifier: string | undefined;
+}): { valid: boolean; error?: string } {
+	const { code, state, storedState, codeVerifier } = params;
+
+	if (!code) {
+		return { valid: false, error: 'Missing authorization code' };
+	}
+
+	if (!state) {
+		return { valid: false, error: 'Missing state parameter' };
+	}
+
+	if (!storedState) {
+		return { valid: false, error: 'Missing stored state (session expired?)' };
+	}
+
+	if (state !== storedState) {
+		return { valid: false, error: 'State mismatch (possible CSRF attack)' };
+	}
+
+	if (!codeVerifier) {
+		return { valid: false, error: 'Missing code verifier (session expired?)' };
+	}
+
+	return { valid: true };
+}
+
+/**
  * Generate a secure random token
  */
 export function generateToken(): string {

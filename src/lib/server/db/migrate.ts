@@ -10,28 +10,32 @@ import { logger } from '../logger';
  */
 function ensureDatabaseDirectory(dbPath: string): void {
 	const dir = dirname(dbPath);
-	
+
 	// Resolve to absolute path
 	const absoluteDir = resolve(dir);
-	
+
 	if (!existsSync(absoluteDir)) {
 		logger.info(`Creating database directory: ${absoluteDir}`);
 		try {
 			mkdirSync(absoluteDir, { recursive: true, mode: 0o755 });
 		} catch (error) {
 			logger.error(`Failed to create database directory: ${absoluteDir}`, error);
-			throw new Error(`Cannot create database directory: ${error instanceof Error ? error.message : String(error)}`);
+			throw new Error(
+				`Cannot create database directory: ${error instanceof Error ? error.message : String(error)}`
+			);
 		}
 	}
-	
+
 	// Verify directory is writable
 	try {
 		accessSync(absoluteDir, constants.W_OK | constants.R_OK);
 	} catch (error) {
 		logger.error(`Database directory is not writable: ${absoluteDir}`, error);
-		throw new Error(`Database directory is not writable: ${absoluteDir}. Please check permissions.`);
+		throw new Error(
+			`Database directory is not writable: ${absoluteDir}. Please check permissions.`
+		);
 	}
-	
+
 	logger.info(`Database directory verified: ${absoluteDir}`);
 }
 
@@ -53,7 +57,7 @@ function hasMigrations(migrationsPath: string): boolean {
 
 	const files = readdirSync(migrationsPath);
 	const sqlFiles = files.filter((f) => f.endsWith('.sql'));
-	
+
 	return sqlFiles.length > 0;
 }
 
@@ -65,7 +69,7 @@ export async function initializeDatabase(dbPath: string): Promise<void> {
 	// Resolve to absolute path
 	const absoluteDbPath = resolve(dbPath);
 	const isNewDatabase = !databaseExists(absoluteDbPath);
-	
+
 	if (isNewDatabase) {
 		logger.info(`Database file not found, creating new database at: ${absoluteDbPath}`);
 	} else {
@@ -82,9 +86,11 @@ export async function initializeDatabase(dbPath: string): Promise<void> {
 		logger.info('Database connection established successfully');
 	} catch (error) {
 		logger.error(`Failed to open database at ${absoluteDbPath}`, error);
-		throw new Error(`Cannot open database: ${error instanceof Error ? error.message : String(error)}`);
+		throw new Error(
+			`Cannot open database: ${error instanceof Error ? error.message : String(error)}`
+		);
 	}
-	
+
 	const db = drizzle(client);
 
 	// Determine migrations path (relative to project root)
@@ -99,10 +105,10 @@ export async function initializeDatabase(dbPath: string): Promise<void> {
 
 	try {
 		logger.info('Running database migrations...');
-		
+
 		// Run migrations
 		migrate(db, { migrationsFolder: migrationsPath });
-		
+
 		if (isNewDatabase) {
 			logger.info('Database created and migrations applied successfully');
 		} else {
@@ -110,9 +116,10 @@ export async function initializeDatabase(dbPath: string): Promise<void> {
 		}
 	} catch (error) {
 		logger.error('Failed to run database migrations', error);
-		throw new Error(`Database migration failed: ${error instanceof Error ? error.message : String(error)}`);
+		throw new Error(
+			`Database migration failed: ${error instanceof Error ? error.message : String(error)}`
+		);
 	} finally {
 		client.close();
 	}
 }
-

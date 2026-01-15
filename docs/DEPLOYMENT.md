@@ -5,17 +5,20 @@ This guide covers deploying Bookrequestarr using Docker and Docker Compose.
 ## Quick Start with Docker Compose
 
 1. **Clone the repository:**
+
 ```bash
 git clone https://github.com/broemp/bookrequestarr.git
 cd bookrequestarr
 ```
 
 2. **Create environment file:**
+
 ```bash
 cp .env.example .env
 ```
 
 3. **Edit `.env` with your configuration:**
+
 ```bash
 # Required variables
 OIDC_ISSUER=https://your-oidc-provider.com
@@ -27,6 +30,7 @@ PUBLIC_APP_URL=http://localhost:3000
 ```
 
 4. **Start the application:**
+
 ```bash
 # Option A: Use the helper script (recommended)
 ./start.sh
@@ -37,7 +41,7 @@ docker compose up -d
 ```
 
 5. **Access the application:**
-Open your browser to `http://localhost:3000`
+   Open your browser to `http://localhost:3000`
 
 **Note:** The application runs as your current user (UID:GID) to avoid permission issues with the data directory.
 
@@ -104,22 +108,26 @@ docker run -d \
 ### Without Docker
 
 1. **Install dependencies:**
+
 ```bash
 npm install
 ```
 
 2. **Configure environment:**
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
 3. **Run database migrations:**
+
 ```bash
 npm run db:migrate
 ```
 
 4. **Start development server:**
+
 ```bash
 npm run dev
 ```
@@ -145,11 +153,11 @@ This will automatically log you in as an admin user. **Never use this in product
 services:
   bookrequestarr:
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.bookrequestarr.rule=Host(`books.example.com`)"
-      - "traefik.http.routers.bookrequestarr.entrypoints=websecure"
-      - "traefik.http.routers.bookrequestarr.tls.certresolver=letsencrypt"
-      - "traefik.http.services.bookrequestarr.loadbalancer.server.port=3000"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.bookrequestarr.rule=Host(`books.example.com`)'
+      - 'traefik.http.routers.bookrequestarr.entrypoints=websecure'
+      - 'traefik.http.routers.bookrequestarr.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.bookrequestarr.loadbalancer.server.port=3000'
 ```
 
 #### Nginx
@@ -182,6 +190,7 @@ curl http://localhost:3000/health
 ```
 
 Docker will automatically monitor container health:
+
 ```bash
 docker ps  # Shows health status
 ```
@@ -262,11 +271,13 @@ tar xzf bookrequestarr-backup.tar.gz
 ### Container won't start
 
 Check logs:
+
 ```bash
 docker compose logs bookrequestarr
 ```
 
 Verify environment variables:
+
 ```bash
 docker compose config
 ```
@@ -274,6 +285,7 @@ docker compose config
 ### Database permission errors
 
 Ensure the data directory has correct permissions:
+
 ```bash
 chmod -R 755 ./data
 ```
@@ -281,6 +293,7 @@ chmod -R 755 ./data
 ### Health check failing
 
 Test the health endpoint manually:
+
 ```bash
 docker exec bookrequestarr wget -q -O- http://localhost:3000/health
 ```
@@ -288,11 +301,13 @@ docker exec bookrequestarr wget -q -O- http://localhost:3000/health
 ### Build cache issues
 
 Clear build cache:
+
 ```bash
 docker builder prune -af
 ```
 
 Rebuild without cache:
+
 ```bash
 docker compose build --no-cache
 ```
@@ -317,4 +332,3 @@ services:
           cpus: '0.5'
           memory: 256M
 ```
-

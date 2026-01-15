@@ -49,9 +49,9 @@ services:
 
     volumes:
       - ./data:/app/data
-    
+
     # Run as the current user to avoid permission issues
-    user: "${UID:-1000}:${GID:-1000}"
+    user: '${UID:-1000}:${GID:-1000}'
 
     healthcheck:
       test:

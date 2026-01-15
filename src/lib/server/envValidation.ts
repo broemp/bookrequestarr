@@ -6,6 +6,7 @@ interface EnvVar {
 	required: boolean;
 	description: string;
 	validate?: (value: string) => boolean;
+	validationError?: string; // Specific error message when validation fails
 	default?: string;
 }
 
@@ -22,7 +23,8 @@ const ENV_VARS: EnvVar[] = [
 		name: 'OIDC_ISSUER',
 		required: false, // Checked conditionally
 		description: 'OIDC provider issuer URL',
-		validate: (value) => value.startsWith('http://') || value.startsWith('https://')
+		validate: (value) => value.startsWith('http://') || value.startsWith('https://'),
+		validationError: 'Must start with http:// or https://'
 	},
 	{
 		name: 'OIDC_CLIENT_ID',
@@ -33,13 +35,15 @@ const ENV_VARS: EnvVar[] = [
 		name: 'OIDC_CLIENT_SECRET',
 		required: false, // Checked conditionally
 		description: 'OIDC client secret',
-		validate: (value) => value.length >= 16
+		validate: (value) => value.length >= 16,
+		validationError: 'Must be at least 16 characters long'
 	},
 	{
 		name: 'OIDC_REDIRECT_URI',
 		required: false, // Checked conditionally
 		description: 'OIDC callback URL',
-		validate: (value) => value.startsWith('http://') || value.startsWith('https://')
+		validate: (value) => value.startsWith('http://') || value.startsWith('https://'),
+		validationError: 'Must start with http:// or https://'
 	},
 
 	// Security
@@ -47,7 +51,8 @@ const ENV_VARS: EnvVar[] = [
 		name: 'JWT_SECRET',
 		required: false, // Checked conditionally
 		description: 'JWT token signing secret',
-		validate: (value) => value.length >= 32
+		validate: (value) => value.length >= 32,
+		validationError: 'Must be at least 32 characters long'
 	},
 
 	// Hardcover API
@@ -63,7 +68,8 @@ const ENV_VARS: EnvVar[] = [
 		required: false,
 		description: 'Public application URL',
 		default: 'http://localhost:3000',
-		validate: (value) => value.startsWith('http://') || value.startsWith('https://')
+		validate: (value) => value.startsWith('http://') || value.startsWith('https://'),
+		validationError: 'Must start with http:// or https://'
 	},
 
 	// Optional
@@ -71,7 +77,8 @@ const ENV_VARS: EnvVar[] = [
 		name: 'DISABLE_AUTH',
 		required: false,
 		description: 'Disable authentication for development (NEVER use in production!)',
-		validate: (value) => value === 'true' || value === 'false'
+		validate: (value) => value === 'true' || value === 'false',
+		validationError: 'Must be either "true" or "false"'
 	},
 	{
 		name: 'NODE_ENV',
@@ -84,14 +91,37 @@ const ENV_VARS: EnvVar[] = [
 		required: false,
 		description: 'Logging level (debug, info, warn, error)',
 		default: 'info',
-		validate: (value) => ['debug', 'info', 'warn', 'error'].includes(value)
+		validate: (value) => ['debug', 'info', 'warn', 'error'].includes(value),
+		validationError: 'Must be one of: debug, info, warn, error'
 	},
 	{
 		name: 'API_CACHE_TTL_DAYS',
 		required: false,
 		description: 'API cache TTL in days',
 		default: '7',
-		validate: (value) => !isNaN(parseInt(value)) && parseInt(value) > 0
+		validate: (value) => !isNaN(parseInt(value)) && parseInt(value) > 0,
+		validationError: 'Must be a positive integer'
+	},
+
+	// Anna's Archive Integration (optional)
+	{
+		name: 'ANNAS_ARCHIVE_API_KEY',
+		required: false,
+		description: "Anna's Archive API key for fast downloads"
+	},
+	{
+		name: 'DOWNLOAD_DIRECTORY',
+		required: false,
+		description: 'Directory for downloaded books',
+		default: './data/downloads'
+	},
+	{
+		name: 'DOWNLOAD_DAILY_LIMIT',
+		required: false,
+		description: 'Maximum downloads per day',
+		default: '25',
+		validate: (value) => !isNaN(parseInt(value, 10)) && parseInt(value, 10) > 0,
+		validationError: 'Must be a positive integer'
 	}
 ];
 
@@ -119,7 +149,15 @@ export function validateEnv(): ValidationResult {
 		let isRequired = envVar.required;
 
 		// OIDC and JWT_SECRET are only required if auth is enabled
-		if (['OIDC_ISSUER', 'OIDC_CLIENT_ID', 'OIDC_CLIENT_SECRET', 'OIDC_REDIRECT_URI', 'JWT_SECRET'].includes(envVar.name)) {
+		if (
+			[
+				'OIDC_ISSUER',
+				'OIDC_CLIENT_ID',
+				'OIDC_CLIENT_SECRET',
+				'OIDC_REDIRECT_URI',
+				'JWT_SECRET'
+			].includes(envVar.name)
+		) {
 			isRequired = !disableAuth;
 		}
 
@@ -136,7 +174,20 @@ export function validateEnv(): ValidationResult {
 		// Validate the value if present and validator exists
 		if (value && envVar.validate) {
 			if (!envVar.validate(value)) {
-				errors.push(`Invalid value for ${envVar.name}: ${envVar.description}`);
+				// Mask sensitive values in error messages
+				const isSensitive =
+					envVar.name.includes('SECRET') ||
+					envVar.name.includes('KEY') ||
+					envVar.name.includes('TOKEN');
+				const displayValue = isSensitive
+					? `***${value.slice(-4)}` // Show only last 4 characters for secrets
+					: `"${value}"`;
+
+				const errorMsg = envVar.validationError
+					? `Invalid value for ${envVar.name}: ${displayValue}. ${envVar.validationError}`
+					: `Invalid value for ${envVar.name}: ${displayValue}. ${envVar.description}`;
+
+				errors.push(errorMsg);
 			}
 		}
 	}
@@ -144,11 +195,16 @@ export function validateEnv(): ValidationResult {
 	// Production-specific checks
 	if (nodeEnv === 'production') {
 		if (disableAuth) {
-			errors.push('DISABLE_AUTH=true is NOT allowed in production! This is a severe security risk.');
+			errors.push(
+				'DISABLE_AUTH=true is NOT allowed in production! This is a severe security risk.'
+			);
 		}
 
-		if (env.PUBLIC_APP_URL?.startsWith('http://') && !env.PUBLIC_APP_URL.includes('localhost')) {
-			warnings.push('PUBLIC_APP_URL uses HTTP in production. HTTPS is strongly recommended for security.');
+		const publicAppUrl = env.PUBLIC_APP_URL as string | undefined;
+		if (publicAppUrl && publicAppUrl.startsWith('http://') && !publicAppUrl.includes('localhost')) {
+			warnings.push(
+				'PUBLIC_APP_URL uses HTTP in production. HTTPS is strongly recommended for security.'
+			);
 		}
 
 		if (env.JWT_SECRET && env.JWT_SECRET.length < 64) {
@@ -158,7 +214,9 @@ export function validateEnv(): ValidationResult {
 
 	// Development-specific warnings
 	if (nodeEnv === 'development' && disableAuth) {
-		warnings.push('Authentication is disabled (DISABLE_AUTH=true). This should NEVER be used in production!');
+		warnings.push(
+			'Authentication is disabled (DISABLE_AUTH=true). This should NEVER be used in production!'
+		);
 	}
 
 	return {
@@ -208,7 +266,11 @@ export function getEnvSummary(): Record<string, string> {
 
 		if (!value) {
 			summary[envVar.name] = envVar.default ? `(default: ${envVar.default})` : '(not set)';
-		} else if (envVar.name.includes('SECRET') || envVar.name.includes('KEY') || envVar.name.includes('TOKEN')) {
+		} else if (
+			envVar.name.includes('SECRET') ||
+			envVar.name.includes('KEY') ||
+			envVar.name.includes('TOKEN')
+		) {
 			// Mask secrets
 			summary[envVar.name] = '***REDACTED***';
 		} else {
@@ -218,4 +280,3 @@ export function getEnvSummary(): Record<string, string> {
 
 	return summary;
 }
-

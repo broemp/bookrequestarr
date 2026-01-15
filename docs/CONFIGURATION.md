@@ -57,7 +57,7 @@ identity_providers:
     clients:
       - client_id: bookrequestarr
         client_name: Bookrequestarr Book Request Manager
-        client_secret: "$pbkdf2-sha512$310000$..." # your hashed secret
+        client_secret: '$pbkdf2-sha512$310000$...' # your hashed secret
         public: false
         authorization_policy: two_factor
         redirect_uris:
@@ -79,6 +79,7 @@ identity_providers:
 4. Restart Authelia to apply the changes
 
 **Notes:**
+
 - The `secret` in Authelia must be hashed using `authelia crypto hash generate pbkdf2`
 - The `OIDC_CLIENT_SECRET` in Bookrequestarr should be the **plain text** version (not hashed)
 - Ensure the `groups` scope is included in the client configuration
@@ -139,6 +140,70 @@ Bookrequestarr supports multiple notification backends. Configure the ones you w
    - Send a message to the bot/group
    - Visit `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
    - Find the `chat.id` in the response
+
+### Anna's Archive Integration
+
+Bookrequestarr can automatically download books from Anna's Archive when requests are approved.
+
+| Variable                | Required | Default             | Description                                                                                                         |
+| ----------------------- | -------- | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `ANNAS_ARCHIVE_DOMAIN`  | No       | `annas-archive.org` | Base domain for Anna's Archive (e.g., `annas-archive.org`, `annas-archive.se`)                                      |
+| `ANNAS_ARCHIVE_API_KEY` | No       | -                   | Anna's Archive API key for fast downloads. Get one by supporting [Anna's Archive](https://annas-archive.org/donate) |
+| `DOWNLOAD_DIRECTORY`    | No       | `./data/downloads`  | Directory where downloaded books will be stored (e.g., Calibre ingest folder)                                       |
+| `DOWNLOAD_DAILY_LIMIT`  | No       | `25`                | Maximum number of downloads per day to respect rate limits                                                          |
+| `CALIBRE_BASE_URL`      | No       | -                   | Base URL for Calibre-Web instance (e.g., `https://calibre.example.com`). Enables Calibre-Web Automated integration  |
+
+**Setup:**
+
+1. Support [Anna's Archive](https://annas-archive.org/donate) to get access to fast downloads
+2. Obtain your API key from your Anna's Archive account
+3. Set the `ANNAS_ARCHIVE_API_KEY` environment variable
+4. Configure download settings in the admin settings page:
+   - **Enable Anna's Archive Downloads**: Toggle to enable/disable the feature
+   - **Download Directory**: Path where books will be saved (default: `./data/downloads`)
+   - **Auto-Download Mode**:
+     - `Disabled`: Manual downloads only via admin interface
+     - `All Users`: Automatically download when any request is approved
+     - `Selected Users`: Only auto-download for users with auto-download enabled
+   - **Daily Download Limit**: Maximum downloads per day (default: 25)
+   - **Auto-Select Best File**: Automatically choose the best file format, or prompt for manual selection
+   - **Calibre Base URL**: Optional URL to link downloaded books to your Calibre web interface
+
+**File Type Preferences:**
+
+The downloader will search for books in the following order of preference:
+
+1. EPUB (most compatible with e-readers)
+2. PDF (universal format)
+3. MOBI (Kindle format)
+4. AZW3 (Kindle format)
+
+Users can specify a preferred language when making requests, which will be used during the search.
+
+**Download Process:**
+
+1. When a request is approved (and auto-download is enabled), the system searches Anna's Archive
+2. Search is performed by ISBN first, then falls back to title + author
+3. If multiple versions are found and auto-select is disabled, admin can choose which file to download
+4. Downloaded files are saved to the configured directory
+5. Request status is automatically updated to "completed" on successful download
+6. If download fails, status is set to "download_problem" and admin can retry
+
+**Calibre-Web Automated Integration:**
+
+If you use Calibre-Web Automated for managing your ebook library:
+
+1. Set the `DOWNLOAD_DIRECTORY` to your Calibre-Web Automated ingest/import folder
+2. Configure the `Calibre Base URL` in settings or via `CALIBRE_BASE_URL` environment variable (e.g., `https://calibre.example.com`)
+3. Calibre-Web Automated will automatically watch the folder and import downloaded books
+4. Downloaded books will be marked as "Delivered to Calibre-Web" with search links to find them in your library
+5. **Optional**: Enable automatic file cleanup in settings:
+   - Files older than X hours (default: 24) will be automatically removed from the download directory
+   - This assumes Calibre-Web Automated has already imported the files
+   - Cleanup only runs when Calibre-Web integration is enabled
+   - Download records are preserved even after files are cleaned up
+
+**Note**: The download directory acts as a transient ingest folder when Calibre-Web integration is enabled. Files are delivered to Calibre-Web Automated and can be automatically cleaned up after a configured period.
 
 ### Application
 
@@ -246,4 +311,3 @@ bookrequestarr.example.com {
 4. **Regularly update dependencies** - Run `npm audit` and update packages
 5. **Backup your database** - Regularly backup the SQLite database file
 6. **Restrict admin access** - Only add trusted users to the admin group
-

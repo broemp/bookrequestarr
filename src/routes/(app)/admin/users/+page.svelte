@@ -4,14 +4,28 @@
 	import Badge from '$lib/components/ui/badge.svelte';
 	import Button from '$lib/components/ui/button.svelte';
 	import Input from '$lib/components/ui/input.svelte';
-	import { User, Mail, Calendar, Shield, UserPlus } from 'lucide-svelte';
+	import { User, Mail, Calendar, Shield, UserPlus, Download } from 'lucide-svelte';
 	import { formatDistance } from 'date-fns';
 	import { enhance } from '$app/forms';
 
 	let { data }: { data: PageData } = $props();
 
 	let showCreateModal = $state(false);
+
+	function handleBackdropClick(event: MouseEvent) {
+		if (event.target === event.currentTarget) {
+			showCreateModal = false;
+		}
+	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			showCreateModal = false;
+		}
+	}
 </script>
+
+<svelte:window onkeydown={showCreateModal ? handleKeydown : undefined} />
 
 <svelte:head>
 	<title>Admin: Users - Bookrequestarr</title>
@@ -70,17 +84,40 @@
 										})}
 									</span>
 								</div>
+								{#if data.downloadAutoMode === 'selected_users'}
+									<div class="flex items-center gap-2">
+										<Download class="h-4 w-4" />
+										<span>
+											Auto-Download: {user.autoDownloadEnabled ? 'Enabled' : 'Disabled'}
+										</span>
+									</div>
+								{/if}
 							</div>
 						</div>
 					</div>
 
-					<div class="flex gap-2">
+					<div class="flex flex-col gap-2">
 						{#if user.role === 'user'}
 							<form method="POST" action="?/promoteUser" use:enhance>
 								<input type="hidden" name="userId" value={user.id} />
 								<Button type="submit" size="sm" variant="outline">
 									<Shield class="mr-2 h-4 w-4" />
 									Promote to Admin
+								</Button>
+							</form>
+						{/if}
+
+						{#if data.downloadAutoMode === 'selected_users'}
+							<form method="POST" action="?/toggleAutoDownload" use:enhance>
+								<input type="hidden" name="userId" value={user.id} />
+								<input
+									type="hidden"
+									name="enabled"
+									value={user.autoDownloadEnabled ? 'false' : 'true'}
+								/>
+								<Button type="submit" size="sm" variant="outline">
+									<Download class="mr-2 h-4 w-4" />
+									{user.autoDownloadEnabled ? 'Disable' : 'Enable'} Auto-Download
 								</Button>
 							</form>
 						{/if}
@@ -93,21 +130,20 @@
 
 <!-- Create user modal -->
 {#if showCreateModal}
-	<button
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+	<div
 		class="bg-background/80 fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-		onclick={() => {
-			showCreateModal = false;
-		}}
-		aria-label="Close modal"
+		onclick={handleBackdropClick}
 	>
 		<div
 			class="w-full max-w-md"
-			onclick={(e: MouseEvent) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
+			aria-labelledby="create-user-title"
+			tabindex="-1"
 		>
 			<Card class="p-6">
-				<h2 class="mb-4 text-2xl font-bold">Create New User</h2>
+				<h2 id="create-user-title" class="mb-4 text-2xl font-bold">Create New User</h2>
 
 				<form method="POST" action="?/createUser" use:enhance class="space-y-4">
 					<div>
@@ -130,7 +166,8 @@
 						<select
 							id="role"
 							name="role"
-							class="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+							class="border-input ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+							style="background-color: hsl(var(--input));"
 						>
 							<option value="user">User</option>
 							<option value="admin">Admin</option>
@@ -152,5 +189,5 @@
 				</form>
 			</Card>
 		</div>
-	</button>
+	</div>
 {/if}

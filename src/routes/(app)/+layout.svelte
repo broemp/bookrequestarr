@@ -3,7 +3,18 @@
 	import type { LayoutData } from './$types';
 	import Button from '$lib/components/ui/button.svelte';
 	import Toast from '$lib/components/Toast.svelte';
-	import { Home, Search, FileText, Settings, Users, LogOut, Bell, Menu, X } from 'lucide-svelte';
+	import {
+		Home,
+		Search,
+		FileText,
+		Settings,
+		Users,
+		LogOut,
+		Bell,
+		Menu,
+		X,
+		Download
+	} from 'lucide-svelte';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 
@@ -17,6 +28,7 @@
 		...(data.user?.role === 'admin'
 			? [
 					{ name: 'Admin: Requests', href: '/admin/requests', icon: FileText },
+					{ name: 'Admin: Downloads', href: '/admin/downloads', icon: Download },
 					{ name: 'Admin: Users', href: '/admin/users', icon: Users },
 					{ name: 'Admin: Settings', href: '/admin/settings', icon: Settings }
 				]

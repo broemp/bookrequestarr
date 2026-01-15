@@ -3,20 +3,27 @@
 	import Card from '$lib/components/ui/card.svelte';
 	import Badge from '$lib/components/ui/badge.svelte';
 	import Button from '$lib/components/ui/button.svelte';
-	import { BookOpen, User, Calendar, MessageSquare } from 'lucide-svelte';
+	import DownloadStatus from '$lib/components/DownloadStatus.svelte';
+	import FileSelectionModal from '$lib/components/FileSelectionModal.svelte';
+	import { BookOpen, User, Calendar, MessageSquare, Download, RefreshCw } from 'lucide-svelte';
 	import { formatDistance } from 'date-fns';
 	import { enhance } from '$app/forms';
+	import type { AnnasArchiveSearchResult } from '$lib/types/download';
 
 	let { data }: { data: PageData } = $props();
 
 	let statusFilter = $state<string>('active');
+	let showFileSelection = $state(false);
+	let selectedRequestId = $state<string | null>(null);
+	let availableFiles = $state<AnnasArchiveSearchResult[]>([]);
+	let downloadingRequests = $state<Set<string>>(new Set());
 
 	const filteredRequests = $derived(
-		statusFilter === 'all' 
-			? data.requests 
+		statusFilter === 'all'
+			? data.requests
 			: statusFilter === 'active'
-			? data.requests.filter((r) => r.status === 'pending' || r.status === 'approved')
-			: data.requests.filter((r) => r.status === statusFilter)
+				? data.requests.filter((r) => r.status === 'pending' || r.status === 'approved')
+				: data.requests.filter((r) => r.status === statusFilter)
 	);
 
 	function getStatusVariant(status: string) {
@@ -29,8 +36,105 @@
 				return 'default';
 			case 'rejected':
 				return 'destructive';
+			case 'download_problem':
+				return 'destructive';
 			default:
 				return 'secondary';
+		}
+	}
+
+	async function initiateDownload(requestId: string) {
+		downloadingRequests.add(requestId);
+		downloadingRequests = downloadingRequests;
+
+		try {
+			const response = await fetch('/api/downloads/initiate', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ requestId })
+			});
+
+			const result = await response.json();
+
+			if (result.requiresSelection && result.results) {
+				// Show file selection modal
+				selectedRequestId = requestId;
+				availableFiles = result.results;
+				showFileSelection = true;
+			} else if (!result.success) {
+				alert(`Download failed: ${result.error}`);
+			} else {
+				// Refresh page to show updated status
+				window.location.reload();
+			}
+		} catch (error) {
+			console.error('Error initiating download:', error);
+			alert('Failed to initiate download');
+		} finally {
+			downloadingRequests.delete(requestId);
+			downloadingRequests = downloadingRequests;
+		}
+	}
+
+	async function handleFileSelection(file: AnnasArchiveSearchResult) {
+		if (!selectedRequestId) return;
+
+		downloadingRequests.add(selectedRequestId);
+		downloadingRequests = downloadingRequests;
+
+		try {
+			const response = await fetch('/api/downloads/initiate', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					requestId: selectedRequestId,
+					md5: file.md5,
+					fileType: file.extension,
+					manual: true
+				})
+			});
+
+			const result = await response.json();
+
+			if (!result.success) {
+				alert(`Download failed: ${result.error}`);
+			} else {
+				// Refresh page to show updated status
+				window.location.reload();
+			}
+		} catch (error) {
+			console.error('Error initiating download:', error);
+			alert('Failed to initiate download');
+		} finally {
+			downloadingRequests.delete(selectedRequestId);
+			downloadingRequests = downloadingRequests;
+			selectedRequestId = null;
+		}
+	}
+
+	async function retryDownload(downloadId: string, requestId: string) {
+		downloadingRequests.add(requestId);
+		downloadingRequests = downloadingRequests;
+
+		try {
+			const response = await fetch(`/api/downloads/retry/${downloadId}`, {
+				method: 'POST'
+			});
+
+			const result = await response.json();
+
+			if (!result.success) {
+				alert(`Retry failed: ${result.error}`);
+			} else {
+				// Refresh page to show updated status
+				window.location.reload();
+			}
+		} catch (error) {
+			console.error('Error retrying download:', error);
+			alert('Failed to retry download');
+		} finally {
+			downloadingRequests.delete(requestId);
+			downloadingRequests = downloadingRequests;
 		}
 	}
 </script>
@@ -54,7 +158,8 @@
 				statusFilter = 'active';
 			}}
 		>
-			Active ({data.requests.filter((r) => r.status === 'pending' || r.status === 'approved').length})
+			Active ({data.requests.filter((r) => r.status === 'pending' || r.status === 'approved')
+				.length})
 		</Button>
 		<Button
 			variant={statusFilter === 'pending' ? 'default' : 'outline'}
@@ -108,7 +213,11 @@
 		<Card class="p-12 text-center">
 			<BookOpen class="text-muted-foreground mx-auto mb-3 h-12 w-12 opacity-50" />
 			<p class="text-muted-foreground">
-				{statusFilter === 'all' ? 'No requests yet' : statusFilter === 'active' ? 'No active requests' : `No ${statusFilter} requests`}
+				{statusFilter === 'all'
+					? 'No requests yet'
+					: statusFilter === 'active'
+						? 'No active requests'
+						: `No ${statusFilter} requests`}
 			</p>
 		</Card>
 	{:else}
@@ -136,9 +245,25 @@
 										{request.book.author || 'Unknown Author'}
 									</p>
 								</div>
-								<Badge variant={getStatusVariant(request.status)}>
-									{request.status}
-								</Badge>
+								<div class="flex flex-col items-end gap-2">
+									<Badge variant={getStatusVariant(request.status)}>
+										{request.status}
+									</Badge>
+									{#if request.download && data.annasArchiveEnabled}
+										<DownloadStatus
+											status={request.download.downloadStatus}
+											fileType={request.download.fileType}
+											fileSize={request.download.fileSize}
+											errorMessage={request.download.errorMessage}
+											calibreUrl={data.calibreBaseUrl &&
+											request.download.downloadStatus === 'completed'
+												? `${data.calibreBaseUrl}/search?query=${encodeURIComponent(
+														`${request.book.title} ${request.book.author || ''}`
+													)}`
+												: null}
+										/>
+									{/if}
+								</div>
 							</div>
 
 							<div class="text-muted-foreground mb-3 flex flex-wrap gap-4 text-sm">
@@ -171,8 +296,8 @@
 							</div>
 
 							<!-- Action buttons -->
-							{#if request.status === 'pending'}
-								<div class="flex gap-2">
+							<div class="flex flex-wrap gap-2">
+								{#if request.status === 'pending'}
 									<form method="POST" action="?/updateStatus" use:enhance>
 										<input type="hidden" name="requestId" value={request.id} />
 										<input type="hidden" name="status" value="approved" />
@@ -184,14 +309,38 @@
 										<input type="hidden" name="status" value="rejected" />
 										<Button type="submit" size="sm" variant="destructive">Reject</Button>
 									</form>
-								</div>
-							{:else if request.status === 'approved'}
-								<form method="POST" action="?/updateStatus" use:enhance>
-									<input type="hidden" name="requestId" value={request.id} />
-									<input type="hidden" name="status" value="completed" />
-									<Button type="submit" size="sm">Mark as Completed</Button>
-								</form>
-							{/if}
+								{:else if request.status === 'approved'}
+									{#if data.annasArchiveEnabled && !request.download}
+										<Button
+											size="sm"
+											variant="default"
+											onclick={() => initiateDownload(request.id)}
+											disabled={downloadingRequests.has(request.id)}
+										>
+											<Download class="mr-2 h-4 w-4" />
+											{downloadingRequests.has(request.id) ? 'Downloading...' : 'Download'}
+										</Button>
+									{/if}
+
+									<form method="POST" action="?/updateStatus" use:enhance>
+										<input type="hidden" name="requestId" value={request.id} />
+										<input type="hidden" name="status" value="completed" />
+										<Button type="submit" size="sm">Mark as Completed</Button>
+									</form>
+								{:else if request.status === 'download_problem'}
+									{#if data.annasArchiveEnabled && request.download}
+										<Button
+											size="sm"
+											variant="default"
+											onclick={() => retryDownload(request.download.id, request.id)}
+											disabled={downloadingRequests.has(request.id)}
+										>
+											<RefreshCw class="mr-2 h-4 w-4" />
+											{downloadingRequests.has(request.id) ? 'Retrying...' : 'Retry Download'}
+										</Button>
+									{/if}
+								{/if}
+							</div>
 						</div>
 					</div>
 				</Card>
@@ -199,3 +348,9 @@
 		</div>
 	{/if}
 </div>
+
+<FileSelectionModal
+	bind:isOpen={showFileSelection}
+	results={availableFiles}
+	onSelect={handleFileSelection}
+/>

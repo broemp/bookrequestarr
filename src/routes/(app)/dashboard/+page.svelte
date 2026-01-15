@@ -27,8 +27,10 @@
 			<div class="relative -mx-6 px-6">
 				<div class="flex gap-3 overflow-x-auto pb-4">
 					{#each data.trendingBooks as book}
-						<a href="/search?book={book.hardcoverId}" class="group flex-shrink-0 w-32">
-							<div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg shadow-md transition-all group-hover:shadow-xl group-hover:scale-105">
+						<a href="/search?book={book.hardcoverId}" class="group w-32 flex-shrink-0">
+							<div
+								class="relative aspect-[2/3] w-full overflow-hidden rounded-lg shadow-md transition-all group-hover:scale-105 group-hover:shadow-xl"
+							>
 								{#if book.coverImage}
 									<img src={book.coverImage} alt={book.title} class="h-full w-full object-cover" />
 								{:else}
@@ -39,8 +41,8 @@
 							</div>
 
 							<div class="mt-2">
-								<h3 class="line-clamp-2 text-xs font-medium leading-tight">{book.title}</h3>
-								<p class="text-muted-foreground truncate text-xs mt-0.5">
+								<h3 class="line-clamp-2 text-xs leading-tight font-medium">{book.title}</h3>
+								<p class="text-muted-foreground mt-0.5 truncate text-xs">
 									{book.author || 'Unknown Author'}
 								</p>
 							</div>
@@ -52,7 +54,7 @@
 	{/if}
 
 	<!-- Stats -->
-	<div class="grid gap-4 grid-cols-2 lg:grid-cols-4">
+	<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
 		<Card class="p-6">
 			<div class="flex items-center justify-between">
 				<div>
@@ -117,8 +119,10 @@
 			<div class="relative -mx-6 px-6">
 				<div class="flex gap-3 overflow-x-auto pb-4">
 					{#each data.recentRequests as request}
-						<a href="/requests" class="group flex-shrink-0 w-32 relative">
-							<div class="relative aspect-[2/3] w-full overflow-hidden rounded-lg shadow-md transition-all group-hover:shadow-xl group-hover:scale-105">
+						<a href="/requests" class="group relative w-32 flex-shrink-0">
+							<div
+								class="relative aspect-[2/3] w-full overflow-hidden rounded-lg shadow-md transition-all group-hover:scale-105 group-hover:shadow-xl"
+							>
 								{#if request.book.coverImage}
 									<img
 										src={request.book.coverImage}
@@ -130,7 +134,7 @@
 										<BookOpen class="text-muted-foreground h-8 w-8" />
 									</div>
 								{/if}
-								
+
 								<!-- Status badge overlay -->
 								<div class="absolute top-2 right-2">
 									<Badge
@@ -149,8 +153,8 @@
 							</div>
 
 							<div class="mt-2">
-								<h3 class="line-clamp-2 text-xs font-medium leading-tight">{request.book.title}</h3>
-								<p class="text-muted-foreground truncate text-xs mt-0.5">
+								<h3 class="line-clamp-2 text-xs leading-tight font-medium">{request.book.title}</h3>
+								<p class="text-muted-foreground mt-0.5 truncate text-xs">
 									{request.book.author || 'Unknown Author'}
 								</p>
 							</div>

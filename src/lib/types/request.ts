@@ -5,7 +5,7 @@ import type { User } from './user';
 export type Request = typeof requests.$inferSelect;
 export type NewRequest = typeof requests.$inferInsert;
 
-export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'completed';
+export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'completed' | 'download_problem';
 
 export interface RequestWithDetails extends Request {
 	book: Book;

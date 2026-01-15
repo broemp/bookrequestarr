@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+---
+Use node version 24. If not installed use `nvm use 24`.

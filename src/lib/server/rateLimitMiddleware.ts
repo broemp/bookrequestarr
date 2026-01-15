@@ -1,6 +1,8 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 import { checkRateLimit, type RateLimitConfig } from './rateLimit';
+import { env } from '$env/dynamic/private';
+import { dev } from '$app/environment';
 
 /**
  * Get client identifier from request
@@ -27,10 +29,12 @@ function getClientIdentifier(event: RequestEvent): string {
  * Apply rate limiting to a request handler
  * Returns a Response if rate limited, null if allowed
  */
-export function applyRateLimit(
-	event: RequestEvent,
-	config: RateLimitConfig
-): Response | null {
+export function applyRateLimit(event: RequestEvent, config: RateLimitConfig): Response | null {
+	// Skip rate limiting in development mode
+	if (dev || env.NODE_ENV === 'development') {
+		return null;
+	}
+
 	const identifier = getClientIdentifier(event);
 	const result = checkRateLimit(identifier, config);
 
@@ -86,4 +90,3 @@ export function addRateLimitHeaders(
 		headers
 	});
 }
-

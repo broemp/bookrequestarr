@@ -11,9 +11,11 @@ The workflow requires specific permissions to function correctly. Configure thes
 **Path:** `Settings` → `Actions` → `General` → `Workflow permissions`
 
 **Required Setting:**
+
 - ✅ Select **"Read and write permissions"**
 
 This allows workflows to:
+
 - Push Docker images to GitHub Container Registry (GHCR)
 - Create attestations
 - Write job summaries
@@ -23,6 +25,7 @@ This allows workflows to:
 The workflow automatically uses `GITHUB_TOKEN` to authenticate with GHCR. No additional secrets needed!
 
 **What happens automatically:**
+
 - The workflow uses `${{ secrets.GITHUB_TOKEN }}` (automatically provided by GitHub)
 - Images are pushed to `ghcr.io/<your-username>/<repository-name>`
 - The token has the necessary permissions when workflow permissions are set correctly
@@ -34,10 +37,12 @@ After the first successful workflow run, you may want to configure package visib
 **Path:** `Settings` → `Packages` → Select your package → `Package settings`
 
 **Options:**
+
 - **Private**: Only you and collaborators can pull the image (default)
 - **Public**: Anyone can pull the image
 
 To make the package public:
+
 1. Go to the package page: `https://github.com/users/<username>/packages/container/<repo-name>`
 2. Click `Package settings`
 3. Scroll to "Danger Zone"
@@ -48,6 +53,7 @@ To make the package public:
 **Path:** `Settings` → `Actions` → `General` → `Actions permissions`
 
 **Required Setting:**
+
 - ✅ Select **"Allow all actions and reusable workflows"** (or at minimum allow the specific actions used)
 
 ## Workflow Triggers
@@ -66,6 +72,7 @@ The workflow runs automatically on:
 The workflow uses GitHub's built-in `GITHUB_TOKEN` which is automatically available to all workflows. You don't need to create any secrets.
 
 **What `GITHUB_TOKEN` provides:**
+
 - Authentication to GitHub Container Registry
 - Permission to create attestations
 - Access to repository metadata
@@ -78,8 +85,8 @@ If you want to customize the workflow, you can modify these in `.github/workflow
 
 ```yaml
 env:
-  REGISTRY: ghcr.io                          # Container registry
-  IMAGE_NAME: ${{ github.repository }}       # Image name (owner/repo)
+  REGISTRY: ghcr.io # Container registry
+  IMAGE_NAME: ${{ github.repository }} # Image name (owner/repo)
 ```
 
 ### Custom Registry (Advanced)
@@ -88,7 +95,6 @@ To push to a different registry (e.g., Docker Hub, AWS ECR):
 
 1. Add registry credentials as repository secrets:
    - `Settings` → `Secrets and variables` → `Actions` → `New repository secret`
-   
 2. Modify the workflow to use those secrets:
 
 ```yaml
@@ -116,12 +122,14 @@ After setting up, verify everything works:
 ### 2. Trigger a Test Run
 
 **Option A: Push to main**
+
 ```bash
 git commit --allow-empty -m "Test workflow"
 git push origin main
 ```
 
 **Option B: Manual trigger**
+
 1. Go to `Actions` tab
 2. Select "Build and Push Docker Image"
 3. Click `Run workflow`
@@ -142,11 +150,13 @@ git push origin main
 After successful completion:
 
 **View in GitHub:**
+
 - Navigate to your repository main page
 - Look for "Packages" in the right sidebar
 - Click on your package to see details
 
 **Pull the image:**
+
 ```bash
 # For public packages
 docker pull ghcr.io/<username>/<repo-name>:latest
@@ -157,6 +167,7 @@ docker pull ghcr.io/<username>/<repo-name>:latest
 ```
 
 **Verify attestation:**
+
 ```bash
 gh attestation verify oci://ghcr.io/<username>/<repo-name>:latest --owner <username>
 ```
@@ -168,6 +179,7 @@ gh attestation verify oci://ghcr.io/<username>/<repo-name>:latest --owner <usern
 **Cause:** Insufficient workflow permissions
 
 **Solution:**
+
 1. Go to `Settings` → `Actions` → `General` → `Workflow permissions`
 2. Select "Read and write permissions"
 3. Re-run the workflow
@@ -177,6 +189,7 @@ gh attestation verify oci://ghcr.io/<username>/<repo-name>:latest --owner <usern
 **Cause:** Trying to pull a private package without authentication
 
 **Solution:**
+
 ```bash
 # Create a Personal Access Token with read:packages scope
 # Settings → Developer settings → Personal access tokens → Tokens (classic)
@@ -190,6 +203,7 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u <username> --password-stdin
 **Cause:** Multi-platform build issues
 
 **Solution:**
+
 - The workflow includes QEMU setup for ARM64 emulation
 - GitHub-hosted runners support this by default
 - If using self-hosted runners, ensure QEMU is installed
@@ -197,6 +211,7 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u <username> --password-stdin
 ### Workflow doesn't trigger
 
 **Check:**
+
 1. Workflow file is in `.github/workflows/` directory
 2. File has `.yml` or `.yaml` extension
 3. Syntax is valid (use GitHub's workflow editor to validate)
@@ -207,6 +222,7 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u <username> --password-stdin
 ### 1. Review Workflow Permissions
 
 Only grant the minimum required permissions:
+
 - `contents: read` - Read repository contents
 - `packages: write` - Push to GHCR
 - `id-token: write` - OIDC token for attestations
@@ -219,10 +235,10 @@ Create `.github/dependabot.yml`:
 ```yaml
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
 ```
 
 ### 3. Pin Action Versions
@@ -258,4 +274,3 @@ Before running the workflow, ensure:
 - [GitHub Container Registry Documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
 - [Docker Build Push Action](https://github.com/docker/build-push-action)
 - [Artifact Attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)
-

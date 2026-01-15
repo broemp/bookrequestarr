@@ -6,9 +6,31 @@ import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { logger } from '$lib/server/logger';
 import { validateEnvOrExit } from '$lib/server/envValidation';
+import { cleanupOldDownloads } from '$lib/server/cleanup';
 
 // Validate environment variables at startup
 validateEnvOrExit();
+
+// Run cleanup every hour
+setInterval(
+	async () => {
+		try {
+			await cleanupOldDownloads();
+		} catch (error) {
+			logger.error('Cleanup job failed', error instanceof Error ? error : undefined);
+		}
+	},
+	60 * 60 * 1000
+); // 1 hour
+
+// Run cleanup on startup (after 1 minute delay)
+setTimeout(async () => {
+	try {
+		await cleanupOldDownloads();
+	} catch (error) {
+		logger.error('Initial cleanup failed', error instanceof Error ? error : undefined);
+	}
+}, 60 * 1000);
 
 // Track if dev user has been created
 let devUserCreated = false;
@@ -16,13 +38,9 @@ let devUserCreated = false;
 // Ensure dev admin user exists in database
 async function ensureDevUser() {
 	if (devUserCreated) return;
-	
+
 	const devUserId = 'dev-admin';
-	const [existingUser] = await db
-		.select()
-		.from(users)
-		.where(eq(users.id, devUserId))
-		.limit(1);
+	const [existingUser] = await db.select().from(users).where(eq(users.id, devUserId)).limit(1);
 
 	if (!existingUser) {
 		await db.insert(users).values({
@@ -35,7 +53,7 @@ async function ensureDevUser() {
 		});
 		logger.info('Created dev admin user');
 	}
-	
+
 	devUserCreated = true;
 }
 
@@ -44,7 +62,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (env.DISABLE_AUTH === 'true') {
 		// Ensure dev user exists in database
 		await ensureDevUser();
-		
+
 		// Automatically log in as admin
 		event.locals.user = {
 			id: 'dev-admin',

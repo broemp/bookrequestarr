@@ -4,7 +4,16 @@
 	import Button from '$lib/components/ui/button.svelte';
 	import Input from '$lib/components/ui/input.svelte';
 	import Badge from '$lib/components/ui/badge.svelte';
-	import { Settings, Bell, TestTube, CheckCircle, XCircle, Database, Trash2 } from 'lucide-svelte';
+	import {
+		Settings,
+		Bell,
+		TestTube,
+		CheckCircle,
+		XCircle,
+		Database,
+		Trash2,
+		Download
+	} from 'lucide-svelte';
 	import { enhance } from '$app/forms';
 
 	let { data, form }: { data: PageData; form: any } = $props();
@@ -57,15 +66,22 @@
 					type="text"
 					placeholder="your-hardcover-api-key"
 					value={data.settings.hardcoverApiKey || ''}
+					disabled={data.envOverrides.hardcoverApiKey}
 				/>
-				<p class="text-muted-foreground mt-1 text-xs">
-					Enter your Hardcover API key to fetch book metadata. Get one at <a
-						href="https://hardcover.app/settings/api"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="hover:text-foreground underline">hardcover.app/settings/api</a
-					>
-				</p>
+				{#if data.envOverrides.hardcoverApiKey}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						Enter your Hardcover API key to fetch book metadata. Get one at <a
+							href="https://hardcover.app/settings/api"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="hover:text-foreground underline">hardcover.app/settings/api</a
+						>
+					</p>
+				{/if}
 			</div>
 
 			<div>
@@ -85,6 +101,217 @@
 					How long to cache API responses before refetching (default: 7 days)
 				</p>
 			</div>
+
+			<div class="flex gap-3">
+				<Button type="submit">Save Settings</Button>
+			</div>
+
+			{#if form?.success}
+				<div class="rounded-md bg-green-500/10 p-4 text-sm text-green-500">
+					Settings saved successfully!
+				</div>
+			{/if}
+
+			{#if form?.error}
+				<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+					{form.error}
+				</div>
+			{/if}
+		</form>
+	</Card>
+
+	<!-- Anna's Archive Integration -->
+	<Card class="p-6">
+		<div class="mb-4 flex items-center gap-3">
+			<Download class="h-6 w-6" />
+			<h2 class="text-xl font-semibold">Anna's Archive Integration</h2>
+		</div>
+
+		{#if !data.settings.annasArchiveApiKey}
+			<div class="mb-4 rounded-md bg-blue-500/10 p-4 text-sm text-blue-500">
+				<p class="font-medium">Anna's Archive API Key Required</p>
+				<p class="mt-1">
+					To enable automatic book downloads, you need to configure an Anna's Archive API key.
+					Please consider <a
+						href="https://annas-archive.org/donate"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="underline hover:text-blue-400">supporting Anna's Archive</a
+					> to get access to fast downloads.
+				</p>
+			</div>
+		{/if}
+
+		<form method="POST" action="?/updateSettings" use:enhance class="space-y-4">
+			<div>
+				<label for="annasArchiveDomain" class="mb-2 block text-sm font-medium">
+					Anna's Archive Domain
+				</label>
+				<Input
+					id="annasArchiveDomain"
+					name="annasArchiveDomain"
+					type="text"
+					placeholder="annas-archive.org"
+					value={data.settings.annasArchiveDomain || 'annas-archive.org'}
+					disabled={data.envOverrides.annasArchiveDomain}
+				/>
+				{#if data.envOverrides.annasArchiveDomain}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						Base domain for Anna's Archive (e.g., annas-archive.org, annas-archive.se)
+					</p>
+				{/if}
+			</div>
+
+			<div>
+				<label for="annasArchiveApiKey" class="mb-2 block text-sm font-medium">
+					Anna's Archive API Key
+				</label>
+				<Input
+					id="annasArchiveApiKey"
+					name="annasArchiveApiKey"
+					type="text"
+					placeholder="your-annas-archive-api-key"
+					value={data.settings.annasArchiveApiKey || ''}
+					disabled={data.envOverrides.annasArchiveApiKey}
+				/>
+				{#if data.envOverrides.annasArchiveApiKey}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						Enter your Anna's Archive API key for fast downloads
+					</p>
+				{/if}
+			</div>
+
+			<div>
+				<label for="downloadDirectory" class="mb-2 block text-sm font-medium">
+					Download Directory
+				</label>
+				<Input
+					id="downloadDirectory"
+					name="downloadDirectory"
+					type="text"
+					placeholder="./data/downloads"
+					value={data.settings.downloadDirectory || './data/downloads'}
+				/>
+				<p class="text-muted-foreground mt-1 text-xs">
+					Path where downloaded books will be stored (e.g., Calibre ingest folder)
+				</p>
+			</div>
+
+			<div>
+				<label for="downloadAutoMode" class="mb-2 block text-sm font-medium">
+					Auto-Download Mode
+				</label>
+				<select
+					id="downloadAutoMode"
+					name="downloadAutoMode"
+					value={data.settings.downloadAutoMode || 'disabled'}
+					class="border-input ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+					style="background-color: hsl(var(--input));"
+				>
+					<option value="disabled">Disabled (Manual only)</option>
+					<option value="all_users">All Users</option>
+					<option value="selected_users">Selected Users Only</option>
+				</select>
+				<p class="text-muted-foreground mt-1 text-xs">
+					Control which users' requests trigger automatic downloads
+				</p>
+			</div>
+
+			<div>
+				<label for="downloadDailyLimit" class="mb-2 block text-sm font-medium">
+					Daily Download Limit
+				</label>
+				<Input
+					id="downloadDailyLimit"
+					name="downloadDailyLimit"
+					type="number"
+					min="1"
+					max="1000"
+					placeholder="25"
+					value={data.settings.downloadDailyLimit || '25'}
+				/>
+				<p class="text-muted-foreground mt-1 text-xs">
+					Maximum number of downloads per day (default: 25)
+				</p>
+			</div>
+
+			<div class="flex items-center gap-2">
+				<input
+					type="checkbox"
+					id="downloadAutoSelect"
+					name="downloadAutoSelect"
+					checked={data.settings.downloadAutoSelect}
+					class="h-4 w-4 rounded border-gray-300"
+				/>
+				<label for="downloadAutoSelect" class="text-sm font-medium"> Auto-Select Best File </label>
+				<p class="text-muted-foreground text-xs">
+					(Automatically choose the best file format, or prompt for manual selection)
+				</p>
+			</div>
+
+			<div>
+				<label for="calibreBaseUrl" class="mb-2 block text-sm font-medium">
+					Calibre Base URL (Optional)
+				</label>
+				<Input
+					id="calibreBaseUrl"
+					name="calibreBaseUrl"
+					type="url"
+					placeholder="https://calibre.example.com"
+					value={data.settings.calibreBaseUrl || ''}
+				/>
+				<p class="text-muted-foreground mt-1 text-xs">
+					Base URL for Calibre-Web interface to link downloaded books
+				</p>
+			</div>
+
+			{#if data.settings.calibreBaseUrl}
+				<div class="space-y-4 rounded-md bg-blue-500/10 p-4">
+					<h3 class="text-sm font-semibold text-blue-600">Calibre-Web Automated Integration</h3>
+
+					<div class="flex items-center gap-2">
+						<input
+							type="checkbox"
+							id="calibreCleanupEnabled"
+							name="calibreCleanupEnabled"
+							checked={data.settings.calibreCleanupEnabled}
+							class="h-4 w-4 rounded border-gray-300"
+						/>
+						<label for="calibreCleanupEnabled" class="text-sm font-medium">
+							Enable automatic cleanup of ingested files
+						</label>
+					</div>
+
+					{#if data.settings.calibreCleanupEnabled}
+						<div>
+							<label for="calibreCleanupHours" class="mb-2 block text-sm font-medium">
+								Cleanup files older than (hours)
+							</label>
+							<Input
+								id="calibreCleanupHours"
+								name="calibreCleanupHours"
+								type="number"
+								min="1"
+								max="168"
+								placeholder="24"
+								value={data.settings.calibreCleanupHours || '24'}
+							/>
+							<p class="text-muted-foreground mt-1 text-xs">
+								Files in the download directory will be automatically removed after this many hours,
+								assuming Calibre-Web has imported them
+							</p>
+						</div>
+					{/if}
+				</div>
+			{/if}
 
 			<div class="flex gap-3">
 				<Button type="submit">Save Settings</Button>
@@ -172,10 +399,17 @@
 					type="url"
 					placeholder="https://discord.com/api/webhooks/..."
 					value={data.settings.discordWebhook || ''}
+					disabled={data.envOverrides.discordWebhook}
 				/>
-				<p class="text-muted-foreground mt-1 text-xs">
-					Enter your Discord webhook URL to receive notifications
-				</p>
+				{#if data.envOverrides.discordWebhook}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						Enter your Discord webhook URL to receive notifications
+					</p>
+				{/if}
 			</div>
 
 			<div>
@@ -188,10 +422,17 @@
 					type="text"
 					placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
 					value={data.settings.telegramBotToken || ''}
+					disabled={data.envOverrides.telegramBotToken}
 				/>
-				<p class="text-muted-foreground mt-1 text-xs">
-					Enter your Telegram bot token from @BotFather
-				</p>
+				{#if data.envOverrides.telegramBotToken}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						Enter your Telegram bot token from @BotFather
+					</p>
+				{/if}
 			</div>
 
 			<div>
@@ -204,10 +445,17 @@
 					type="text"
 					placeholder="-1001234567890"
 					value={data.settings.telegramChatId || ''}
+					disabled={data.envOverrides.telegramChatId}
 				/>
-				<p class="text-muted-foreground mt-1 text-xs">
-					Enter the chat ID where notifications should be sent
-				</p>
+				{#if data.envOverrides.telegramChatId}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						Enter the chat ID where notifications should be sent
+					</p>
+				{/if}
 			</div>
 
 			<div class="flex gap-3">

@@ -34,9 +34,11 @@ export interface HardcoverBook {
 		};
 	};
 	taggings?: Array<{
+		tag_id?: string;
 		tag: {
 			id: string;
-			name: string;
+			slug?: string;
+			tag: string; // The actual tag name is in the 'tag' field
 			tag_category?: {
 				category?: string;
 			};

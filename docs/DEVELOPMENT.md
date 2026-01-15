@@ -149,4 +149,3 @@ npm run dev -- --port 5174
 6. **Test with real auth** - Before deploying
 7. **Never commit `.env`** - Use `.env.example`
 8. **Document new features** - Update documentation
-
