@@ -1,6 +1,6 @@
 services:
   bookrequestarr:
-    image: ghcr.io/broemp/gremlinprinter:latest
+    image: ghcr.io/broemp/bookrequestarr:latest
     container_name: bookrequestarr
     restart: unless-stopped
     ports:
