@@ -106,6 +106,47 @@ Bookrequestarr uses the Hardcover API to fetch book metadata.
 3. Generate a new API key
 4. Copy the key and set it in your environment variables
 
+### Caching
+
+Bookrequestarr uses a two-tier caching system to optimize performance and reduce API calls:
+
+**Note:** These settings can be configured via the Admin Settings page in the web UI or through the database directly. Environment variables are not used for cache settings.
+
+#### Cache Settings (Configurable in Admin UI)
+
+| Setting                        | Default | Description                                                                                                    |
+| ------------------------------ | ------- | -------------------------------------------------------------------------------------------------------------- |
+| **API Cache TTL**              | 7 days  | How long to cache Hardcover API responses before refetching. Reduces API calls and improves search performance |
+| **Local Book Cache TTL**       | 6 hours | How long to keep book details in local database cache for instant loading. Lower values = fresher data         |
+
+**How it works:**
+
+1. **Local Book Cache (Tier 1)** - Ultra-fast database cache
+   - When you click on a book, it first checks the local database
+   - If the book was cached within the TTL (default 6 hours), it loads instantly (< 50ms)
+   - No API calls, no loading spinners - just instant results
+   - Perfect for frequently accessed books
+
+2. **API Response Cache (Tier 2)** - Longer-term cache
+   - If local cache is expired or missing, checks the API response cache
+   - Stores complete Hardcover API responses for the configured TTL (default 7 days)
+   - Prevents redundant API calls and respects rate limits
+   - Updates the local cache for next time
+
+**Performance Tips:**
+
+- **For instant loading:** Keep Local Book Cache TTL at 6+ hours
+- **For fresh data:** Lower Local Book Cache TTL to 1-2 hours
+- **To reduce API calls:** Increase API Cache TTL to 14-30 days
+- **For development:** Lower both values to see changes quickly
+
+**To configure:**
+
+1. Log in as an admin
+2. Navigate to **Admin** → **Settings**
+3. Adjust the cache TTL values under "API Settings"
+4. Click **Save Settings**
+
 ### Notification Backends
 
 Bookrequestarr supports multiple notification backends. Configure the ones you want to use:
@@ -204,6 +245,79 @@ If you use Calibre-Web Automated for managing your ebook library:
    - Download records are preserved even after files are cleaned up
 
 **Note**: The download directory acts as a transient ingest folder when Calibre-Web integration is enabled. Files are delivered to Calibre-Web Automated and can be automatically cleaned up after a configured period.
+
+### Prowlarr + SABnzbd Integration (Usenet)
+
+Bookrequestarr can integrate with Prowlarr (indexer manager) and SABnzbd (Usenet download client) as the primary download source, with Anna's Archive as fallback.
+
+| Variable                   | Required | Default          | Description                                                                                          |
+| -------------------------- | -------- | ---------------- | ---------------------------------------------------------------------------------------------------- |
+| `PROWLARR_URL`             | No       | -                | Base URL for Prowlarr instance (e.g., `http://localhost:9696`)                                       |
+| `PROWLARR_API_KEY`         | No       | -                | Prowlarr API key from Settings → General → Security                                                  |
+| `SABNZBD_URL`              | No       | -                | Base URL for SABnzbd instance (e.g., `http://localhost:8080`)                                        |
+| `SABNZBD_API_KEY`          | No       | -                | SABnzbd API key from Config → General → Security → API Key                                           |
+| `SABNZBD_CATEGORY`         | No       | `books`          | SABnzbd category for book downloads (must exist in SABnzbd settings)                                 |
+| `DOWNLOAD_SOURCE_PRIORITY` | No       | `prowlarr_first` | Download source priority: `prowlarr_first`, `annas_archive_first`, `prowlarr_only`, `annas_archive_only` |
+| `MIN_CONFIDENCE_SCORE`     | No       | `50`             | Minimum confidence score (0-100) required to auto-download from Prowlarr                            |
+
+**Setup:**
+
+1. **Install Prowlarr**:
+   - Download from [prowlarr.com](https://prowlarr.com/)
+   - Configure indexers in Prowlarr (Settings → Indexers)
+   - Ensure indexers support book categories (7000-7999 for ebooks, 3030 for audiobooks)
+   - Get API key from Settings → General → Security
+
+2. **Install SABnzbd**:
+   - Download from [sabnzbd.org](https://sabnzbd.org/)
+   - Configure Usenet server(s) in SABnzbd (Config → Servers)
+   - Create a "books" category in SABnzbd (Config → Categories)
+   - Get API key from Config → General → Security → API Key
+
+3. **Configure in Bookrequestarr**:
+   - Go to Admin Settings
+   - Enable Prowlarr Integration and enter URL + API key
+   - Test connection to verify configuration
+   - Enter SABnzbd URL + API key
+   - Test connection to verify configuration
+   - Set download source priority (Prowlarr first recommended)
+   - Adjust minimum confidence score (default: 50)
+
+**How It Works:**
+
+1. When a request is approved, Bookrequestarr searches Prowlarr for matching releases
+2. Search is performed by ISBN first (highest accuracy), then title + author
+3. Each result is scored for confidence (0-100) based on:
+   - ISBN match (50 points)
+   - Title similarity (25 points)
+   - Author match (15 points)
+   - Year match (5 points)
+   - Language match (5 points)
+4. Best result above minimum confidence threshold is selected
+5. NZB is sent to SABnzbd for download
+6. Background job polls SABnzbd for completion status
+7. On failure, falls back to Anna's Archive (if configured)
+
+**Confidence Score Thresholds:**
+
+- **80-100**: High confidence - auto-download enabled
+- **50-79**: Medium confidence - download with warning
+- **0-49**: Low confidence - skip and try next result or fallback
+
+**Download Source Priority Options:**
+
+- **Prowlarr First** (recommended): Try Prowlarr, fallback to Anna's Archive
+- **Anna's Archive First**: Try Anna's Archive, fallback to Prowlarr
+- **Prowlarr Only**: Only use Prowlarr (no fallback)
+- **Anna's Archive Only**: Only use Anna's Archive (no Prowlarr)
+
+**Benefits of Usenet via Prowlarr:**
+
+- Faster download speeds compared to direct downloads
+- Better availability for recent releases
+- Automatic quality selection based on file size and popularity
+- Support for multiple indexers simultaneously
+- Detailed metadata extraction from release names
 
 ### Application
 

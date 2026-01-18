@@ -28,7 +28,12 @@ export const load: PageServerLoad = async () => {
 		telegramBotToken: !!env.TELEGRAM_BOT_TOKEN,
 		telegramChatId: !!env.TELEGRAM_CHAT_ID,
 		annasArchiveDomain: !!env.ANNAS_ARCHIVE_DOMAIN,
-		annasArchiveApiKey: !!env.ANNAS_ARCHIVE_API_KEY
+		annasArchiveApiKey: !!env.ANNAS_ARCHIVE_API_KEY,
+		prowlarrUrl: !!env.PROWLARR_URL,
+		prowlarrApiKey: !!env.PROWLARR_API_KEY,
+		sabnzbdUrl: !!env.SABNZBD_URL,
+		sabnzbdApiKey: !!env.SABNZBD_API_KEY,
+		sabnzbdCategory: !!env.SABNZBD_CATEGORY
 	};
 
 	return {
@@ -38,6 +43,7 @@ export const load: PageServerLoad = async () => {
 			telegramBotToken: settingsMap['telegram_bot_token'] || '',
 			telegramChatId: settingsMap['telegram_chat_id'] || '',
 			apiCacheTtlDays: settingsMap['api_cache_ttl_days'] || '7',
+			localBookCacheTtlHours: settingsMap['local_book_cache_ttl_hours'] || '6',
 			annasArchiveDomain: settingsMap['annas_archive_domain'] || 'annas-archive.org',
 			annasArchiveApiKey: settingsMap['annas_archive_api_key'] || '',
 			downloadDirectory: settingsMap['download_directory'] || './data/downloads',
@@ -46,7 +52,15 @@ export const load: PageServerLoad = async () => {
 			downloadAutoSelect: settingsMap['download_auto_select'] === 'true',
 			calibreBaseUrl: settingsMap['calibre_base_url'] || '',
 			calibreCleanupEnabled: settingsMap['calibre_cleanup_enabled'] === 'true',
-			calibreCleanupHours: settingsMap['calibre_cleanup_hours'] || '24'
+			calibreCleanupHours: settingsMap['calibre_cleanup_hours'] || '24',
+			prowlarrEnabled: settingsMap['prowlarr_enabled'] === 'true',
+			prowlarrUrl: settingsMap['prowlarr_url'] || '',
+			prowlarrApiKey: settingsMap['prowlarr_api_key'] || '',
+			minConfidenceScore: settingsMap['min_confidence_score'] || '50',
+			sabnzbdUrl: settingsMap['sabnzbd_url'] || '',
+			sabnzbdApiKey: settingsMap['sabnzbd_api_key'] || '',
+			sabnzbdCategory: settingsMap['sabnzbd_category'] || 'books',
+			downloadSourcePriority: settingsMap['download_source_priority'] || 'prowlarr_first'
 		},
 		envOverrides,
 		stats: {
@@ -66,6 +80,7 @@ export const actions: Actions = {
 		const telegramBotToken = formData.get('telegramBotToken') as string;
 		const telegramChatId = formData.get('telegramChatId') as string;
 		const apiCacheTtlDays = formData.get('apiCacheTtlDays') as string;
+		const localBookCacheTtlHours = formData.get('localBookCacheTtlHours') as string;
 		const annasArchiveDomain = formData.get('annasArchiveDomain') as string;
 		const annasArchiveApiKey = formData.get('annasArchiveApiKey') as string;
 		const downloadDirectory = formData.get('downloadDirectory') as string;
@@ -75,6 +90,14 @@ export const actions: Actions = {
 		const calibreBaseUrl = formData.get('calibreBaseUrl') as string;
 		const calibreCleanupEnabled = formData.get('calibreCleanupEnabled') === 'on';
 		const calibreCleanupHours = formData.get('calibreCleanupHours') as string;
+		const prowlarrEnabled = formData.get('prowlarrEnabled') === 'on';
+		const prowlarrUrl = formData.get('prowlarrUrl') as string;
+		const prowlarrApiKey = formData.get('prowlarrApiKey') as string;
+		const minConfidenceScore = formData.get('minConfidenceScore') as string;
+		const sabnzbdUrl = formData.get('sabnzbdUrl') as string;
+		const sabnzbdApiKey = formData.get('sabnzbdApiKey') as string;
+		const sabnzbdCategory = formData.get('sabnzbdCategory') as string;
+		const downloadSourcePriority = formData.get('downloadSourcePriority') as string;
 
 		try {
 			// Update or insert settings
@@ -84,6 +107,7 @@ export const actions: Actions = {
 				{ key: 'telegram_bot_token', value: telegramBotToken || '' },
 				{ key: 'telegram_chat_id', value: telegramChatId || '' },
 				{ key: 'api_cache_ttl_days', value: apiCacheTtlDays || '7' },
+				{ key: 'local_book_cache_ttl_hours', value: localBookCacheTtlHours || '6' },
 				{ key: 'annas_archive_domain', value: annasArchiveDomain || 'annas-archive.org' },
 				{ key: 'annas_archive_api_key', value: annasArchiveApiKey || '' },
 				{ key: 'download_directory', value: downloadDirectory || './data/downloads' },
@@ -92,7 +116,15 @@ export const actions: Actions = {
 				{ key: 'download_auto_select', value: downloadAutoSelect ? 'true' : 'false' },
 				{ key: 'calibre_base_url', value: calibreBaseUrl || '' },
 				{ key: 'calibre_cleanup_enabled', value: calibreCleanupEnabled ? 'true' : 'false' },
-				{ key: 'calibre_cleanup_hours', value: calibreCleanupHours || '24' }
+				{ key: 'calibre_cleanup_hours', value: calibreCleanupHours || '24' },
+				{ key: 'prowlarr_enabled', value: prowlarrEnabled ? 'true' : 'false' },
+				{ key: 'prowlarr_url', value: prowlarrUrl || '' },
+				{ key: 'prowlarr_api_key', value: prowlarrApiKey || '' },
+				{ key: 'min_confidence_score', value: minConfidenceScore || '50' },
+				{ key: 'sabnzbd_url', value: sabnzbdUrl || '' },
+				{ key: 'sabnzbd_api_key', value: sabnzbdApiKey || '' },
+				{ key: 'sabnzbd_category', value: sabnzbdCategory || 'books' },
+				{ key: 'download_source_priority', value: downloadSourcePriority || 'prowlarr_first' }
 			];
 
 			for (const setting of settingsToUpdate) {
@@ -119,6 +151,11 @@ export const actions: Actions = {
 			if (telegramChatId) process.env.TELEGRAM_CHAT_ID = telegramChatId;
 			if (annasArchiveDomain) process.env.ANNAS_ARCHIVE_DOMAIN = annasArchiveDomain;
 			if (annasArchiveApiKey) process.env.ANNAS_ARCHIVE_API_KEY = annasArchiveApiKey;
+			if (prowlarrUrl) process.env.PROWLARR_URL = prowlarrUrl;
+			if (prowlarrApiKey) process.env.PROWLARR_API_KEY = prowlarrApiKey;
+			if (sabnzbdUrl) process.env.SABNZBD_URL = sabnzbdUrl;
+			if (sabnzbdApiKey) process.env.SABNZBD_API_KEY = sabnzbdApiKey;
+			if (sabnzbdCategory) process.env.SABNZBD_CATEGORY = sabnzbdCategory;
 
 			return { success: true };
 		} catch (error) {

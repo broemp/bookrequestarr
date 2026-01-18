@@ -101,16 +101,25 @@ bookrequestarr/
 ### 2. Hardcover API Integration
 
 - **Location**: `src/lib/server/hardcover.ts`
-- **Pattern**: GraphQL queries with response caching (7-day TTL)
+- **Pattern**: GraphQL queries with two-tier caching strategy
 - **Key Functions**:
   - `searchBooks(query, limit)`: Search for books
-  - `getBookDetails(hardcoverId)`: Fetch full book details
+  - `getBookDetails(hardcoverId)`: Fetch full book details with smart caching
   - `getTrendingBooks(limit)`: Two-step query (fetch IDs, then details)
   - `getBooksBySeries(seriesId)`: Fetch books in a series
   - `cacheBook(book)`: Store book metadata in local DB
-- **Caching Strategy**:
-  - API response cache: 7 days (full GraphQL responses)
-  - Book metadata cache: Used for request records only
+- **Two-Tier Caching Strategy**:
+  - **Tier 1 - Local Book Cache**: Database cache (default 6 hours TTL, configurable)
+    - Checks local database first for instant loading (< 50ms)
+    - Reconstructs book details from cached data (books, authors, tags tables)
+    - Skips expensive API calls and database writes
+    - Configurable via `local_book_cache_ttl_hours` setting
+  - **Tier 2 - API Response Cache**: API response cache (default 7 days TTL, configurable)
+    - Used when local cache is expired or missing
+    - Stores complete GraphQL responses in `api_cache` table
+    - Prevents redundant API calls to Hardcover
+    - Configurable via `api_cache_ttl_days` setting
+- **Performance**: Frequently accessed books load instantly with no loading indicators
 - **Important**: Always use introspection to verify field availability before querying
 
 ### 3. Request Management

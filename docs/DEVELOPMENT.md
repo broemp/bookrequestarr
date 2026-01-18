@@ -139,6 +139,62 @@ Change the port:
 npm run dev -- --port 5174
 ```
 
+## Background Jobs
+
+The application runs several background jobs automatically:
+
+### SABnzbd Status Polling
+
+- **Frequency**: Every 30 seconds
+- **Purpose**: Checks status of active SABnzbd downloads and updates database
+- **Location**: `src/hooks.server.ts`
+- **Function**: `updateSabnzbdDownloadStatuses()` in `src/lib/server/downloadOrchestrator.ts`
+
+When a download completes:
+1. Download status is updated to `completed`
+2. Request status is updated to `completed`
+3. Download stats are incremented
+4. File path and size are recorded
+
+When a download fails:
+1. Download status is updated to `failed`
+2. Request status is updated to `download_problem`
+3. Error message is stored for debugging
+
+### Cleanup Job
+
+- **Frequency**: Every hour
+- **Purpose**: Cleans up old download records and temporary files
+- **Location**: `src/hooks.server.ts`
+- **Function**: `cleanupOldDownloads()` in `src/lib/server/cleanup.ts`
+
+### Manual Polling
+
+Admins can manually trigger status polling via API:
+
+```bash
+curl -X POST http://localhost:5173/api/downloads/poll \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+
+### Monitoring Active Downloads
+
+Admins can view all active SABnzbd downloads:
+
+```bash
+curl http://localhost:5173/api/downloads/active \
+  -H "Cookie: session=YOUR_SESSION_TOKEN"
+```
+
+Response includes:
+- Download ID and request ID
+- Book title
+- SABnzbd job ID (nzo_id)
+- NZB name and indexer
+- Current status
+- Confidence score
+- Creation timestamp
+
 ## Best Practices
 
 1. **Always use TypeScript types** - No `any` types

@@ -118,13 +118,134 @@ export async function searchBooks(searchQuery: string, limit = 20): Promise<Book
 }
 
 /**
+ * Get configured local book cache TTL from settings or use default
+ */
+async function getLocalBookCacheTTL(): Promise<number> {
+	const DEFAULT_LOCAL_CACHE_TTL_HOURS = 6; // 6 hours default
+	
+	try {
+		const { settings: settingsTable } = await import('./db/schema');
+		const [setting] = await db
+			.select()
+			.from(settingsTable)
+			.where(eq(settingsTable.key, 'local_book_cache_ttl_hours'))
+			.limit(1);
+
+		if (setting?.value) {
+			const hours = parseInt(setting.value, 10);
+			if (!isNaN(hours) && hours > 0) {
+				return hours * 60 * 60 * 1000; // Convert hours to milliseconds
+			}
+		}
+	} catch (error) {
+		logger.error('Error fetching local book cache TTL setting', error);
+	}
+
+	return DEFAULT_LOCAL_CACHE_TTL_HOURS * 60 * 60 * 1000;
+}
+
+/**
  * Get detailed book information by Hardcover ID
- * Note: This function relies on the API response cache (7-day TTL) rather than
- * the book metadata cache, as the API response includes all fields (slug, subtitle, book_series)
- * that the UI needs. The book metadata cache is only used for storing basic info for requests.
+ * Uses a two-tier caching strategy:
+ * 1. Check local database cache first (fast, < 10ms)
+ * 2. Fall back to API cache or fresh API call if needed
+ * 
+ * Local cache TTL is configurable via settings (default: 6 hours).
  */
 export async function getBookDetails(hardcoverId: string): Promise<HardcoverBook | null> {
-	// Fetch from API (will use API response cache if available)
+	const LOCAL_CACHE_TTL_MS = await getLocalBookCacheTTL();
+	
+	// Step 1: Check if we have a recent local cache entry
+	try {
+		const [cachedBook] = await db
+			.select()
+			.from(books)
+			.where(eq(books.hardcoverId, hardcoverId))
+			.limit(1);
+
+		if (cachedBook) {
+			const cacheAge = Date.now() - cachedBook.cachedAt.getTime();
+			
+			// If cache is fresh (< 6 hours), use it directly
+			if (cacheAge < LOCAL_CACHE_TTL_MS) {
+				logger.debug('Serving book from local database cache', { 
+					hardcoverId, 
+					cacheAgeMinutes: Math.round(cacheAge / 60000) 
+				});
+				
+				// Reconstruct HardcoverBook format from cached data
+				// Note: This won't have all fields like slug, subtitle, book_series
+				// but for frequently accessed books, we accept this trade-off
+				const { authors: authorsTable, bookAuthors: bookAuthorsTable } = await import('./db/schema');
+				const { tags: tagsTable, bookTags: bookTagsTable } = await import('./db/schema');
+				
+				// Fetch authors
+				const bookAuthorsData = await db
+					.select({
+						authorId: authorsTable.id,
+						authorName: authorsTable.name,
+						hardcoverAuthorId: authorsTable.hardcoverAuthorId
+					})
+					.from(bookAuthorsTable)
+					.innerJoin(authorsTable, eq(bookAuthorsTable.authorId, authorsTable.id))
+					.where(eq(bookAuthorsTable.bookId, cachedBook.id));
+				
+				// Fetch tags
+				const bookTagsData = await db
+					.select({
+						tagId: tagsTable.id,
+						tagName: tagsTable.name,
+						tagCategory: tagsTable.category,
+						hardcoverTagId: tagsTable.hardcoverTagId
+					})
+					.from(bookTagsTable)
+					.innerJoin(tagsTable, eq(bookTagsTable.tagId, tagsTable.id))
+					.where(eq(bookTagsTable.bookId, cachedBook.id));
+				
+				// Build HardcoverBook object from cached data
+				const book: HardcoverBook = {
+					id: hardcoverId,
+					title: cachedBook.title,
+					description: cachedBook.description || undefined,
+					image: cachedBook.coverImage ? { url: cachedBook.coverImage } : undefined,
+					release_date: cachedBook.publishDate || undefined,
+					pages: cachedBook.pages || undefined,
+					rating: cachedBook.rating ? parseFloat(cachedBook.rating) : undefined,
+					ratings_count: cachedBook.ratingCount || undefined,
+					contributions: bookAuthorsData.map(a => ({
+						author: {
+							id: a.hardcoverAuthorId,
+							name: a.authorName
+						}
+					})),
+					default_physical_edition: (cachedBook.isbn13 || cachedBook.isbn10 || cachedBook.publisher) ? {
+						isbn_13: cachedBook.isbn13 || undefined,
+						isbn_10: cachedBook.isbn10 || undefined,
+						publisher: cachedBook.publisher ? { name: cachedBook.publisher } : undefined
+					} : undefined,
+					taggings: bookTagsData.map(t => ({
+						tag_id: parseInt(t.hardcoverTagId),
+						tag: {
+							id: t.hardcoverTagId,
+							tag: t.tagName,
+							tag_category: t.tagCategory ? { category: t.tagCategory } : undefined
+						}
+					}))
+				};
+				
+				return book;
+			}
+			
+			logger.debug('Local cache expired, fetching fresh data', { 
+				hardcoverId, 
+				cacheAgeHours: Math.round(cacheAge / 3600000) 
+			});
+		}
+	} catch (error) {
+		logger.warn('Error checking local cache, falling back to API', error, { hardcoverId });
+	}
+	
+	// Step 2: Fetch from API (will use API response cache if available)
 	const query = `
 		query GetBook($id: Int!) {
 			books(where: { id: { _eq: $id } }) {

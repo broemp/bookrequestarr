@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 import { logger } from '$lib/server/logger';
 import { validateEnvOrExit } from '$lib/server/envValidation';
 import { cleanupOldDownloads } from '$lib/server/cleanup';
+import { updateSabnzbdDownloadStatuses } from '$lib/server/downloadOrchestrator';
 
 // Validate environment variables at startup
 validateEnvOrExit();
@@ -31,6 +32,27 @@ setTimeout(async () => {
 		logger.error('Initial cleanup failed', error instanceof Error ? error : undefined);
 	}
 }, 60 * 1000);
+
+// Run SABnzbd status polling every 30 seconds
+setInterval(
+	async () => {
+		try {
+			await updateSabnzbdDownloadStatuses();
+		} catch (error) {
+			logger.error('SABnzbd status polling failed', error instanceof Error ? error : undefined);
+		}
+	},
+	30 * 1000
+); // 30 seconds
+
+// Run SABnzbd status polling on startup (after 10 seconds delay to allow server to fully initialize)
+setTimeout(async () => {
+	try {
+		await updateSabnzbdDownloadStatuses();
+	} catch (error) {
+		logger.error('Initial SABnzbd status check failed', error instanceof Error ? error : undefined);
+	}
+}, 10 * 1000);
 
 // Track if dev user has been created
 let devUserCreated = false;

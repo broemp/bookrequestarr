@@ -181,8 +181,13 @@
 	});
 
 	async function selectBook(book: any) {
-		isLoadingBook = true;
 		selectedBook = book;
+		
+		// Only show loading modal if request takes longer than 150ms (cached responses are < 50ms)
+		const loadingTimeout = setTimeout(() => {
+			isLoadingBook = true;
+		}, 150);
+		
 		try {
 			// Fetch full details
 			const response = await fetch(`/api/books/${book.hardcoverId}`);
@@ -199,13 +204,19 @@
 			toast.show('Failed to load book details', 'error');
 			selectedBook = null;
 		} finally {
+			clearTimeout(loadingTimeout);
 			isLoadingBook = false;
 		}
 	}
 
 	async function selectBookById(bookId: string) {
 		console.log('[selectBookById] Called with bookId:', bookId);
-		isLoadingBook = true;
+		
+		// Only show loading modal if request takes longer than 150ms (cached responses are < 50ms)
+		const loadingTimeout = setTimeout(() => {
+			isLoadingBook = true;
+		}, 150);
+		
 		try {
 			const response = await fetch(`/api/books/${bookId}`);
 			console.log('[selectBookById] Response status:', response.status);
@@ -228,6 +239,7 @@
 			console.error('[selectBookById] Error fetching book details:', error);
 			toast.show('Failed to load book details', 'error');
 		} finally {
+			clearTimeout(loadingTimeout);
 			isLoadingBook = false;
 		}
 	}

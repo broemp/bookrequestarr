@@ -220,7 +220,8 @@ export const apiCache = sqliteTable('api_cache', {
 });
 
 /**
- * Downloads table - tracks book downloads from Anna's Archive
+ * Downloads table - tracks book downloads from various sources
+ * Supports: Anna's Archive (direct), Prowlarr/SABnzbd (Usenet)
  */
 export const downloads = sqliteTable('downloads', {
 	id: text('id')
@@ -229,9 +230,21 @@ export const downloads = sqliteTable('downloads', {
 	requestId: text('request_id')
 		.notNull()
 		.references(() => requests.id, { onDelete: 'cascade' }),
-	annasArchiveMd5: text('annas_archive_md5').notNull(),
+	// Download source tracking
+	downloadSource: text('download_source', { enum: ['prowlarr', 'annas_archive'] })
+		.notNull()
+		.default('annas_archive'),
+	// Anna's Archive specific fields
+	annasArchiveMd5: text('annas_archive_md5'), // Nullable - only for Anna's Archive downloads
+	// Prowlarr/SABnzbd specific fields
+	sabnzbdNzoId: text('sabnzbd_nzo_id'), // SABnzbd job ID for tracking
+	nzbName: text('nzb_name'), // Original NZB release name
+	indexerName: text('indexer_name'), // Which Prowlarr indexer was used
+	// Match quality scoring
+	confidenceScore: integer('confidence_score'), // 0-100, match quality from result matcher
+	// Common fields
 	searchMethod: text('search_method', { enum: ['isbn', 'title_author', 'manual'] }).notNull(),
-	fileType: text('file_type').notNull(), // e.g., 'epub', 'pdf', 'mobi'
+	fileType: text('file_type').notNull(), // e.g., 'epub', 'pdf', 'mobi', 'nzb'
 	filePath: text('file_path'),
 	fileSize: integer('file_size'), // bytes
 	downloadStatus: text('download_status', {

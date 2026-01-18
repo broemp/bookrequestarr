@@ -50,6 +50,13 @@
       "when": 1730981280000,
       "tag": "0006_add_downloads_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1737244800000,
+      "tag": "0007_add_prowlarr_sabnzbd_fields",
+      "breakpoints": true
     }
   ]
 }

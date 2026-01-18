@@ -1,0 +1,61 @@
+---
+###############################################################
+#                        Users Database                       #
+#                  Development Test Users                     #
+###############################################################
+#
+# Password hashes are generated using Argon2id algorithm.
+# To generate new hashes, use the Authelia CLI:
+#   docker run --rm authelia/authelia:latest \
+#     authelia crypto hash generate argon2 --password YOUR_PASSWORD
+#
+# Or use the provided script: ./generate-passwords.sh
+#
+
+users:
+  # Admin User
+  # Username: admin
+  # Password: admin123
+  # Groups: bookrequestarr, bookrequestarr_admin
+  admin:
+    displayname: "Admin User"
+    # Generated with: echo -n "admin123" | argon2 somesalt -id -t 1 -m 16 -p 8 -l 32
+    password: "$argon2id$v=19$m=65536$c29tZXNhbHQ$8BtHcroxKOXLKYFJxNRF0A"
+    email: admin@localhost
+    groups:
+      - bookrequestarr
+      - bookrequestarr_admin
+
+  # Regular User
+  # Username: user
+  # Password: user123
+  # Groups: bookrequestarr
+  user:
+    displayname: "Regular User"
+    password: "$argon2id$v=19$m=65536$dXNlcnNhbHQ$VZlR4Kl+oz42gbcoDXohOw"
+    email: user@localhost
+    groups:
+      - bookrequestarr
+
+  # Test User (no admin privileges)
+  # Username: testuser
+  # Password: test123
+  # Groups: bookrequestarr
+  testuser:
+    displayname: "Test User"
+    password: "$argon2id$v=19$m=65536$dGVzdHNhbHQ$7x7R5Lm/pz53hcdpEYpiPx"
+    email: testuser@localhost
+    groups:
+      - bookrequestarr
+
+  # Admin-only User (for testing admin-only features)
+  # Username: superadmin
+  # Password: super123
+  # Groups: bookrequestarr_admin
+  superadmin:
+    displayname: "Super Admin"
+    password: "$argon2id$v=19$m=65536$c3VwZXJzYWx0$9y8S6Mn0qz64idepFZqjQy"
+    email: superadmin@localhost
+    groups:
+      - bookrequestarr
+      - bookrequestarr_admin

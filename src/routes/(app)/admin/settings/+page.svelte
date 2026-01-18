@@ -12,7 +12,9 @@
 		XCircle,
 		Database,
 		Trash2,
-		Download
+		Download,
+		Search,
+		Zap
 	} from 'lucide-svelte';
 	import { enhance } from '$app/forms';
 
@@ -99,6 +101,25 @@
 				/>
 				<p class="text-muted-foreground mt-1 text-xs">
 					How long to cache API responses before refetching (default: 7 days)
+				</p>
+			</div>
+
+			<div>
+				<label for="localBookCacheTtlHours" class="mb-2 block text-sm font-medium">
+					Local Book Cache TTL (Hours)
+				</label>
+				<Input
+					id="localBookCacheTtlHours"
+					name="localBookCacheTtlHours"
+					type="number"
+					min="1"
+					max="168"
+					placeholder="6"
+					value={data.settings.localBookCacheTtlHours || '6'}
+				/>
+				<p class="text-muted-foreground mt-1 text-xs">
+					How long to keep book details in local database cache for instant loading (default: 6
+					hours)
 				</p>
 			</div>
 
@@ -315,6 +336,288 @@
 
 			<div class="flex gap-3">
 				<Button type="submit">Save Settings</Button>
+			</div>
+
+			{#if form?.success}
+				<div class="rounded-md bg-green-500/10 p-4 text-sm text-green-500">
+					Settings saved successfully!
+				</div>
+			{/if}
+
+			{#if form?.error}
+				<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+					{form.error}
+				</div>
+			{/if}
+		</form>
+	</Card>
+
+	<!-- Prowlarr Integration -->
+	<Card class="p-6">
+		<div class="mb-4 flex items-center gap-3">
+			<Search class="h-6 w-6" />
+			<h2 class="text-xl font-semibold">Prowlarr Integration</h2>
+		</div>
+
+		<div class="mb-4 rounded-md bg-blue-500/10 p-4 text-sm text-blue-500">
+			<p class="font-medium">Usenet Indexer Manager</p>
+			<p class="mt-1">
+				Prowlarr searches across multiple Usenet indexers to find book releases. When enabled, it
+				will be used as the primary download source, with Anna's Archive as fallback.
+			</p>
+		</div>
+
+		<form method="POST" action="?/updateSettings" use:enhance class="space-y-4">
+			<div class="flex items-center gap-2">
+				<input
+					type="checkbox"
+					id="prowlarrEnabled"
+					name="prowlarrEnabled"
+					checked={data.settings.prowlarrEnabled}
+					class="h-4 w-4 rounded border-gray-300"
+				/>
+				<label for="prowlarrEnabled" class="text-sm font-medium"> Enable Prowlarr Integration </label>
+			</div>
+
+			<div>
+				<label for="prowlarrUrl" class="mb-2 block text-sm font-medium"> Prowlarr URL </label>
+				<Input
+					id="prowlarrUrl"
+					name="prowlarrUrl"
+					type="url"
+					placeholder="http://localhost:9696"
+					value={data.settings.prowlarrUrl || ''}
+					disabled={data.envOverrides.prowlarrUrl}
+				/>
+				{#if data.envOverrides.prowlarrUrl}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						Base URL for your Prowlarr instance (e.g., http://localhost:9696)
+					</p>
+				{/if}
+			</div>
+
+			<div>
+				<label for="prowlarrApiKey" class="mb-2 block text-sm font-medium">
+					Prowlarr API Key
+				</label>
+				<Input
+					id="prowlarrApiKey"
+					name="prowlarrApiKey"
+					type="text"
+					placeholder="your-prowlarr-api-key"
+					value={data.settings.prowlarrApiKey || ''}
+					disabled={data.envOverrides.prowlarrApiKey}
+				/>
+				{#if data.envOverrides.prowlarrApiKey}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						API key from Prowlarr Settings → General → Security
+					</p>
+				{/if}
+			</div>
+
+			<div>
+				<label for="minConfidenceScore" class="mb-2 block text-sm font-medium">
+					Minimum Confidence Score
+				</label>
+				<Input
+					id="minConfidenceScore"
+					name="minConfidenceScore"
+					type="number"
+					min="0"
+					max="100"
+					placeholder="50"
+					value={data.settings.minConfidenceScore || '50'}
+				/>
+				<p class="text-muted-foreground mt-1 text-xs">
+					Minimum match confidence (0-100) required to auto-download from Prowlarr. Higher values
+					are more strict. (default: 50)
+				</p>
+			</div>
+
+			<div class="flex gap-3">
+				<Button type="submit">Save Settings</Button>
+				{#if data.settings.prowlarrUrl && data.settings.prowlarrApiKey}
+					<Button
+						type="button"
+						variant="outline"
+						onclick={async () => {
+							isTesting = true;
+							try {
+								const response = await fetch('/api/prowlarr/test', { method: 'POST' });
+								const result = await response.json();
+								if (result.success) {
+									alert('Prowlarr connection successful!');
+								} else {
+									alert(`Prowlarr connection failed: ${result.error}`);
+								}
+							} catch (error) {
+								alert('Failed to test Prowlarr connection');
+							} finally {
+								isTesting = false;
+							}
+						}}
+						disabled={isTesting}
+					>
+						<TestTube class="mr-2 h-4 w-4" />
+						Test Connection
+					</Button>
+				{/if}
+			</div>
+
+			{#if form?.success}
+				<div class="rounded-md bg-green-500/10 p-4 text-sm text-green-500">
+					Settings saved successfully!
+				</div>
+			{/if}
+
+			{#if form?.error}
+				<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+					{form.error}
+				</div>
+			{/if}
+		</form>
+	</Card>
+
+	<!-- SABnzbd Integration -->
+	<Card class="p-6">
+		<div class="mb-4 flex items-center gap-3">
+			<Zap class="h-6 w-6" />
+			<h2 class="text-xl font-semibold">SABnzbd Integration</h2>
+		</div>
+
+		<div class="mb-4 rounded-md bg-blue-500/10 p-4 text-sm text-blue-500">
+			<p class="font-medium">Usenet Download Client</p>
+			<p class="mt-1">
+				SABnzbd handles downloading NZB files from Usenet. Required when using Prowlarr as a
+				download source.
+			</p>
+		</div>
+
+		<form method="POST" action="?/updateSettings" use:enhance class="space-y-4">
+			<div>
+				<label for="sabnzbdUrl" class="mb-2 block text-sm font-medium"> SABnzbd URL </label>
+				<Input
+					id="sabnzbdUrl"
+					name="sabnzbdUrl"
+					type="url"
+					placeholder="http://localhost:8080"
+					value={data.settings.sabnzbdUrl || ''}
+					disabled={data.envOverrides.sabnzbdUrl}
+				/>
+				{#if data.envOverrides.sabnzbdUrl}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						Base URL for your SABnzbd instance (e.g., http://localhost:8080)
+					</p>
+				{/if}
+			</div>
+
+			<div>
+				<label for="sabnzbdApiKey" class="mb-2 block text-sm font-medium">
+					SABnzbd API Key
+				</label>
+				<Input
+					id="sabnzbdApiKey"
+					name="sabnzbdApiKey"
+					type="text"
+					placeholder="your-sabnzbd-api-key"
+					value={data.settings.sabnzbdApiKey || ''}
+					disabled={data.envOverrides.sabnzbdApiKey}
+				/>
+				{#if data.envOverrides.sabnzbdApiKey}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						API key from SABnzbd Config → General → Security → API Key
+					</p>
+				{/if}
+			</div>
+
+			<div>
+				<label for="sabnzbdCategory" class="mb-2 block text-sm font-medium">
+					Download Category
+				</label>
+				<Input
+					id="sabnzbdCategory"
+					name="sabnzbdCategory"
+					type="text"
+					placeholder="books"
+					value={data.settings.sabnzbdCategory || 'books'}
+					disabled={data.envOverrides.sabnzbdCategory}
+				/>
+				{#if data.envOverrides.sabnzbdCategory}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						SABnzbd category for book downloads (must exist in SABnzbd settings)
+					</p>
+				{/if}
+			</div>
+
+			<div>
+				<label for="downloadSourcePriority" class="mb-2 block text-sm font-medium">
+					Download Source Priority
+				</label>
+				<select
+					id="downloadSourcePriority"
+					name="downloadSourcePriority"
+					value={data.settings.downloadSourcePriority || 'prowlarr_first'}
+					class="border-input ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+					style="background-color: hsl(var(--input));"
+				>
+					<option value="prowlarr_first">Prowlarr First (fallback to Anna's Archive)</option>
+					<option value="annas_archive_first">Anna's Archive First (fallback to Prowlarr)</option>
+					<option value="prowlarr_only">Prowlarr Only</option>
+					<option value="annas_archive_only">Anna's Archive Only</option>
+				</select>
+				<p class="text-muted-foreground mt-1 text-xs">
+					Control which download source is tried first when a request is approved
+				</p>
+			</div>
+
+			<div class="flex gap-3">
+				<Button type="submit">Save Settings</Button>
+				{#if data.settings.sabnzbdUrl && data.settings.sabnzbdApiKey}
+					<Button
+						type="button"
+						variant="outline"
+						onclick={async () => {
+							isTesting = true;
+							try {
+								const response = await fetch('/api/sabnzbd/test', { method: 'POST' });
+								const result = await response.json();
+								if (result.success) {
+									alert(`SABnzbd connection successful! Version: ${result.version}`);
+								} else {
+									alert(`SABnzbd connection failed: ${result.error}`);
+								}
+							} catch (error) {
+								alert('Failed to test SABnzbd connection');
+							} finally {
+								isTesting = false;
+							}
+						}}
+						disabled={isTesting}
+					>
+						<TestTube class="mr-2 h-4 w-4" />
+						Test Connection
+					</Button>
+				{/if}
 			</div>
 
 			{#if form?.success}

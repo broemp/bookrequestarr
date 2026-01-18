@@ -17,6 +17,7 @@ dist
 *.db-shm
 *.db-wal
 data/
+dev-data/
 
 # Logs
 logs

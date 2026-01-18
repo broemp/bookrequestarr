@@ -1,0 +1,6 @@
+# Exclude generated secrets and runtime data
+secrets/
+*.key
+*.pem
+db.sqlite3
+notification.txt
