@@ -6,6 +6,7 @@ export type Request = typeof requests.$inferSelect;
 export type NewRequest = typeof requests.$inferInsert;
 
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'completed' | 'download_problem';
+export type FormatType = 'ebook' | 'audiobook';
 
 export interface RequestWithDetails extends Request {
 	book: Book;

@@ -5,6 +5,7 @@ import { requests, books, users, bookAuthors, authors } from '$lib/server/db/sch
 import { eq, sql } from 'drizzle-orm';
 import { sendNotification, formatRequestNotification } from '$lib/server/notifications';
 import { logger } from '$lib/server/logger';
+import type { FormatType } from '$lib/types/request';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	// Require authentication
@@ -18,11 +19,26 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const hardcoverId = formData.get('hardcoverId') as string; // Fallback
 		const language = formData.get('language') as string;
 		const specialNotes = formData.get('specialNotes') as string;
+		const formatTypeInput = (formData.get('formatType') as string) || 'ebook';
 
-		logger.debug('Creating book request', { bookId, hardcoverId, userId: locals.user.id });
+		// Determine which format types to create
+		const formatTypes: FormatType[] =
+			formatTypeInput === 'both' ? ['ebook', 'audiobook'] : [formatTypeInput as FormatType];
+
+		logger.debug('Creating book request', {
+			bookId,
+			hardcoverId,
+			userId: locals.user.id,
+			formatTypes
+		});
 
 		if (!bookId && !hardcoverId) {
 			return new Response('Book ID or Hardcover ID is required', { status: 400 });
+		}
+
+		// Validate format type input
+		if (!['ebook', 'audiobook', 'both'].includes(formatTypeInput)) {
+			return new Response('Invalid format type', { status: 400 });
 		}
 
 		// Try to get book by database ID first, then by Hardcover ID
@@ -71,48 +87,47 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		logger.debug('User and book verified, creating request');
 
-		// Check if user already has a request for this book in the same language
+		// Get existing requests for this book
 		const existingRequests = await db.select().from(requests).where(eq(requests.bookId, book.id));
 
-		// Check if there's a request with the same language (or both null)
-		const duplicateRequest = existingRequests.find((req) => {
-			const reqLang = req.language?.toLowerCase().trim() || null;
-			const newLang = language?.toLowerCase().trim() || null;
-			return reqLang === newLang;
-		});
+		// Check for duplicates and filter out format types that already exist
+		const formatsToCreate: FormatType[] = [];
+		const duplicateFormats: FormatType[] = [];
 
-		if (duplicateRequest) {
+		for (const formatType of formatTypes) {
+			// Check if there's a request with the same language AND format type
+			const duplicateRequest = existingRequests.find((req) => {
+				const reqLang = req.language?.toLowerCase().trim() || null;
+				const newLang = language?.toLowerCase().trim() || null;
+				return reqLang === newLang && req.formatType === formatType;
+			});
+
+			if (duplicateRequest) {
+				duplicateFormats.push(formatType);
+			} else {
+				formatsToCreate.push(formatType);
+			}
+		}
+
+		// If all requested formats are duplicates, return error
+		if (formatsToCreate.length === 0) {
 			const langMsg = language ? ` in ${language}` : '';
-			logger.info('Book already requested', { bookId: book.id, language, userId: locals.user.id });
-			return new Response(`This book has already been requested${langMsg}`, { status: 409 });
+			const formatMsg =
+				duplicateFormats.length > 1
+					? ` (${duplicateFormats.join(' and ')})`
+					: ` (${duplicateFormats[0]})`;
+			logger.info('Book already requested', {
+				bookId: book.id,
+				language,
+				userId: locals.user.id,
+				duplicateFormats
+			});
+			return new Response(`This book has already been requested${langMsg}${formatMsg}`, {
+				status: 409
+			});
 		}
 
-		// Create request
-		try {
-			await db.insert(requests).values({
-				userId: locals.user.id,
-				bookId: book.id,
-				language: language || null,
-				specialNotes: specialNotes || null,
-				status: 'pending'
-			});
-			logger.info('Book request created successfully', {
-				bookId: book.id,
-				userId: locals.user.id,
-				language
-			});
-		} catch (insertError: unknown) {
-			const error = insertError as Error & { code?: string };
-			logger.error('Failed to insert book request', error, {
-				userId: locals.user.id,
-				bookId: book.id,
-				language: language || null,
-				errorCode: error.code
-			});
-			throw error;
-		}
-
-		// Get author name for notification
+		// Get author name for notification (do this once before the loop)
 		const bookWithAuthor = await db
 			.select({
 				authorName: sql<string>`GROUP_CONCAT(${authors.name}, ', ')`
@@ -124,17 +139,48 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const authorName = bookWithAuthor[0]?.authorName || undefined;
 
-		// Send notification to admins
-		await sendNotification(
-			'request_created',
-			formatRequestNotification({
-				userName: locals.user.displayName,
-				bookTitle: book.title,
-				bookAuthor: authorName,
-				language: language || undefined,
-				specialNotes: specialNotes || undefined
-			})
-		);
+		// Create requests for each format type
+		for (const formatType of formatsToCreate) {
+			try {
+				await db.insert(requests).values({
+					userId: locals.user.id,
+					bookId: book.id,
+					language: language || null,
+					specialNotes: specialNotes || null,
+					formatType,
+					status: 'pending'
+				});
+				logger.info('Book request created successfully', {
+					bookId: book.id,
+					userId: locals.user.id,
+					language,
+					formatType
+				});
+
+				// Send notification for each request
+				await sendNotification(
+					'request_created',
+					formatRequestNotification({
+						userName: locals.user.displayName,
+						bookTitle: book.title,
+						bookAuthor: authorName,
+						language: language || undefined,
+						specialNotes: specialNotes || undefined,
+						formatType
+					})
+				);
+			} catch (insertError: unknown) {
+				const error = insertError as Error & { code?: string };
+				logger.error('Failed to insert book request', error, {
+					userId: locals.user.id,
+					bookId: book.id,
+					language: language || null,
+					formatType,
+					errorCode: error.code
+				});
+				throw error;
+			}
+		}
 
 		throw redirect(303, '/requests');
 	} catch (error) {

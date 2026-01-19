@@ -3,7 +3,7 @@
 	import Card from '$lib/components/ui/card.svelte';
 	import Badge from '$lib/components/ui/badge.svelte';
 	import Button from '$lib/components/ui/button.svelte';
-	import { BookOpen, Calendar, MessageSquare } from 'lucide-svelte';
+	import { BookOpen, Calendar, MessageSquare, Book, Headphones } from 'lucide-svelte';
 	import { formatDistance } from 'date-fns';
 
 	let { data }: { data: PageData } = $props();
@@ -125,9 +125,20 @@
 										{request.book.author || 'Unknown Author'}
 									</p>
 								</div>
-								<Badge variant={getStatusVariant(request.status)}>
-									{request.status}
-								</Badge>
+								<div class="flex items-center gap-2">
+									<Badge variant="outline" class="flex items-center gap-1">
+										{#if request.formatType === 'audiobook'}
+											<Headphones class="h-3 w-3" />
+											<span>Audiobook</span>
+										{:else}
+											<Book class="h-3 w-3" />
+											<span>Ebook</span>
+										{/if}
+									</Badge>
+									<Badge variant={getStatusVariant(request.status)}>
+										{request.status}
+									</Badge>
+								</div>
 							</div>
 
 							<div class="text-muted-foreground flex flex-wrap gap-4 text-sm">

@@ -57,6 +57,13 @@
       "when": 1737244800000,
       "tag": "0007_add_prowlarr_sabnzbd_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1737331200000,
+      "tag": "0008_add_format_type",
+      "breakpoints": true
     }
   ]
 }

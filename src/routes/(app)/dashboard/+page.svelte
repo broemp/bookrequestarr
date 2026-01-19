@@ -15,6 +15,7 @@
 	let selectedBook: any = $state(null);
 	let isLoadingBook = $state(false);
 	let requestLanguage = $state('English');
+	let requestFormat = $state<'ebook' | 'audiobook' | 'both'>('ebook');
 	let specialNotes = $state('');
 
 	// Prevent body scroll when modal is open
@@ -31,8 +32,9 @@
 	});
 
 	async function selectBook(book: any) {
-		isLoadingBook = true;
 		selectedBook = book;
+		isLoadingBook = true;
+		
 		try {
 			// Fetch full details
 			const response = await fetch(`/api/books/${book.hardcoverId}`);
@@ -57,27 +59,66 @@
 		e.preventDefault();
 		if (!selectedBook) return;
 
-		try {
-			const response = await fetch('/api/requests', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					bookId: selectedBook.dbId,
-					preferredLanguage: requestLanguage,
-					specialNotes: specialNotes
-				})
-			});
+		const formats: ('ebook' | 'audiobook')[] =
+			requestFormat === 'both' ? ['ebook', 'audiobook'] : [requestFormat];
 
-			if (response.ok) {
-				toast.show('Book requested successfully!', 'success');
+		try {
+			let successCount = 0;
+			let errorMessages: string[] = [];
+
+		for (const format of formats) {
+			const formData = new FormData();
+			formData.append('bookId', selectedBook.dbId);
+			if (requestLanguage) formData.append('language', requestLanguage);
+			if (specialNotes) formData.append('specialNotes', specialNotes);
+			formData.append('formatType', format);
+
+			try {
+				const response = await fetch('/api/requests/create', {
+					method: 'POST',
+					body: formData
+				});
+
+				// The API redirects to /requests on success, which will return a 200
+				// Check if we got redirected by looking at the final URL
+				if (response.ok || response.redirected) {
+					successCount++;
+				} else {
+					const errorText = await response.text();
+					if (response.status === 409) {
+						errorMessages.push(`${format}: already requested`);
+					} else {
+						errorMessages.push(`${format}: ${errorText || 'failed'}`);
+					}
+				}
+			} catch (err) {
+				console.error(`Error requesting ${format}:`, err);
+				errorMessages.push(`${format}: network error`);
+			}
+		}
+
+			// Show appropriate toast message
+			if (successCount === formats.length) {
+				const msg =
+					formats.length > 1
+						? 'Both formats requested successfully!'
+						: 'Book requested successfully!';
+				toast.show(msg, 'success');
 				selectedBook = null;
 				requestLanguage = 'English';
+				requestFormat = 'ebook';
 				specialNotes = '';
 				// Reload page to update stats
 				window.location.reload();
+			} else if (successCount > 0) {
+				toast.show(`Partially successful: ${errorMessages.join(', ')}`, 'warning');
+				selectedBook = null;
+				requestLanguage = 'English';
+				requestFormat = 'ebook';
+				specialNotes = '';
+				window.location.reload();
 			} else {
-				const error = await response.json();
-				toast.show(error.error || 'Failed to request book', 'error');
+				toast.show(errorMessages.join(', ') || 'Failed to request book', 'error');
 			}
 		} catch (error) {
 			console.error('Error requesting book:', error);
@@ -254,6 +295,19 @@
 	</div>
 </div>
 
+<!-- Loading modal -->
+{#if isLoadingBook}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+		style="background-color: rgba(0, 0, 0, 0.5);"
+	>
+		<Card class="flex flex-col items-center gap-4 p-8">
+			<Loader2 class="h-12 w-12 animate-spin text-purple-400" />
+			<p class="text-lg font-medium">Loading book details...</p>
+		</Card>
+	</div>
+{/if}
+
 <!-- Book detail modal -->
 {#if selectedBook && !isLoadingBook}
 	<button
@@ -412,6 +466,23 @@
 										</label>
 										<LanguageSelect bind:value={requestLanguage} />
 									</div>
+
+								<div>
+									<label for="formatType" class="mb-2 block text-sm font-medium">
+										Format
+									</label>
+									<select
+										id="formatType"
+										name="formatType"
+										bind:value={requestFormat}
+										class="border-input ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+										style="background-color: hsl(var(--input));"
+									>
+										<option value="ebook">Ebook</option>
+										<option value="audiobook">Audiobook</option>
+										<option value="both">Both</option>
+									</select>
+								</div>
 
 									<div>
 										<label for="notes" class="mb-2 block text-sm font-medium">

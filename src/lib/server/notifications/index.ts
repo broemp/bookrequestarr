@@ -93,11 +93,16 @@ export function formatRequestNotification(request: {
 	bookAuthor?: string;
 	language?: string;
 	specialNotes?: string;
+	formatType?: string;
 }): NotificationMessage {
 	let body = `User: ${request.userName}\nBook: ${request.bookTitle}`;
 
 	if (request.bookAuthor) {
 		body += `\nAuthor: ${request.bookAuthor}`;
+	}
+
+	if (request.formatType) {
+		body += `\nFormat: ${request.formatType.charAt(0).toUpperCase() + request.formatType.slice(1)}`;
 	}
 
 	if (request.language) {

@@ -33,6 +33,7 @@ export const load: PageServerLoad = async () => {
 		.select({
 			id: requests.id,
 			status: requests.status,
+			formatType: requests.formatType,
 			language: requests.language,
 			specialNotes: requests.specialNotes,
 			createdAt: requests.createdAt,

@@ -17,6 +17,7 @@
 	let isSearching = $state(false);
 	let selectedBook = $state<any>(null);
 	let selectedLanguage = $state(data.user?.preferredLanguage || 'English');
+	let selectedFormat = $state<'ebook' | 'audiobook' | 'both'>('ebook');
 	let selectedSeries = $state<{ id: string; name: string; fromBook?: any } | null>(null);
 	let seriesBooks = $state<any[]>([]);
 	let isLoadingSeries = $state(false);
@@ -182,11 +183,7 @@
 
 	async function selectBook(book: any) {
 		selectedBook = book;
-		
-		// Only show loading modal if request takes longer than 150ms (cached responses are < 50ms)
-		const loadingTimeout = setTimeout(() => {
-			isLoadingBook = true;
-		}, 150);
+		isLoadingBook = true;
 		
 		try {
 			// Fetch full details
@@ -204,18 +201,13 @@
 			toast.show('Failed to load book details', 'error');
 			selectedBook = null;
 		} finally {
-			clearTimeout(loadingTimeout);
 			isLoadingBook = false;
 		}
 	}
 
 	async function selectBookById(bookId: string) {
 		console.log('[selectBookById] Called with bookId:', bookId);
-		
-		// Only show loading modal if request takes longer than 150ms (cached responses are < 50ms)
-		const loadingTimeout = setTimeout(() => {
-			isLoadingBook = true;
-		}, 150);
+		isLoadingBook = true;
 		
 		try {
 			const response = await fetch(`/api/books/${bookId}`);
@@ -239,7 +231,6 @@
 			console.error('[selectBookById] Error fetching book details:', error);
 			toast.show('Failed to load book details', 'error');
 		} finally {
-			clearTimeout(loadingTimeout);
 			isLoadingBook = false;
 		}
 	}
@@ -639,30 +630,66 @@
 										'Submitting request with bookId:',
 										selectedBook.dbId,
 										'hardcoverId:',
-										selectedBook.id
+										selectedBook.id,
+										'format:',
+										selectedFormat
 									);
 
 									const formData = new FormData(e.currentTarget);
+									const formats: ('ebook' | 'audiobook')[] =
+										selectedFormat === 'both' ? ['ebook', 'audiobook'] : [selectedFormat];
 
 									try {
-										const response = await fetch('/api/requests/create', {
-											method: 'POST',
-											body: formData
-										});
+										let successCount = 0;
+										let errorMessages: string[] = [];
 
-										if (response.ok) {
-											toast.show('Book requested successfully!', 'success');
-											selectedBook = null;
-											// Refresh the requested books list
-											await checkRequestedBooks(allSearchResults);
-										} else {
-											const text = await response.text();
-											if (response.status === 409) {
-												toast.show('This book has already been requested', 'warning');
+										for (const format of formats) {
+											const requestFormData = new FormData();
+											requestFormData.set('bookId', formData.get('bookId') as string);
+											requestFormData.set('hardcoverId', formData.get('hardcoverId') as string);
+											requestFormData.set('language', formData.get('language') as string);
+											requestFormData.set('specialNotes', formData.get('specialNotes') as string);
+											requestFormData.set('formatType', format);
+
+											const response = await fetch('/api/requests/create', {
+												method: 'POST',
+												body: requestFormData
+											});
+
+											if (response.ok) {
+												successCount++;
 											} else {
-												toast.show(text || 'Failed to create request', 'error');
+												const text = await response.text();
+												if (response.status === 409) {
+													errorMessages.push(`${format}: already requested`);
+												} else {
+													errorMessages.push(`${format}: ${text || 'failed'}`);
+												}
 											}
 										}
+
+										// Show appropriate toast message
+										if (successCount === formats.length) {
+											const msg =
+												formats.length > 1
+													? 'Both formats requested successfully!'
+													: 'Book requested successfully!';
+											toast.show(msg, 'success');
+											selectedBook = null;
+											selectedFormat = 'ebook';
+										} else if (successCount > 0) {
+											toast.show(
+												`Partially successful: ${errorMessages.join(', ')}`,
+												'warning'
+											);
+											selectedBook = null;
+											selectedFormat = 'ebook';
+										} else {
+											toast.show(errorMessages.join(', ') || 'Failed to create request', 'error');
+										}
+
+										// Refresh the requested books list
+										await checkRequestedBooks(allSearchResults);
 									} catch (error) {
 										console.error('Request error:', error);
 										toast.show('Failed to create request', 'error');
@@ -684,6 +711,23 @@
 											placeholder="Select or type a language..."
 										/>
 									</div>
+
+								<div>
+									<label for="formatType" class="mb-2 block text-sm font-medium">
+										Format
+									</label>
+									<select
+										id="formatType"
+										name="formatType"
+										bind:value={selectedFormat}
+										class="border-input ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+										style="background-color: hsl(var(--input));"
+									>
+										<option value="ebook">Ebook</option>
+										<option value="audiobook">Audiobook</option>
+										<option value="both">Both</option>
+									</select>
+								</div>
 
 									<div>
 										<label for="specialNotes" class="mb-2 block text-sm font-medium">

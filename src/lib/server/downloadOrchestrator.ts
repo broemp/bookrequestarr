@@ -516,17 +516,47 @@ async function processAnnasArchiveDownload(
 	downloadId: string,
 	md5: string,
 	fileType: string,
-	pathIndex: number = 0,
-	domainIndex: number = 0
+	pathIndex?: number,
+	domainIndex?: number
 ): Promise<void> {
 	logger.info("Processing Anna's Archive download", { downloadId, md5 });
 
 	try {
+		// Check if API key is configured
+		const hasApiKey = await annasArchive.isApiKeyConfigured();
+		if (!hasApiKey) {
+			throw new Error(
+				"Anna's Archive API key not configured. Please set ANNAS_ARCHIVE_API_KEY in your environment variables or configure it in the admin settings. Get an API key at: https://annas-archive.org/account"
+			);
+		}
+
 		// Update status to downloading
 		await db
 			.update(downloads)
 			.set({ downloadStatus: 'downloading' })
 			.where(eq(downloads.id, downloadId));
+
+		// If path_index and domain_index not provided, fetch file details to get them
+		if (pathIndex === undefined || domainIndex === undefined) {
+			logger.info("Fetching file details to get download indices", { md5 });
+			const fileInfo = await annasArchive.getAvailableFiles(md5);
+
+			if (!fileInfo || !fileInfo.download_urls || fileInfo.download_urls.length === 0) {
+				throw new Error(
+					"Could not find download options for this file. The file may not be available for fast download."
+				);
+			}
+
+			// Use the first available download option
+			pathIndex = fileInfo.download_urls[0].path_index;
+			domainIndex = fileInfo.download_urls[0].domain_index;
+			logger.info("Using download indices from file details", {
+				md5,
+				pathIndex,
+				domainIndex,
+				domainName: fileInfo.download_urls[0].domain_name
+			});
+		}
 
 		// Get fast download URL
 		const downloadResponse = await annasArchive.getFastDownloadUrl(md5, pathIndex, domainIndex);

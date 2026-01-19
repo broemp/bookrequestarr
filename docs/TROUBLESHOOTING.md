@@ -267,6 +267,87 @@ docker compose up -d
 
 ## API Issues
 
+### Anna's Archive Connection Issues
+
+**Symptom:**
+
+```
+[ERROR] Error searching Anna's Archive by title/author
+[ERROR] All Anna's Archive domains failed
+```
+
+**Cause:** DNS resolution failure, network connectivity issues, or domain blocking.
+
+**Solution:**
+
+The application automatically tries multiple Anna's Archive domains (.li, .pm, .in) to work around blocking. If all domains fail:
+
+1. **Check your internet connection:**
+   ```bash
+   ping 1.1.1.1
+   ```
+
+2. **Check if HTTPS is blocked:**
+   ```bash
+   curl -I https://annas-archive.li
+   ```
+
+3. **Try using a VPN** if Anna's Archive is blocked in your region
+
+4. **Check the logs** for specific error messages:
+   ```bash
+   docker compose logs -f bookrequestarr | grep -i "anna"
+   ```
+
+5. **Set a custom domain** (if you know of a working mirror):
+   ```env
+   ANNAS_ARCHIVE_DOMAIN=your-custom-domain.org
+   ```
+
+### Anna's Archive Download Fails with HTTP 400
+
+**Symptom:**
+
+```
+[ERROR] Error getting fast download URL
+[ERROR] All Anna's Archive domains failed. Tried: annas-archive.li: HTTP 400 BAD REQUEST
+```
+
+**Cause:** Anna's Archive API key is not configured. The API key is required for automated downloads.
+
+**Solution:**
+
+1. **Get an API key from Anna's Archive:**
+   - Visit https://annas-archive.org/account
+   - Create an account or log in
+   - Generate an API key
+
+2. **Configure the API key:**
+
+   Add to your `.env` file:
+   ```env
+   ANNAS_ARCHIVE_API_KEY=your_api_key_here
+   ```
+
+   Or for Docker:
+   ```yaml
+   environment:
+     - ANNAS_ARCHIVE_API_KEY=your_api_key_here
+   ```
+
+3. **Restart the application:**
+   ```bash
+   docker compose down
+   docker compose up -d
+   ```
+
+4. **Verify configuration:**
+   ```bash
+   docker compose exec bookrequestarr env | grep ANNAS_ARCHIVE_API_KEY
+   ```
+
+**Note:** Without an API key, Anna's Archive downloads will not work. The API key is free and allows automated downloads within their rate limits (default: 25 downloads per day).
+
 ### Hardcover API Errors
 
 **Symptom:**

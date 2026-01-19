@@ -186,19 +186,36 @@ Bookrequestarr supports multiple notification backends. Configure the ones you w
 
 Bookrequestarr can automatically download books from Anna's Archive when requests are approved.
 
-| Variable                | Required | Default             | Description                                                                                                         |
-| ----------------------- | -------- | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `ANNAS_ARCHIVE_DOMAIN`  | No       | `annas-archive.org` | Base domain for Anna's Archive (e.g., `annas-archive.org`, `annas-archive.se`)                                      |
-| `ANNAS_ARCHIVE_API_KEY` | No       | -                   | Anna's Archive API key for fast downloads. Get one by supporting [Anna's Archive](https://annas-archive.org/donate) |
-| `DOWNLOAD_DIRECTORY`    | No       | `./data/downloads`  | Directory where downloaded books will be stored (e.g., Calibre ingest folder)                                       |
-| `DOWNLOAD_DAILY_LIMIT`  | No       | `25`                | Maximum number of downloads per day to respect rate limits                                                          |
-| `CALIBRE_BASE_URL`      | No       | -                   | Base URL for Calibre-Web instance (e.g., `https://calibre.example.com`). Enables Calibre-Web Automated integration  |
+| Variable                | Required                | Default                                              | Description                                                                                                         |
+| ----------------------- | ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `ANNAS_ARCHIVE_API_KEY` | **Yes** (for downloads) | -                                                    | **Required for downloads.** Anna's Archive API key. Get one at [annas-archive.org/account](https://annas-archive.org/account) |
+| `ANNAS_ARCHIVE_DOMAIN`  | No                      | `.li`, `.pm`, `.in` (automatic fallback)             | Custom domain for Anna's Archive. If not set, automatically tries multiple domains (.li, .pm, .in) to work around blocking |
+| `DOWNLOAD_DIRECTORY`    | No                      | `./data/downloads`                                   | Directory where downloaded books will be stored (e.g., Calibre ingest folder)                                       |
+| `DOWNLOAD_DAILY_LIMIT`  | No                      | `25`                                                 | Maximum number of downloads per day to respect rate limits                                                          |
+| `CALIBRE_BASE_URL`      | No                      | -                                                    | Base URL for Calibre-Web instance (e.g., `https://calibre.example.com`). Enables Calibre-Web Automated integration  |
+
+**Important:** The `ANNAS_ARCHIVE_API_KEY` is **required** for automated downloads. Without it, you can search for books but downloads will fail with a 400 error. The API key is free and can be obtained by creating an account at [annas-archive.org/account](https://annas-archive.org/account).
+
+**Domain Fallback:**
+
+The application automatically tries multiple Anna's Archive domains in order:
+1. `annas-archive.li`
+2. `annas-archive.pm`
+3. `annas-archive.in`
+
+This helps work around regional blocking or temporary unavailability. If you set a custom domain via `ANNAS_ARCHIVE_DOMAIN`, it will be tried first, then fall back to the default domains.
 
 **Setup:**
 
-1. Support [Anna's Archive](https://annas-archive.org/donate) to get access to fast downloads
-2. Obtain your API key from your Anna's Archive account
-3. Set the `ANNAS_ARCHIVE_API_KEY` environment variable
+1. **Get an API key** (required for downloads):
+   - Visit [annas-archive.org/account](https://annas-archive.org/account)
+   - Create a free account or log in
+   - Generate an API key from your account settings
+2. **Set the API key** in your environment:
+   ```env
+   ANNAS_ARCHIVE_API_KEY=your_api_key_here
+   ```
+3. **Restart the application** to apply changes
 4. Configure download settings in the admin settings page:
    - **Enable Anna's Archive Downloads**: Toggle to enable/disable the feature
    - **Download Directory**: Path where books will be saved (default: `./data/downloads`)

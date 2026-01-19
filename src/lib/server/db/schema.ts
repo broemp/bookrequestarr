@@ -133,6 +133,9 @@ export const requests = sqliteTable('requests', {
 	})
 		.notNull()
 		.default('pending'),
+	formatType: text('format_type', { enum: ['ebook', 'audiobook'] })
+		.notNull()
+		.default('ebook'),
 	language: text('language'),
 	specialNotes: text('special_notes'),
 	createdAt: integer('created_at', { mode: 'timestamp' })

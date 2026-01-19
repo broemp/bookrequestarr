@@ -12,33 +12,112 @@ import { pipeline } from 'stream/promises';
 import { env } from '$env/dynamic/private';
 import * as cheerio from 'cheerio';
 
-const DEFAULT_ANNAS_ARCHIVE_DOMAIN = 'annas-archive.org';
+/**
+ * List of Anna's Archive domains to try (in order of preference)
+ * These domains are rotated automatically if one is blocked or unavailable
+ */
+const ANNAS_ARCHIVE_DOMAINS = ['annas-archive.li', 'annas-archive.pm', 'annas-archive.in'];
 
 /**
- * Get Anna's Archive base domain from settings or environment
+ * Get list of Anna's Archive domains to try
+ * Allows custom domain via environment variable or database settings
  */
-async function getBaseDomain(): Promise<string> {
+async function getDomains(): Promise<string[]> {
 	try {
-		// First check environment variable
+		// Check for custom domain in environment variable
 		if (env.ANNAS_ARCHIVE_DOMAIN) {
-			return env.ANNAS_ARCHIVE_DOMAIN;
+			// If custom domain is set, try it first, then fall back to defaults
+			return [env.ANNAS_ARCHIVE_DOMAIN, ...ANNAS_ARCHIVE_DOMAINS];
 		}
 
-		// Then check database settings
+		// Check database settings
 		const [setting] = await db
 			.select()
 			.from(settings)
 			.where(eq(settings.key, 'annas_archive_domain'))
 			.limit(1);
 
-		return setting?.value || DEFAULT_ANNAS_ARCHIVE_DOMAIN;
+		if (setting?.value) {
+			// If custom domain is set, try it first, then fall back to defaults
+			return [setting.value, ...ANNAS_ARCHIVE_DOMAINS];
+		}
+
+		return ANNAS_ARCHIVE_DOMAINS;
 	} catch (error) {
 		logger.error(
-			"Error fetching Anna's Archive domain",
+			"Error fetching Anna's Archive domains",
 			error instanceof Error ? error : undefined
 		);
-		return DEFAULT_ANNAS_ARCHIVE_DOMAIN;
+		return ANNAS_ARCHIVE_DOMAINS;
 	}
+}
+
+/**
+ * Try fetching from multiple domains until one succeeds
+ */
+async function fetchWithDomainFallback(
+	path: string,
+	options: RequestInit = {}
+): Promise<Response> {
+	const domains = await getDomains();
+	const errors: Array<{ domain: string; error: string }> = [];
+
+	for (const domain of domains) {
+		const url = `https://${domain}${path}`;
+		let timeout: NodeJS.Timeout | undefined;
+		
+		try {
+			logger.debug('Attempting to fetch from Anna\'s Archive', { domain, path });
+			
+			const controller = new AbortController();
+			timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+			const response = await fetch(url, {
+				...options,
+				signal: controller.signal,
+				headers: {
+					'User-Agent': 'Bookrequestarr/1.0',
+					Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+					...options.headers
+				}
+			});
+
+			clearTimeout(timeout);
+
+			if (response.ok) {
+				logger.info('Successfully connected to Anna\'s Archive', { domain });
+				return response;
+			}
+
+			// Non-OK response, try next domain
+			errors.push({
+				domain,
+				error: `HTTP ${response.status} ${response.statusText}`
+			});
+			logger.warn('Anna\'s Archive domain returned error, trying next', {
+				domain,
+				status: response.status
+			});
+		} catch (error) {
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+			
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			errors.push({ domain, error: errorMessage });
+			
+			logger.warn('Failed to connect to Anna\'s Archive domain, trying next', {
+				domain,
+				error: errorMessage
+			});
+		}
+	}
+
+	// All domains failed
+	const errorSummary = errors.map((e) => `${e.domain}: ${e.error}`).join('; ');
+	throw new Error(
+		`All Anna's Archive domains failed. Tried: ${errorSummary}. The service may be down or blocked by your network.`
+	);
 }
 
 /**
@@ -272,25 +351,27 @@ export async function searchByIsbn(isbn: string): Promise<AnnasArchiveSearchResu
 	logger.info("Searching Anna's Archive by ISBN", { isbn: cleanIsbn });
 
 	try {
-		const baseDomain = await getBaseDomain();
-		const searchUrl = `https://${baseDomain}/search`;
-		const params = new URLSearchParams({
-			q: cleanIsbn
+		// First try with fast download filter
+		const paramsWithFast = new URLSearchParams({
+			q: cleanIsbn,
+			acc: 'aa_download' // Filter for files with fast download available
 		});
 
-		const response = await fetch(`${searchUrl}?${params}`, {
-			headers: {
-				'User-Agent': 'Bookrequestarr/1.0',
-				Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-			}
-		});
+		let response = await fetchWithDomainFallback(`/search?${paramsWithFast}`);
+		let html = await response.text();
+		let results = parseSearchResults(html);
 
-		if (!response.ok) {
-			throw new Error(`Anna's Archive search failed: ${response.statusText}`);
+		// If no results with fast download filter, try without it
+		if (results.length === 0) {
+			logger.info("No fast download results, searching all files", { isbn: cleanIsbn });
+			const params = new URLSearchParams({
+				q: cleanIsbn
+			});
+
+			response = await fetchWithDomainFallback(`/search?${params}`);
+			html = await response.text();
+			results = parseSearchResults(html);
 		}
-
-		const html = await response.text();
-		const results = parseSearchResults(html);
 
 		logger.info("Anna's Archive ISBN search completed", {
 			isbn: cleanIsbn,
@@ -317,26 +398,29 @@ export async function searchByTitleAuthor(
 	logger.info("Searching Anna's Archive by title and author", { title, author });
 
 	try {
-		const baseDomain = await getBaseDomain();
-		const searchUrl = `https://${baseDomain}/search`;
 		const query = `${title} ${author}`.trim();
-		const params = new URLSearchParams({
-			q: query
+		
+		// First try with fast download filter
+		const paramsWithFast = new URLSearchParams({
+			q: query,
+			acc: 'aa_download' // Filter for files with fast download available
 		});
 
-		const response = await fetch(`${searchUrl}?${params}`, {
-			headers: {
-				'User-Agent': 'Bookrequestarr/1.0',
-				Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-			}
-		});
+		let response = await fetchWithDomainFallback(`/search?${paramsWithFast}`);
+		let html = await response.text();
+		let results = parseSearchResults(html);
 
-		if (!response.ok) {
-			throw new Error(`Anna's Archive search failed: ${response.statusText}`);
+		// If no results with fast download filter, try without it
+		if (results.length === 0) {
+			logger.info("No fast download results, searching all files", { title, author });
+			const params = new URLSearchParams({
+				q: query
+			});
+
+			response = await fetchWithDomainFallback(`/search?${params}`);
+			html = await response.text();
+			results = parseSearchResults(html);
 		}
-
-		const html = await response.text();
-		const results = parseSearchResults(html);
 
 		logger.info("Anna's Archive title/author search completed", {
 			title,
@@ -361,19 +445,7 @@ export async function getAvailableFiles(md5: string): Promise<AnnasArchiveFileIn
 	logger.info("Getting available files from Anna's Archive", { md5 });
 
 	try {
-		const baseDomain = await getBaseDomain();
-		const detailsUrl = `https://${baseDomain}/md5/${md5}`;
-		const response = await fetch(detailsUrl, {
-			headers: {
-				'User-Agent': 'Bookrequestarr/1.0',
-				Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-			}
-		});
-
-		if (!response.ok) {
-			throw new Error(`Failed to get file details: ${response.statusText}`);
-		}
-
+		const response = await fetchWithDomainFallback(`/md5/${md5}`);
 		const html = await response.text();
 		const $ = cheerio.load(html);
 
@@ -400,14 +472,37 @@ export async function getAvailableFiles(md5: string): Promise<AnnasArchiveFileIn
 			}
 		}
 
-		logger.info("Retrieved file details from Anna's Archive", { md5, title, extension });
+	// Extract download URLs with path_index and domain_index
+		// Look for fast download links in the format: /fast_download/{md5}/{path_index}/{domain_index}
+		const download_urls: Array<{ path_index: number; domain_index: number; domain_name: string }> =
+			[];
+		$('a[href*="/fast_download/"]').each((_, elem) => {
+			const href = $(elem).attr('href');
+			if (href) {
+				const match = href.match(/\/fast_download\/[^/]+\/(\d+)\/(\d+)/);
+				if (match) {
+					const path_index = parseInt(match[1], 10);
+					const domain_index = parseInt(match[2], 10);
+					const domain_name = $(elem).text().trim() || 'Unknown';
+					download_urls.push({ path_index, domain_index, domain_name });
+				}
+			}
+		});
+
+		logger.info("Retrieved file details from Anna's Archive", {
+			md5,
+			title,
+			extension,
+			downloadOptionsCount: download_urls.length
+		});
 
 		return {
 			md5,
 			title,
 			author,
 			extension,
-			filesize
+			filesize,
+			download_urls: download_urls.length > 0 ? download_urls : undefined
 		};
 	} catch (error) {
 		logger.error('Error getting available files', error instanceof Error ? error : undefined, {
@@ -433,7 +528,6 @@ export async function getFastDownloadUrl(
 	logger.info("Getting fast download URL from Anna's Archive", { md5, pathIndex, domainIndex });
 
 	try {
-		const baseDomain = await getBaseDomain();
 		const params = new URLSearchParams({
 			md5,
 			key: apiKey,
@@ -441,15 +535,12 @@ export async function getFastDownloadUrl(
 			domain_index: domainIndex.toString()
 		});
 
-		const response = await fetch(`https://${baseDomain}/dyn/api/fast_download.json?${params}`, {
+		const response = await fetchWithDomainFallback(`/dyn/api/fast_download.json?${params}`, {
 			headers: {
-				'User-Agent': 'Bookrequestarr/1.0'
+				'User-Agent': 'Bookrequestarr/1.0',
+				Accept: 'application/json'
 			}
 		});
-
-		if (!response.ok) {
-			throw new Error(`Fast download API failed: ${response.statusText}`);
-		}
 
 		const data: AnnasArchiveFastDownloadResponse = await response.json();
 
@@ -475,26 +566,42 @@ export async function downloadFile(downloadUrl: string, destinationPath: string)
 	logger.info('Starting file download', { destinationPath });
 
 	try {
-		const response = await fetch(downloadUrl, {
-			headers: {
-				'User-Agent': 'Bookrequestarr/1.0'
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), 300000); // 5 minute timeout for downloads
+
+		try {
+			const response = await fetch(downloadUrl, {
+				headers: {
+					'User-Agent': 'Bookrequestarr/1.0'
+				},
+				signal: controller.signal
+			});
+
+			clearTimeout(timeout);
+
+			if (!response.ok) {
+				throw new Error(`Download failed: ${response.status} ${response.statusText}`);
 			}
-		});
 
-		if (!response.ok) {
-			throw new Error(`Download failed: ${response.statusText}`);
+			if (!response.body) {
+				throw new Error('Response body is null');
+			}
+
+			// Stream the download to file
+			const fileStream = createWriteStream(destinationPath);
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			await pipeline(response.body as unknown as NodeJS.ReadableStream, fileStream);
+
+			logger.info('File download completed', { destinationPath });
+		} catch (fetchError) {
+			clearTimeout(timeout);
+			
+			if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+				throw new Error('File download timed out after 5 minutes');
+			}
+			
+			throw fetchError;
 		}
-
-		if (!response.body) {
-			throw new Error('Response body is null');
-		}
-
-		// Stream the download to file
-		const fileStream = createWriteStream(destinationPath);
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		await pipeline(response.body as unknown as NodeJS.ReadableStream, fileStream);
-
-		logger.info('File download completed', { destinationPath });
 	} catch (error) {
 		logger.error('Error downloading file', error instanceof Error ? error : undefined, {
 			downloadUrl,
