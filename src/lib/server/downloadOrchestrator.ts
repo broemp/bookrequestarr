@@ -28,6 +28,7 @@ import {
 import { join } from 'path';
 import { mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
+import { getSetting as getSettingWithFallback } from './settingsInit';
 
 // ============================================================================
 // Types
@@ -119,13 +120,8 @@ async function getMinConfidenceScore(): Promise<number> {
  */
 async function getDownloadDirectory(): Promise<string> {
 	try {
-		const [setting] = await db
-			.select()
-			.from(settings)
-			.where(eq(settings.key, 'download_directory'))
-			.limit(1);
-
-		return setting?.value || './data/downloads';
+		const directory = await getSettingWithFallback('download_directory', 'DOWNLOAD_DIRECTORY', './data/downloads');
+		return directory || './data/downloads';
 	} catch (error) {
 		logger.error('Error fetching download directory', error instanceof Error ? error : undefined);
 		return './data/downloads';

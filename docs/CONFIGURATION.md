@@ -190,7 +190,7 @@ Bookrequestarr can automatically download books from Anna's Archive when request
 | ----------------------- | ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `ANNAS_ARCHIVE_API_KEY` | **Yes** (for downloads) | -                                                    | **Required for downloads.** Anna's Archive API key. Get one at [annas-archive.org/account](https://annas-archive.org/account) |
 | `ANNAS_ARCHIVE_DOMAIN`  | No                      | `.li`, `.pm`, `.in` (automatic fallback)             | Custom domain for Anna's Archive. If not set, automatically tries multiple domains (.li, .pm, .in) to work around blocking |
-| `DOWNLOAD_DIRECTORY`    | No                      | `./data/downloads`                                   | Directory where downloaded books will be stored (e.g., Calibre ingest folder)                                       |
+| `DOWNLOAD_DIRECTORY`    | No                      | `./data/downloads`                                   | Directory where downloaded books will be stored (e.g., Calibre ingest folder). Can also be configured via Admin Settings UI. Environment variable takes precedence. |
 | `DOWNLOAD_DAILY_LIMIT`  | No                      | `25`                                                 | Maximum number of downloads per day to respect rate limits                                                          |
 | `CALIBRE_BASE_URL`      | No                      | -                                                    | Base URL for Calibre-Web instance (e.g., `https://calibre.example.com`). Enables Calibre-Web Automated integration  |
 
@@ -204,6 +204,15 @@ The application automatically tries multiple Anna's Archive domains in order:
 3. `annas-archive.in`
 
 This helps work around regional blocking or temporary unavailability. If you set a custom domain via `ANNAS_ARCHIVE_DOMAIN`, it will be tried first, then fall back to the default domains.
+
+**Configuration Priority:**
+
+Settings can be configured in three ways (in order of precedence):
+1. **Environment variables** - Highest priority, cannot be changed via UI
+2. **Admin Settings UI** - Can be changed at runtime (if not set via environment)
+3. **Default values** - Used if neither environment variable nor UI setting is set
+
+For example, if you set `DOWNLOAD_DIRECTORY=/mnt/books` as an environment variable, the Admin Settings UI will show this value but it will be read-only. If you don't set the environment variable, you can configure it via the UI.
 
 **Setup:**
 

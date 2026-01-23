@@ -8,9 +8,15 @@ import { logger } from '$lib/server/logger';
 import { validateEnvOrExit } from '$lib/server/envValidation';
 import { cleanupOldDownloads } from '$lib/server/cleanup';
 import { updateSabnzbdDownloadStatuses } from '$lib/server/downloadOrchestrator';
+import { initializeSettings } from '$lib/server/settingsInit';
 
 // Validate environment variables at startup
 validateEnvOrExit();
+
+// Initialize settings from environment variables
+initializeSettings().catch((error) => {
+	logger.error('Failed to initialize settings', error instanceof Error ? error : undefined);
+});
 
 // Run cleanup every hour
 setInterval(

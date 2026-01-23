@@ -220,10 +220,17 @@
 					type="text"
 					placeholder="./data/downloads"
 					value={data.settings.downloadDirectory || './data/downloads'}
+					disabled={data.envOverrides.downloadDirectory}
 				/>
-				<p class="text-muted-foreground mt-1 text-xs">
-					Path where downloaded books will be stored (e.g., Calibre ingest folder)
-				</p>
+				{#if data.envOverrides.downloadDirectory}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable (DOWNLOAD_DIRECTORY) and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						Path where downloaded books will be stored (e.g., Calibre ingest folder)
+					</p>
+				{/if}
 			</div>
 
 			<div>

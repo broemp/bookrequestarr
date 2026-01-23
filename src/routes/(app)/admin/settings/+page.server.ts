@@ -29,6 +29,7 @@ export const load: PageServerLoad = async () => {
 		telegramChatId: !!env.TELEGRAM_CHAT_ID,
 		annasArchiveDomain: !!env.ANNAS_ARCHIVE_DOMAIN,
 		annasArchiveApiKey: !!env.ANNAS_ARCHIVE_API_KEY,
+		downloadDirectory: !!env.DOWNLOAD_DIRECTORY,
 		prowlarrUrl: !!env.PROWLARR_URL,
 		prowlarrApiKey: !!env.PROWLARR_API_KEY,
 		sabnzbdUrl: !!env.SABNZBD_URL,
