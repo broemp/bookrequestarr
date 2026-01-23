@@ -18,6 +18,43 @@
 	let requestFormat = $state<'ebook' | 'audiobook' | 'both'>('ebook');
 	let specialNotes = $state('');
 
+	// Mouse drag scrolling state
+	let trendingBooksContainer: HTMLDivElement;
+	let isDragging = $state(false);
+	let startX = $state(0);
+	let scrollLeft = $state(0);
+
+	function handleMouseDown(e: MouseEvent) {
+		if (!trendingBooksContainer) return;
+		isDragging = true;
+		startX = e.pageX - trendingBooksContainer.offsetLeft;
+		scrollLeft = trendingBooksContainer.scrollLeft;
+		trendingBooksContainer.style.cursor = 'grabbing';
+		trendingBooksContainer.style.userSelect = 'none';
+	}
+
+	function handleMouseLeave() {
+		if (!trendingBooksContainer) return;
+		isDragging = false;
+		trendingBooksContainer.style.cursor = 'grab';
+		trendingBooksContainer.style.userSelect = '';
+	}
+
+	function handleMouseUp() {
+		if (!trendingBooksContainer) return;
+		isDragging = false;
+		trendingBooksContainer.style.cursor = 'grab';
+		trendingBooksContainer.style.userSelect = '';
+	}
+
+	function handleMouseMove(e: MouseEvent) {
+		if (!isDragging || !trendingBooksContainer) return;
+		e.preventDefault();
+		const x = e.pageX - trendingBooksContainer.offsetLeft;
+		const walk = (x - startX) * 2; // Multiply by 2 for faster scrolling
+		trendingBooksContainer.scrollLeft = scrollLeft - walk;
+	}
+
 	// Prevent body scroll when modal is open
 	$effect(() => {
 		if (selectedBook) {
@@ -151,7 +188,17 @@
 			<h2 class="mb-4 text-2xl font-bold">Trending Books</h2>
 
 			<div class="relative -mx-6 px-6">
-				<div class="flex gap-3 overflow-x-auto pb-4">
+				<div 
+					bind:this={trendingBooksContainer}
+					class="flex gap-3 overflow-x-auto pb-4"
+					style="cursor: grab; scroll-behavior: smooth;"
+					onmousedown={handleMouseDown}
+					onmouseleave={handleMouseLeave}
+					onmouseup={handleMouseUp}
+					onmousemove={handleMouseMove}
+					role="region"
+					aria-label="Trending books carousel"
+				>
 					{#each data.trendingBooks as book}
 						<button
 							class="group w-32 flex-shrink-0 text-left"
