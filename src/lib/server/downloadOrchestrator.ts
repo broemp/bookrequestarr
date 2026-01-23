@@ -581,12 +581,30 @@ async function processAnnasArchiveDownload(
 			});
 		}
 
-		// Get fast download URL
-		const downloadResponse = await annasArchive.getFastDownloadUrl(md5, pathIndex, domainIndex);
+	// Get fast download URL
+	const downloadResponse = await annasArchive.getFastDownloadUrl(md5, pathIndex, domainIndex);
 
-		if (!downloadResponse.download_url) {
-			throw new Error(downloadResponse.error || 'Failed to get download URL');
+	if (!downloadResponse.download_url) {
+		const errorMsg = downloadResponse.error || 'Failed to get download URL';
+		
+		// Provide more helpful error messages for common issues
+		if (errorMsg.toLowerCase().includes('invalid md5')) {
+			throw new Error(
+				`Invalid MD5 hash: The file with MD5 "${md5}" does not exist in Anna's Archive or is not available for fast download. ` +
+				`This may happen if the file was removed or if the search result is outdated. ` +
+				`Try searching for the book again or use a different edition.`
+			);
 		}
+		
+		if (errorMsg.toLowerCase().includes('membership') || errorMsg.toLowerCase().includes('account')) {
+			throw new Error(
+				`Anna's Archive membership issue: ${errorMsg}. ` +
+				`Please verify your API key is valid and your account has an active membership at https://annas-archive.org/account`
+			);
+		}
+		
+		throw new Error(errorMsg);
+	}
 
 		// Ensure both directories exist
 		const tempDir = await ensureDownloadTempDirectory();

@@ -223,14 +223,14 @@ export async function getBookDetails(hardcoverId: string): Promise<HardcoverBook
 						isbn_10: cachedBook.isbn10 || undefined,
 						publisher: cachedBook.publisher ? { name: cachedBook.publisher } : undefined
 					} : undefined,
-					taggings: bookTagsData.map(t => ({
-						tag_id: parseInt(t.hardcoverTagId),
-						tag: {
-							id: t.hardcoverTagId,
-							tag: t.tagName,
-							tag_category: t.tagCategory ? { category: t.tagCategory } : undefined
-						}
-					}))
+				taggings: bookTagsData.map(t => ({
+					tag_id: t.hardcoverTagId,
+					tag: {
+						id: t.hardcoverTagId,
+						tag: t.tagName,
+						tag_category: t.tagCategory ? { category: t.tagCategory } : undefined
+					}
+				}))
 				};
 				
 				return book;
@@ -242,7 +242,10 @@ export async function getBookDetails(hardcoverId: string): Promise<HardcoverBook
 			});
 		}
 	} catch (error) {
-		logger.warn('Error checking local cache, falling back to API', error, { hardcoverId });
+		logger.warn('Error checking local cache, falling back to API', { 
+			hardcoverId,
+			error: error instanceof Error ? error.message : String(error)
+		});
 	}
 	
 	// Step 2: Fetch from API (will use API response cache if available)

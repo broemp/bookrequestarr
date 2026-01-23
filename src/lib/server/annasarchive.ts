@@ -57,7 +57,8 @@ async function getDomains(): Promise<string[]> {
  */
 async function fetchWithDomainFallback(
 	path: string,
-	options: RequestInit = {}
+	options: RequestInit = {},
+	acceptClientErrors: boolean = false
 ): Promise<Response> {
 	const domains = await getDomains();
 	const errors: Array<{ domain: string; error: string }> = [];
@@ -86,6 +87,16 @@ async function fetchWithDomainFallback(
 
 			if (response.ok) {
 				logger.info('Successfully connected to Anna\'s Archive', { domain });
+				return response;
+			}
+
+			// For API endpoints, 4xx errors contain valid error responses
+			// Return them instead of trying other domains
+			if (acceptClientErrors && response.status >= 400 && response.status < 500) {
+				logger.info('Received client error from Anna\'s Archive API', { 
+					domain, 
+					status: response.status 
+				});
 				return response;
 			}
 
@@ -442,10 +453,20 @@ export async function searchByTitleAuthor(
  * Get available file formats and download options for a specific MD5
  */
 export async function getAvailableFiles(md5: string): Promise<AnnasArchiveFileInfo | null> {
-	logger.info("Getting available files from Anna's Archive", { md5 });
+	// Normalize MD5 to lowercase
+	const normalizedMd5 = md5.toLowerCase().trim();
+	
+	logger.info("Getting available files from Anna's Archive", { md5: normalizedMd5 });
 
 	try {
-		const response = await fetchWithDomainFallback(`/md5/${md5}`);
+		const response = await fetchWithDomainFallback(`/md5/${normalizedMd5}`);
+		
+		// Check if the page exists (404 means invalid MD5)
+		if (response.status === 404) {
+			logger.warn("MD5 not found in Anna's Archive", { md5: normalizedMd5 });
+			return null;
+		}
+		
 		const html = await response.text();
 		const $ = cheerio.load(html);
 
@@ -489,21 +510,21 @@ export async function getAvailableFiles(md5: string): Promise<AnnasArchiveFileIn
 			}
 		});
 
-		logger.info("Retrieved file details from Anna's Archive", {
-			md5,
-			title,
-			extension,
-			downloadOptionsCount: download_urls.length
-		});
+	logger.info("Retrieved file details from Anna's Archive", {
+		md5: normalizedMd5,
+		title,
+		extension,
+		downloadOptionsCount: download_urls.length
+	});
 
-		return {
-			md5,
-			title,
-			author,
-			extension,
-			filesize,
-			download_urls: download_urls.length > 0 ? download_urls : undefined
-		};
+	return {
+		md5: normalizedMd5,
+		title,
+		author,
+		extension,
+		filesize,
+		download_urls: download_urls.length > 0 ? download_urls : undefined
+	};
 	} catch (error) {
 		logger.error('Error getting available files', error instanceof Error ? error : undefined, {
 			md5
@@ -528,26 +549,39 @@ export async function getFastDownloadUrl(
 	logger.info("Getting fast download URL from Anna's Archive", { md5, pathIndex, domainIndex });
 
 	try {
+		// Normalize MD5 to lowercase (Anna's Archive expects lowercase)
+		const normalizedMd5 = md5.toLowerCase().trim();
+		
 		const params = new URLSearchParams({
-			md5,
+			md5: normalizedMd5,
 			key: apiKey,
 			path_index: pathIndex.toString(),
 			domain_index: domainIndex.toString()
 		});
 
-		const response = await fetchWithDomainFallback(`/dyn/api/fast_download.json?${params}`, {
-			headers: {
-				'User-Agent': 'Bookrequestarr/1.0',
-				Accept: 'application/json'
-			}
-		});
+		const response = await fetchWithDomainFallback(
+			`/dyn/api/fast_download.json?${params}`, 
+			{
+				headers: {
+					'User-Agent': 'Bookrequestarr/1.0',
+					Accept: 'application/json'
+				}
+			},
+			true // Accept 4xx responses as they contain error details
+		);
 
 		const data: AnnasArchiveFastDownloadResponse = await response.json();
 
 		if (data.error) {
-			logger.warn("Anna's Archive fast download error", { md5, error: data.error });
+			logger.warn("Anna's Archive fast download error", { 
+				md5: normalizedMd5, 
+				pathIndex,
+				domainIndex,
+				error: data.error,
+				httpStatus: response.status
+			});
 		} else {
-			logger.info('Fast download URL obtained', { md5 });
+			logger.info('Fast download URL obtained', { md5: normalizedMd5 });
 		}
 
 		return data;
