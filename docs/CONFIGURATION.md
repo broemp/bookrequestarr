@@ -186,13 +186,14 @@ Bookrequestarr supports multiple notification backends. Configure the ones you w
 
 Bookrequestarr can automatically download books from Anna's Archive when requests are approved.
 
-| Variable                | Required                | Default                                              | Description                                                                                                         |
-| ----------------------- | ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `ANNAS_ARCHIVE_API_KEY` | **Yes** (for downloads) | -                                                    | **Required for downloads.** Anna's Archive API key. Get one at [annas-archive.org/account](https://annas-archive.org/account) |
-| `ANNAS_ARCHIVE_DOMAIN`  | No                      | `.li`, `.pm`, `.in` (automatic fallback)             | Custom domain for Anna's Archive. If not set, automatically tries multiple domains (.li, .pm, .in) to work around blocking |
-| `DOWNLOAD_DIRECTORY`    | No                      | `./data/downloads`                                   | Directory where downloaded books will be stored (e.g., Calibre ingest folder). Can also be configured via Admin Settings UI. Environment variable takes precedence. |
-| `DOWNLOAD_DAILY_LIMIT`  | No                      | `25`                                                 | Maximum number of downloads per day to respect rate limits                                                          |
-| `CALIBRE_BASE_URL`      | No                      | -                                                    | Base URL for Calibre-Web instance (e.g., `https://calibre.example.com`). Enables Calibre-Web Automated integration  |
+| Variable                   | Required                | Default                                              | Description                                                                                                         |
+| -------------------------- | ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `ANNAS_ARCHIVE_API_KEY`    | **Yes** (for downloads) | -                                                    | **Required for downloads.** Anna's Archive API key. Get one at [annas-archive.org/account](https://annas-archive.org/account) |
+| `ANNAS_ARCHIVE_DOMAIN`     | No                      | `.li`, `.pm`, `.in` (automatic fallback)             | Custom domain for Anna's Archive. If not set, automatically tries multiple domains (.li, .pm, .in) to work around blocking |
+| `DOWNLOAD_DIRECTORY`       | No                      | `./data/downloads`                                   | Directory where completed downloads will be stored (e.g., Calibre ingest folder). Can also be configured via Admin Settings UI. Environment variable takes precedence. |
+| `DOWNLOAD_TEMP_DIRECTORY`  | No                      | `./data/downloads-temp`                              | Temporary directory for in-progress downloads. Files are moved to `DOWNLOAD_DIRECTORY` when complete. Can also be configured via Admin Settings UI. |
+| `DOWNLOAD_DAILY_LIMIT`     | No                      | `25`                                                 | Maximum number of downloads per day to respect rate limits                                                          |
+| `CALIBRE_BASE_URL`         | No                      | -                                                    | Base URL for Calibre-Web instance (e.g., `https://calibre.example.com`). Enables Calibre-Web Automated integration  |
 
 **Important:** The `ANNAS_ARCHIVE_API_KEY` is **required** for automated downloads. Without it, you can search for books but downloads will fail with a 400 error. The API key is free and can be obtained by creating an account at [annas-archive.org/account](https://annas-archive.org/account).
 

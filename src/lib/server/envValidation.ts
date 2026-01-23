@@ -116,6 +116,12 @@ const ENV_VARS: EnvVar[] = [
 		default: './data/downloads'
 	},
 	{
+		name: 'DOWNLOAD_TEMP_DIRECTORY',
+		required: false,
+		description: 'Temporary directory for in-progress downloads',
+		default: './data/downloads-temp'
+	},
+	{
 		name: 'DOWNLOAD_DAILY_LIMIT',
 		required: false,
 		description: 'Maximum downloads per day',

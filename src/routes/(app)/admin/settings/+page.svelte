@@ -228,7 +228,30 @@
 					</p>
 				{:else}
 					<p class="text-muted-foreground mt-1 text-xs">
-						Path where downloaded books will be stored (e.g., Calibre ingest folder)
+						Path where completed downloads will be stored (e.g., Calibre ingest folder)
+					</p>
+				{/if}
+			</div>
+
+			<div>
+				<label for="downloadTempDirectory" class="mb-2 block text-sm font-medium">
+					Temp Download Directory
+				</label>
+				<Input
+					id="downloadTempDirectory"
+					name="downloadTempDirectory"
+					type="text"
+					placeholder="./data/downloads-temp"
+					value={data.settings.downloadTempDirectory || './data/downloads-temp'}
+					disabled={data.envOverrides.downloadTempDirectory}
+				/>
+				{#if data.envOverrides.downloadTempDirectory}
+					<p class="mt-1 text-xs text-blue-500">
+						✓ This value is set via environment variable (DOWNLOAD_TEMP_DIRECTORY) and cannot be changed here
+					</p>
+				{:else}
+					<p class="text-muted-foreground mt-1 text-xs">
+						Temporary directory for in-progress downloads. Files are moved to the download directory when complete.
 					</p>
 				{/if}
 			</div>

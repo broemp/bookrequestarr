@@ -129,6 +129,19 @@ async function getDownloadDirectory(): Promise<string> {
 }
 
 /**
+ * Get temp download directory from settings or environment
+ */
+async function getDownloadTempDirectory(): Promise<string> {
+	try {
+		const directory = await getSettingWithFallback('download_temp_directory', 'DOWNLOAD_TEMP_DIRECTORY', './data/downloads-temp');
+		return directory || './data/downloads-temp';
+	} catch (error) {
+		logger.error('Error fetching temp download directory', error instanceof Error ? error : undefined);
+		return './data/downloads-temp';
+	}
+}
+
+/**
  * Ensure download directory exists
  */
 async function ensureDownloadDirectory(): Promise<string> {
@@ -140,6 +153,20 @@ async function ensureDownloadDirectory(): Promise<string> {
 	}
 
 	return downloadDir;
+}
+
+/**
+ * Ensure temp download directory exists
+ */
+async function ensureDownloadTempDirectory(): Promise<string> {
+	const tempDir = await getDownloadTempDirectory();
+
+	if (!existsSync(tempDir)) {
+		await mkdir(tempDir, { recursive: true });
+		logger.info('Created temp download directory', { directory: tempDir });
+	}
+
+	return tempDir;
 }
 
 /**
@@ -561,26 +588,33 @@ async function processAnnasArchiveDownload(
 			throw new Error(downloadResponse.error || 'Failed to get download URL');
 		}
 
-		// Ensure download directory exists
+		// Ensure both directories exist
+		const tempDir = await ensureDownloadTempDirectory();
 		const downloadDir = await ensureDownloadDirectory();
 
 		// Generate filename
 		const filename = `${md5}.${fileType}`;
-		const filePath = join(downloadDir, filename);
+		const tempFilePath = join(tempDir, filename);
+		const finalFilePath = join(downloadDir, filename);
 
-		// Download file
-		await annasArchive.downloadFile(downloadResponse.download_url, filePath);
+		// Download file to temp directory
+		logger.info('Downloading file to temp directory', { tempFilePath });
+		await annasArchive.downloadFile(downloadResponse.download_url, tempFilePath);
 
 		// Get file size
 		const fs = await import('fs/promises');
-		const stats = await fs.stat(filePath);
+		const stats = await fs.stat(tempFilePath);
+
+		// Move file from temp to final location
+		logger.info('Moving file to final location', { from: tempFilePath, to: finalFilePath });
+		await fs.rename(tempFilePath, finalFilePath);
 
 		// Update download record
 		await db
 			.update(downloads)
 			.set({
 				downloadStatus: 'completed',
-				filePath,
+				filePath: finalFilePath,
 				fileSize: stats.size,
 				downloadedAt: new Date()
 			})
@@ -603,11 +637,33 @@ async function processAnnasArchiveDownload(
 				.where(eq(requests.id, download.requestId));
 		}
 
-		logger.info("Anna's Archive download completed successfully", { downloadId, filePath });
+		logger.info("Anna's Archive download completed successfully", { downloadId, filePath: finalFilePath });
 	} catch (error) {
 		logger.error("Anna's Archive download processing failed", error instanceof Error ? error : undefined, {
 			downloadId
 		});
+
+		// Clean up temp file if it exists
+		try {
+			const tempDir = await getDownloadTempDirectory();
+			const [download] = await db
+				.select()
+				.from(downloads)
+				.where(eq(downloads.id, downloadId))
+				.limit(1);
+			
+			if (download?.annasArchiveMd5 && download?.fileType) {
+				const tempFilePath = join(tempDir, `${download.annasArchiveMd5}.${download.fileType}`);
+				const fs = await import('fs/promises');
+				if (existsSync(tempFilePath)) {
+					await fs.unlink(tempFilePath);
+					logger.info('Cleaned up temp file after error', { tempFilePath });
+				}
+			}
+		} catch (cleanupError) {
+			const errorMsg = cleanupError instanceof Error ? cleanupError.message : 'Unknown cleanup error';
+			logger.warn('Failed to clean up temp file', { error: errorMsg });
+		}
 
 		// Update download record with error
 		await db

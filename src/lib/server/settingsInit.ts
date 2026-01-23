@@ -15,6 +15,7 @@ const ENV_TO_SETTING_MAP: Record<string, string> = {
 	ANNAS_ARCHIVE_DOMAIN: 'annas_archive_domain',
 	ANNAS_ARCHIVE_API_KEY: 'annas_archive_api_key',
 	DOWNLOAD_DIRECTORY: 'download_directory',
+	DOWNLOAD_TEMP_DIRECTORY: 'download_temp_directory',
 	DOWNLOAD_DAILY_LIMIT: 'download_daily_limit',
 	PROWLARR_URL: 'prowlarr_url',
 	PROWLARR_API_KEY: 'prowlarr_api_key',
@@ -28,6 +29,7 @@ const ENV_TO_SETTING_MAP: Record<string, string> = {
  */
 const SETTING_DEFAULTS: Record<string, string> = {
 	download_directory: './data/downloads',
+	download_temp_directory: './data/downloads-temp',
 	download_daily_limit: '25',
 	download_auto_mode: 'disabled',
 	download_auto_select: 'true',

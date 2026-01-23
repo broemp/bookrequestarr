@@ -30,6 +30,7 @@ export const load: PageServerLoad = async () => {
 		annasArchiveDomain: !!env.ANNAS_ARCHIVE_DOMAIN,
 		annasArchiveApiKey: !!env.ANNAS_ARCHIVE_API_KEY,
 		downloadDirectory: !!env.DOWNLOAD_DIRECTORY,
+		downloadTempDirectory: !!env.DOWNLOAD_TEMP_DIRECTORY,
 		prowlarrUrl: !!env.PROWLARR_URL,
 		prowlarrApiKey: !!env.PROWLARR_API_KEY,
 		sabnzbdUrl: !!env.SABNZBD_URL,
@@ -48,6 +49,7 @@ export const load: PageServerLoad = async () => {
 			annasArchiveDomain: settingsMap['annas_archive_domain'] || 'annas-archive.org',
 			annasArchiveApiKey: settingsMap['annas_archive_api_key'] || '',
 			downloadDirectory: settingsMap['download_directory'] || './data/downloads',
+			downloadTempDirectory: settingsMap['download_temp_directory'] || './data/downloads-temp',
 			downloadAutoMode: settingsMap['download_auto_mode'] || 'disabled',
 			downloadDailyLimit: settingsMap['download_daily_limit'] || '25',
 			downloadAutoSelect: settingsMap['download_auto_select'] === 'true',
@@ -85,6 +87,7 @@ export const actions: Actions = {
 		const annasArchiveDomain = formData.get('annasArchiveDomain') as string;
 		const annasArchiveApiKey = formData.get('annasArchiveApiKey') as string;
 		const downloadDirectory = formData.get('downloadDirectory') as string;
+		const downloadTempDirectory = formData.get('downloadTempDirectory') as string;
 		const downloadAutoMode = formData.get('downloadAutoMode') as string;
 		const downloadDailyLimit = formData.get('downloadDailyLimit') as string;
 		const downloadAutoSelect = formData.get('downloadAutoSelect') === 'on';
@@ -112,6 +115,7 @@ export const actions: Actions = {
 				{ key: 'annas_archive_domain', value: annasArchiveDomain || 'annas-archive.org' },
 				{ key: 'annas_archive_api_key', value: annasArchiveApiKey || '' },
 				{ key: 'download_directory', value: downloadDirectory || './data/downloads' },
+				{ key: 'download_temp_directory', value: downloadTempDirectory || './data/downloads-temp' },
 				{ key: 'download_auto_mode', value: downloadAutoMode || 'disabled' },
 				{ key: 'download_daily_limit', value: downloadDailyLimit || '25' },
 				{ key: 'download_auto_select', value: downloadAutoSelect ? 'true' : 'false' },
