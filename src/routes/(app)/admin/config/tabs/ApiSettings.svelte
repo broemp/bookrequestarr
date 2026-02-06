@@ -68,8 +68,7 @@
 				value={settings.localBookCacheTtlHours || '6'}
 			/>
 			<p class="text-muted-foreground mt-1 text-xs">
-				How long to keep book details in local database cache for instant loading (default: 6
-				hours)
+				How long to keep book details in local database cache for instant loading (default: 6 hours)
 			</p>
 		</div>
 

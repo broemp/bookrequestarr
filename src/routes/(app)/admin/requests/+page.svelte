@@ -297,9 +297,7 @@
 <div class="space-y-6">
 	<div>
 		<h1 class="mb-2 text-3xl font-bold">Manage Requests</h1>
-		<p class="text-muted-foreground">
-			Review and manage book requests from all users
-		</p>
+		<p class="text-muted-foreground">Review and manage book requests from all users</p>
 	</div>
 
 	<!-- Filter Bar -->

@@ -19,19 +19,14 @@ export interface BookloreConfig {
  */
 export async function getBookloreConfig(): Promise<BookloreConfig> {
 	const enabled =
-		env.BOOKLORE_ENABLED === 'true' ||
-		(await getSetting('booklore_enabled', 'false')) === 'true';
+		env.BOOKLORE_ENABLED === 'true' || (await getSetting('booklore_enabled', 'false')) === 'true';
 
-	const baseUrl =
-		env.BOOKLORE_BASE_URL || (await getSetting('booklore_base_url', '')) || undefined;
+	const baseUrl = env.BOOKLORE_BASE_URL || (await getSetting('booklore_base_url', '')) || undefined;
 
 	const bookdropPath =
-		env.BOOKLORE_BOOKDROP_PATH ||
-		(await getSetting('booklore_bookdrop_path', '')) ||
-		undefined;
+		env.BOOKLORE_BOOKDROP_PATH || (await getSetting('booklore_bookdrop_path', '')) || undefined;
 
-	const apiKey =
-		env.BOOKLORE_API_KEY || (await getSetting('booklore_api_key', '')) || undefined;
+	const apiKey = env.BOOKLORE_API_KEY || (await getSetting('booklore_api_key', '')) || undefined;
 
 	const verifyImports =
 		env.BOOKLORE_VERIFY_IMPORTS === 'true' ||
@@ -107,10 +102,14 @@ export async function copyToBookdrop(filePath: string): Promise<boolean> {
 
 		return true;
 	} catch (error) {
-		logger.error('Failed to copy file to Booklore BookDrop', error instanceof Error ? error : undefined, {
-			filePath,
-			bookdropPath: config.bookdropPath
-		});
+		logger.error(
+			'Failed to copy file to Booklore BookDrop',
+			error instanceof Error ? error : undefined,
+			{
+				filePath,
+				bookdropPath: config.bookdropPath
+			}
+		);
 		return false;
 	}
 }

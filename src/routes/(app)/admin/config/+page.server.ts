@@ -205,10 +205,7 @@ export const actions: Actions = {
 				return fail(400, { error: result.error || 'Connection failed' });
 			}
 		} catch (error) {
-			logger.error(
-				'Error testing Booklore connection',
-				error instanceof Error ? error : undefined
-			);
+			logger.error('Error testing Booklore connection', error instanceof Error ? error : undefined);
 			return fail(500, {
 				error: `Connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`
 			});

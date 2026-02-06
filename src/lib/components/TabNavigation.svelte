@@ -40,13 +40,13 @@
 	});
 </script>
 
-<div class="border-b border-border mb-6">
+<div class="border-border mb-6 border-b">
 	<nav class="flex space-x-8" aria-label="Tabs">
 		{#each tabs as tab}
 			<button
 				type="button"
 				onclick={() => handleTabClick(tab.id)}
-				class="py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap"
+				class="border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap transition-colors"
 				class:border-primary={activeTab === tab.id}
 				class:text-foreground={activeTab === tab.id}
 				class:border-transparent={activeTab !== tab.id}

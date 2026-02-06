@@ -74,6 +74,7 @@ All foreign keys use CASCADE delete for data integrity.
 Located in `src/lib/server/hardcover.ts`:
 
 **Single-Tier Local Cache:**
+
 - Stores book metadata (books, authors, tags tables) directly in the database
 - Default TTL: 6 hours (configurable via `local_book_cache_ttl_hours` setting)
 - Cache flow:

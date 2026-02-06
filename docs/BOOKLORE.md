@@ -5,12 +5,14 @@
 Booklore is a self-hosted digital library management system that automatically organizes and manages your ebook collection. Bookrequestarr integrates with Booklore via its **BookDrop** folder feature, which allows automatic import of downloaded books into your library.
 
 **What You Get:**
+
 - ✅ Automatic library ingestion after downloads complete
 - ✅ No manual file management required
 - ✅ Seamless integration between request approval and library availability
 - ✅ Optional API health checks for monitoring
 
 **Links:**
+
 - **Booklore Repository:** https://github.com/booklore-app/booklore
 - **Booklore Documentation:** https://booklore-app.github.io/booklore/
 - **Latest Release:** https://github.com/booklore-app/booklore/releases
@@ -62,6 +64,7 @@ docker run -d \
 ```
 
 **Important Volume Mounts:**
+
 - `/data` - Database and configuration
 - `/library` - Your organized book collection
 - `/bookdrop` - Drop folder for automatic imports
@@ -69,28 +72,33 @@ docker run -d \
 ### Option 2: Manual Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/booklore-app/booklore.git
 cd booklore
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Build the application:
+
 ```bash
 npm run build
 ```
 
 4. Configure environment:
+
 ```bash
 cp .env.example .env
 # Edit .env with your settings
 ```
 
 5. Start Booklore:
+
 ```bash
 npm start
 ```
@@ -108,6 +116,7 @@ npm start
 ### Step 1: Identify BookDrop Folder
 
 In Booklore:
+
 1. Navigate to **Settings** → **Import**
 2. Find the **BookDrop Folder** path
 3. Example: `/var/lib/booklore/bookdrop` or `/library/bookdrop`
@@ -169,7 +178,7 @@ services:
     volumes:
       - ./bookrequestarr-data:/app/data
       - ./downloads:/app/downloads
-      - booklore-bookdrop:/bookdrop  # Shared volume with Booklore
+      - booklore-bookdrop:/bookdrop # Shared volume with Booklore
     networks:
       - library-network
 
@@ -181,12 +190,12 @@ services:
     volumes:
       - ./booklore-data:/data
       - ./booklore-library:/library
-      - booklore-bookdrop:/bookdrop  # Shared volume with Bookrequestarr
+      - booklore-bookdrop:/bookdrop # Shared volume with Bookrequestarr
     networks:
       - library-network
 
 volumes:
-  booklore-bookdrop:  # Named volume shared between containers
+  booklore-bookdrop: # Named volume shared between containers
 
 networks:
   library-network:
@@ -219,6 +228,7 @@ networks:
    - Click **Download** to trigger manual download
 
 2. Check Bookrequestarr logs:
+
 ```bash
 # Docker
 docker logs bookrequestarr -f | grep -i booklore
@@ -228,11 +238,13 @@ pm2 logs bookrequestarr | grep -i booklore
 ```
 
 Expected log output:
+
 ```
 Successfully copied file to Booklore BookDrop { fileName: 'book.epub', destPath: '/bookdrop/book.epub' }
 ```
 
 3. Verify in BookDrop folder:
+
 ```bash
 ls -la /path/to/booklore/bookdrop
 ```
@@ -249,11 +261,13 @@ Should see the downloaded book file.
 Use the **Test Connection** button in Admin Settings:
 
 **Success:**
+
 ```
 ✓ BookDrop OK
 ```
 
 **Failure Examples:**
+
 ```
 ✗ BookDrop path not configured
 ✗ BookDrop path is not a directory
@@ -267,10 +281,12 @@ Use the **Test Connection** button in Admin Settings:
 ### Issue #1: "BookDrop path not configured"
 
 **Symptoms:**
+
 - Test connection fails with this error
 - No files appear in BookDrop folder
 
 **Solutions:**
+
 - Verify `BOOKLORE_BOOKDROP_PATH` is set (environment variable or admin settings)
 - Check spelling and path accuracy
 - Ensure path includes `/bookdrop` at the end
@@ -278,10 +294,12 @@ Use the **Test Connection** button in Admin Settings:
 ### Issue #2: "BookDrop path is not a directory"
 
 **Symptoms:**
+
 - Path exists but test fails
 - Files not being copied
 
 **Solutions:**
+
 - Verify the path points to a directory, not a file
 - Check that Booklore has created the BookDrop folder
 - If using Docker, verify volume mounts are correct
@@ -289,12 +307,14 @@ Use the **Test Connection** button in Admin Settings:
 ### Issue #3: "BookDrop path exists but is not writable"
 
 **Symptoms:**
+
 - Test connection shows permission error
 - Logs show "Failed to copy file to Booklore BookDrop"
 
 **Solutions:**
 
 **For Host Installation:**
+
 ```bash
 # Check current permissions
 ls -ld /path/to/booklore/bookdrop
@@ -308,6 +328,7 @@ chmod 775 /path/to/booklore/bookdrop
 ```
 
 **For Docker:**
+
 ```bash
 # Check container user IDs
 docker exec bookrequestarr id
@@ -327,6 +348,7 @@ services:
 ### Issue #4: Files not appearing in Booklore Library
 
 **Symptoms:**
+
 - Files successfully copy to BookDrop
 - Books never appear in Booklore library
 
@@ -342,6 +364,7 @@ services:
    - Click **Scan Now**
 
 3. Check Booklore logs for import errors:
+
 ```bash
 docker logs booklore -f | grep -i import
 ```
@@ -357,6 +380,7 @@ docker logs booklore -f | grep -i import
 ### Issue #5: "Failed to copy file to Booklore BookDrop"
 
 **Symptoms:**
+
 - Download completes successfully
 - Log shows copy failure
 - File remains only in downloads directory
@@ -364,11 +388,13 @@ docker logs booklore -f | grep -i import
 **Solutions:**
 
 1. Verify disk space:
+
 ```bash
 df -h /path/to/booklore/bookdrop
 ```
 
 2. Check file system permissions:
+
 ```bash
 # Test write access manually
 touch /path/to/booklore/bookdrop/test.txt
@@ -376,6 +402,7 @@ rm /path/to/booklore/bookdrop/test.txt
 ```
 
 3. If Docker, verify volume mounts:
+
 ```bash
 docker inspect bookrequestarr | grep -A 10 Mounts
 docker inspect booklore | grep -A 10 Mounts
@@ -386,6 +413,7 @@ Ensure both containers mount the same underlying directory.
 ### Issue #6: API Health Check Fails
 
 **Symptoms:**
+
 - Test connection shows "API health check failed"
 - Integration still works (files copy successfully)
 
@@ -394,6 +422,7 @@ Ensure both containers mount the same underlying directory.
 **Solutions:**
 
 1. Verify Booklore is running:
+
 ```bash
 curl http://localhost:3001/api/v1/healthcheck
 ```
@@ -421,6 +450,7 @@ curl http://localhost:3001/api/v1/healthcheck
    - Booklore auto-imports from BookDrop
    - Imported files can be deleted from BookDrop
    - Set up a cron job to clean up old files:
+
 ```bash
 # Clean files older than 7 days from BookDrop
 find /path/to/booklore/bookdrop -type f -mtime +7 -delete
@@ -464,16 +494,16 @@ If you need custom processing before Booklore import, modify `src/lib/server/boo
 
 ```typescript
 export async function copyToBookdrop(filePath: string): Promise<boolean> {
-  // ... existing code ...
+	// ... existing code ...
 
-  // Custom logic: Rename files with metadata
-  const metadata = await extractMetadata(filePath);
-  const customFileName = `${metadata.author} - ${metadata.title}.${fileExt}`;
-  const destPath = path.join(config.bookdropPath, customFileName);
+	// Custom logic: Rename files with metadata
+	const metadata = await extractMetadata(filePath);
+	const customFileName = `${metadata.author} - ${metadata.title}.${fileExt}`;
+	const destPath = path.join(config.bookdropPath, customFileName);
 
-  await fs.copyFile(filePath, destPath);
+	await fs.copyFile(filePath, destPath);
 
-  // ... rest of code ...
+	// ... rest of code ...
 }
 ```
 
@@ -511,6 +541,7 @@ Potential future enhancements:
 ### Logs to Watch
 
 **Bookrequestarr:**
+
 ```bash
 # Success
 Successfully copied file to Booklore BookDrop
@@ -523,6 +554,7 @@ Booklore integration disabled, skipping BookDrop copy
 ```
 
 **Booklore:**
+
 ```bash
 # Import started
 Starting BookDrop import scan
@@ -537,6 +569,7 @@ Successfully imported: book.epub
 ### Health Checks
 
 **Automated Monitoring:**
+
 ```bash
 # Check if BookDrop is accessible
 curl -f http://localhost:3000/api/booklore/test || echo "Booklore integration down"
@@ -546,6 +579,7 @@ du -sh /path/to/booklore/bookdrop
 ```
 
 **Alerts:**
+
 - Set up alerts if BookDrop folder exceeds certain size (indicates import failures)
 - Monitor Bookrequestarr logs for repeated copy failures
 - Track library growth in Booklore to ensure imports are working
@@ -623,6 +657,7 @@ For Booklore integration issues:
 5. Open an issue on [Bookrequestarr GitHub](https://github.com/yourusername/bookrequestarr/issues)
 
 **When reporting issues, include:**
+
 - Bookrequestarr version
 - Booklore version
 - BookDrop folder path (sanitized)

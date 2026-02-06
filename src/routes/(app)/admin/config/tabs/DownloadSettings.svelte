@@ -155,8 +155,8 @@
 						/>
 						{#if envOverrides.downloadDirectory}
 							<p class="mt-1 text-xs text-blue-500">
-								✓ This value is set via environment variable (DOWNLOAD_DIRECTORY) and cannot be changed
-								here
+								✓ This value is set via environment variable (DOWNLOAD_DIRECTORY) and cannot be
+								changed here
 							</p>
 						{:else}
 							<p class="text-muted-foreground mt-1 text-xs">
@@ -184,8 +184,8 @@
 							</p>
 						{:else}
 							<p class="text-muted-foreground mt-1 text-xs">
-								Temporary directory for in-progress downloads. Files are moved to the download directory
-								when complete.
+								Temporary directory for in-progress downloads. Files are moved to the download
+								directory when complete.
 							</p>
 						{/if}
 					</div>
@@ -249,8 +249,8 @@
 				<div class="mb-4 rounded-md bg-blue-500/10 p-4 text-sm text-blue-500">
 					<p class="font-medium">Usenet Indexer Manager</p>
 					<p class="mt-1">
-						Prowlarr searches across multiple Usenet indexers to find book releases. When enabled, it
-						will be used as the primary download source, with Anna's Archive as fallback.
+						Prowlarr searches across multiple Usenet indexers to find book releases. When enabled,
+						it will be used as the primary download source, with Anna's Archive as fallback.
 					</p>
 				</div>
 
@@ -326,8 +326,8 @@
 							value={settings.minConfidenceScore || '50'}
 						/>
 						<p class="text-muted-foreground mt-1 text-xs">
-							Minimum match confidence (0-100) required to auto-download from Prowlarr. Higher values
-							are more strict. (default: 50)
+							Minimum match confidence (0-100) required to auto-download from Prowlarr. Higher
+							values are more strict. (default: 50)
 						</p>
 					</div>
 
@@ -406,7 +406,9 @@
 					</div>
 
 					<div>
-						<label for="sabnzbdApiKey" class="mb-2 block text-sm font-medium"> SABnzbd API Key </label>
+						<label for="sabnzbdApiKey" class="mb-2 block text-sm font-medium">
+							SABnzbd API Key
+						</label>
 						<Input
 							id="sabnzbdApiKey"
 							name="sabnzbdApiKey"
@@ -635,7 +637,9 @@
 							style="background-color: hsl(var(--input));"
 						>
 							<option value="prowlarr_first">Prowlarr First (fallback to Anna's Archive)</option>
-							<option value="annas_archive_first">Anna's Archive First (fallback to Prowlarr)</option>
+							<option value="annas_archive_first"
+								>Anna's Archive First (fallback to Prowlarr)</option
+							>
 							<option value="prowlarr_only">Prowlarr Only</option>
 							<option value="annas_archive_only">Anna's Archive Only</option>
 						</select>
@@ -652,7 +656,9 @@
 							checked={settings.downloadAutoSelect}
 							class="h-4 w-4 rounded border-gray-300"
 						/>
-						<label for="downloadAutoSelect" class="text-sm font-medium"> Auto-Select Best File </label>
+						<label for="downloadAutoSelect" class="text-sm font-medium">
+							Auto-Select Best File
+						</label>
 					</div>
 					<p class="text-muted-foreground text-xs">
 						Automatically choose the best file format, or prompt for manual selection
@@ -706,8 +712,8 @@
 										value={settings.calibreCleanupHours || '24'}
 									/>
 									<p class="text-muted-foreground mt-1 text-xs">
-										Files in the download directory will be automatically removed after this many hours,
-										assuming Calibre-Web has imported them
+										Files in the download directory will be automatically removed after this many
+										hours, assuming Calibre-Web has imported them
 									</p>
 								</div>
 							{/if}

@@ -39,13 +39,13 @@
 
 <div class="rounded-lg border {colors[severity]} p-4">
 	<div class="flex items-start gap-3">
-		<div class="text-2xl flex-shrink-0 mt-0.5">
+		<div class="mt-0.5 flex-shrink-0 text-2xl">
 			{errorIcon()}
 		</div>
 
-		<div class="flex-1 min-w-0">
+		<div class="min-w-0 flex-1">
 			<!-- Error title -->
-			<h4 class="font-semibold text-foreground mb-2">
+			<h4 class="text-foreground mb-2 font-semibold">
 				{#if severity === 'error'}
 					Error Details
 				{:else if severity === 'warning'}
@@ -56,17 +56,17 @@
 			</h4>
 
 			<!-- Error message -->
-			<p class="text-sm text-muted-foreground whitespace-pre-wrap break-words">
+			<p class="text-muted-foreground text-sm break-words whitespace-pre-wrap">
 				{error}
 			</p>
 
 			<!-- Attempted steps (if any) -->
 			{#if attemptedSteps.length > 0}
-				<div class="mt-3 pt-3 border-t border-border/50">
-					<p class="text-sm font-medium text-foreground mb-2">Attempted:</p>
+				<div class="border-border/50 mt-3 border-t pt-3">
+					<p class="text-foreground mb-2 text-sm font-medium">Attempted:</p>
 					<ul class="space-y-1">
 						{#each attemptedSteps as step}
-							<li class="text-sm text-muted-foreground flex items-start gap-2">
+							<li class="text-muted-foreground flex items-start gap-2 text-sm">
 								<span class="mt-1">•</span>
 								<span>{step}</span>
 							</li>
@@ -82,7 +82,7 @@
 						<button
 							type="button"
 							onclick={action.onClick}
-							class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {action.variant ===
+							class="rounded-lg px-4 py-2 text-sm font-medium transition-colors {action.variant ===
 							'primary'
 								? 'bg-primary text-primary-foreground hover:bg-primary/90'
 								: action.variant === 'destructive'

@@ -37,7 +37,7 @@
 </script>
 
 <div
-	class="relative group cursor-pointer"
+	class="group relative cursor-pointer"
 	onmouseenter={() => (isHovered = true)}
 	onmouseleave={() => (isHovered = false)}
 	onclick={handleClick}
@@ -50,18 +50,16 @@
 		}
 	}}
 >
-	<div class="bg-card border border-border rounded-lg overflow-hidden transition-all hover:shadow-lg hover:border-primary/50">
+	<div
+		class="bg-card border-border hover:border-primary/50 overflow-hidden rounded-lg border transition-all hover:shadow-lg"
+	>
 		<!-- Cover Image -->
-		<div class="relative aspect-[2/3] bg-muted">
+		<div class="bg-muted relative aspect-[2/3]">
 			{#if book.coverImageUrl}
-				<img
-					src={book.coverImageUrl}
-					alt={book.title}
-					class="w-full h-full object-cover"
-				/>
+				<img src={book.coverImageUrl} alt={book.title} class="h-full w-full object-cover" />
 			{:else}
-				<div class="w-full h-full flex items-center justify-center text-muted-foreground">
-					<svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<div class="text-muted-foreground flex h-full w-full items-center justify-center">
+					<svg class="h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -74,18 +72,22 @@
 
 			<!-- Requested badge -->
 			{#if requested}
-				<div class="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-semibold">
+				<div
+					class="bg-primary text-primary-foreground absolute top-2 right-2 rounded-md px-2 py-1 text-xs font-semibold"
+				>
 					Requested
 				</div>
 			{/if}
 
 			<!-- Quick request overlay (desktop only) -->
 			{#if showQuickRequest && !requested && isHovered}
-				<div class="absolute inset-0 bg-black/60 flex items-center justify-center transition-opacity">
+				<div
+					class="absolute inset-0 flex items-center justify-center bg-black/60 transition-opacity"
+				>
 					<button
 						type="button"
 						onclick={handleQuickRequest}
-						class="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-lg"
+						class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-3 font-medium shadow-lg transition-colors"
 					>
 						Quick Request
 					</button>
@@ -94,9 +96,13 @@
 
 			<!-- Rating badge -->
 			{#if book.averageRating}
-				<div class="absolute bottom-2 left-2 bg-black/75 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1">
-					<svg class="w-3 h-3 text-yellow-400 fill-current" viewBox="0 0 20 20">
-						<path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+				<div
+					class="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-black/75 px-2 py-1 text-xs font-semibold text-white"
+				>
+					<svg class="h-3 w-3 fill-current text-yellow-400" viewBox="0 0 20 20">
+						<path
+							d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"
+						/>
 					</svg>
 					{book.averageRating.toFixed(1)}
 				</div>
@@ -105,18 +111,18 @@
 
 		<!-- Book info -->
 		<div class="p-3">
-			<h3 class="font-semibold text-sm line-clamp-2 text-foreground mb-1">
+			<h3 class="text-foreground mb-1 line-clamp-2 text-sm font-semibold">
 				{book.title}
 			</h3>
 
 			{#if book.authors && book.authors.length > 0}
-				<p class="text-xs text-muted-foreground line-clamp-1 mb-1">
+				<p class="text-muted-foreground mb-1 line-clamp-1 text-xs">
 					{book.authors.join(', ')}
 				</p>
 			{/if}
 
 			{#if book.releaseYear}
-				<p class="text-xs text-muted-foreground">
+				<p class="text-muted-foreground text-xs">
 					{book.releaseYear}
 				</p>
 			{/if}

@@ -10,10 +10,7 @@ const HARDCOVER_API_URL = env.HARDCOVER_API_URL || 'https://api.hardcover.app/v1
 /**
  * Execute a GraphQL query against Hardcover API
  */
-async function graphqlQuery<T>(
-	query: string,
-	variables?: Record<string, unknown>
-): Promise<T> {
+async function graphqlQuery<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
 	const apiKey = env.HARDCOVER_API_KEY;
 
 	if (!apiKey) {

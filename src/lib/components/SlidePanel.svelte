@@ -71,9 +71,7 @@
 	});
 
 	// Responsive position
-	let actualPosition = $derived(
-		browser && window.innerWidth < 768 ? 'bottom' : position
-	);
+	let actualPosition = $derived(browser && window.innerWidth < 768 ? 'bottom' : position);
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -81,7 +79,7 @@
 {#if open}
 	<!-- Backdrop -->
 	<div
-		class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300"
+		class="fixed inset-0 z-40 bg-black/50 transition-opacity duration-300"
 		class:opacity-100={open}
 		class:opacity-0={!open}
 		onclick={handleBackdropClick}
@@ -94,7 +92,7 @@
 		role="dialog"
 		aria-modal="true"
 		tabindex="-1"
-		class="fixed bg-background border-l border-border z-50 overflow-y-auto transition-transform duration-300 ease-out"
+		class="bg-background border-border fixed z-50 overflow-y-auto border-l transition-transform duration-300 ease-out"
 		class:slide-right={actualPosition === 'right'}
 		class:slide-bottom={actualPosition === 'bottom'}
 		style:width={actualPosition === 'right' ? width : '100%'}
@@ -103,15 +101,10 @@
 		<!-- Close button -->
 		<button
 			onclick={close}
-			class="absolute top-4 right-4 p-2 hover:bg-muted rounded-lg transition-colors z-10"
+			class="hover:bg-muted absolute top-4 right-4 z-10 rounded-lg p-2 transition-colors"
 			aria-label="Close panel"
 		>
-			<svg
-				class="w-5 h-5"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-			>
+			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
 					stroke-linecap="round"
 					stroke-linejoin="round"

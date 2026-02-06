@@ -50,7 +50,7 @@
 		<button
 			type="button"
 			onclick={() => handleTabClick(tab.id)}
-			class="px-4 py-2.5 text-left text-sm font-medium rounded-lg transition-colors {activeTab ===
+			class="rounded-lg px-4 py-2.5 text-left text-sm font-medium transition-colors {activeTab ===
 			tab.id
 				? 'bg-muted text-foreground'
 				: 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}"

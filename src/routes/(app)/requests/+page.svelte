@@ -91,8 +91,7 @@
 			const search = searchValue.toLowerCase();
 			result = result.filter(
 				(r) =>
-					r.bookTitle.toLowerCase().includes(search) ||
-					r.bookAuthor?.toLowerCase().includes(search)
+					r.bookTitle.toLowerCase().includes(search) || r.bookAuthor?.toLowerCase().includes(search)
 			);
 		}
 

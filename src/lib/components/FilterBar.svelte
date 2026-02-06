@@ -90,14 +90,14 @@
 	});
 </script>
 
-<div class="flex flex-col gap-4 mb-6">
+<div class="mb-6 flex flex-col gap-4">
 	<!-- Filter buttons -->
 	<div class="flex flex-wrap gap-2">
 		{#each filters as filter}
 			<button
 				type="button"
 				onclick={() => handleFilterClick(filter.id)}
-				class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {activeFilter ===
+				class="rounded-lg px-4 py-2 text-sm font-medium transition-colors {activeFilter ===
 				filter.id
 					? 'bg-primary text-primary-foreground'
 					: 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'}"
@@ -111,7 +111,7 @@
 	</div>
 
 	<!-- Search and sort -->
-	<div class="flex flex-col sm:flex-row gap-4">
+	<div class="flex flex-col gap-4 sm:flex-row">
 		<!-- Search input -->
 		<div class="flex-1">
 			<input
@@ -119,7 +119,7 @@
 				placeholder="Search by title or author..."
 				value={searchValue}
 				oninput={handleSearchInput}
-				class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+				class="bg-background border-border focus:ring-primary w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none"
 			/>
 		</div>
 
@@ -128,7 +128,7 @@
 			<select
 				value={sortBy}
 				onchange={handleSortChange}
-				class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+				class="bg-background border-border focus:ring-primary w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none"
 			>
 				{#each sortOptions as option}
 					<option value={option.value}>{option.label}</option>

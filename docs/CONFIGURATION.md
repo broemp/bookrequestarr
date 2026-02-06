@@ -356,13 +356,13 @@ Bookrequestarr can integrate with [Booklore](https://github.com/booklore-app/boo
 
 **📖 See [BOOKLORE.md](BOOKLORE.md) for comprehensive setup guide and troubleshooting.**
 
-| Variable                    | Required | Default | Description                                                                                                    |
-| --------------------------- | -------- | ------- | -------------------------------------------------------------------------------------------------------------- |
-| `BOOKLORE_ENABLED`          | No       | `false` | Enable Booklore integration (true/false)                                                                       |
-| `BOOKLORE_BOOKDROP_PATH`    | No       | -       | Full path to Booklore's BookDrop folder (e.g., `/var/lib/booklore/bookdrop`)                                  |
-| `BOOKLORE_BASE_URL`         | No       | -       | Booklore API base URL for health checks (e.g., `http://localhost:3001`) - optional                            |
-| `BOOKLORE_API_KEY`          | No       | -       | Booklore API key for authentication (optional, only if Booklore requires it)                                   |
-| `BOOKLORE_VERIFY_IMPORTS`   | No       | `false` | Verify imports via Booklore API after copying to BookDrop (requires base URL and API key)                     |
+| Variable                  | Required | Default | Description                                                                               |
+| ------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------- |
+| `BOOKLORE_ENABLED`        | No       | `false` | Enable Booklore integration (true/false)                                                  |
+| `BOOKLORE_BOOKDROP_PATH`  | No       | -       | Full path to Booklore's BookDrop folder (e.g., `/var/lib/booklore/bookdrop`)              |
+| `BOOKLORE_BASE_URL`       | No       | -       | Booklore API base URL for health checks (e.g., `http://localhost:3001`) - optional        |
+| `BOOKLORE_API_KEY`        | No       | -       | Booklore API key for authentication (optional, only if Booklore requires it)              |
+| `BOOKLORE_VERIFY_IMPORTS` | No       | `false` | Verify imports via Booklore API after copying to BookDrop (requires base URL and API key) |
 
 **Setup:**
 

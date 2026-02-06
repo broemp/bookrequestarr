@@ -148,6 +148,7 @@ For a complete development setup with all services (Authelia, Prowlarr, SABnzbd)
 ```
 
 This sets up everything automatically:
+
 - Creates all necessary directories and config files
 - Generates secure secrets
 - Configures test users (admin/admin123, user/user123)

@@ -95,9 +95,7 @@
 		</div>
 
 		<div>
-			<label for="telegramChatId" class="mb-2 block text-sm font-medium">
-				Telegram Chat ID
-			</label>
+			<label for="telegramChatId" class="mb-2 block text-sm font-medium"> Telegram Chat ID </label>
 			<Input
 				id="telegramChatId"
 				name="telegramChatId"

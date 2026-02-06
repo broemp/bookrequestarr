@@ -13,7 +13,7 @@
 	}
 </script>
 
-<div class="border border-border rounded-lg overflow-hidden transition-all">
+<div class="border-border overflow-hidden rounded-lg border transition-all">
 	<!-- Main content (always visible) -->
 	<div class="p-4">
 		{@render children?.()}
@@ -22,11 +22,11 @@
 	<!-- Expanded content (collapsible) -->
 	{#if expandedContent}
 		<div
-			class="border-t border-border transition-all duration-300 ease-in-out overflow-hidden"
+			class="border-border overflow-hidden border-t transition-all duration-300 ease-in-out"
 			style:max-height={expanded ? '1000px' : '0'}
 			style:opacity={expanded ? '1' : '0'}
 		>
-			<div class="p-4 bg-muted/30">
+			<div class="bg-muted/30 p-4">
 				{@render expandedContent()}
 			</div>
 		</div>

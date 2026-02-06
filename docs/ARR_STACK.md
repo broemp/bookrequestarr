@@ -2,9 +2,10 @@
 
 ## Overview
 
-Bookrequestarr integrates with the *arr ecosystem (Prowlarr + SABnzbd) to enable automated Usenet-based book downloads. This provides an alternative to direct downloads from Anna's Archive, especially useful for books not available for fast download or when you prefer Usenet sources.
+Bookrequestarr integrates with the \*arr ecosystem (Prowlarr + SABnzbd) to enable automated Usenet-based book downloads. This provides an alternative to direct downloads from Anna's Archive, especially useful for books not available for fast download or when you prefer Usenet sources.
 
 **Architecture:**
+
 - **Prowlarr**: Indexer aggregator that searches across configured Usenet indexers
 - **SABnzbd**: Usenet download client that manages the download queue
 - **Result Matcher**: Intelligent scoring system to ensure download quality
@@ -70,6 +71,7 @@ Download orchestrator triggered (if auto-download enabled)
 ### Status Polling
 
 Bookrequestarr polls SABnzbd every **30 seconds** (configured in `hooks.server.ts`) to update download statuses:
+
 - `queued` → `downloading` → `completed`
 - Failed downloads trigger fallback or mark request as `download_problem`
 
@@ -198,10 +200,11 @@ curl -X POST http://localhost:3000/api/sabnzbd/test
 ```
 
 Expected response:
+
 ```json
 {
-  "success": true,
-  "version": "1.x.x"
+	"success": true,
+	"version": "1.x.x"
 }
 ```
 
@@ -228,39 +231,42 @@ When Prowlarr returns search results, Bookrequestarr scores each result based on
 
 ### Scoring Breakdown
 
-| Criteria | Weight | Matching Logic |
-|----------|--------|----------------|
-| **ISBN** | 50% | Exact match (ISBN-10 or ISBN-13) |
-| **Title** | 25% | Levenshtein distance similarity (0-100%) |
-| **Author** | 15% | Levenshtein distance similarity (0-100%) |
-| **Year** | 5% | Exact match or within ±2 years |
-| **Language** | 5% | Exact match (if specified in request) |
+| Criteria     | Weight | Matching Logic                           |
+| ------------ | ------ | ---------------------------------------- |
+| **ISBN**     | 50%    | Exact match (ISBN-10 or ISBN-13)         |
+| **Title**    | 25%    | Levenshtein distance similarity (0-100%) |
+| **Author**   | 15%    | Levenshtein distance similarity (0-100%) |
+| **Year**     | 5%     | Exact match or within ±2 years           |
+| **Language** | 5%     | Exact match (if specified in request)    |
 
 **Total Score:** 0-100
 
 ### Confidence Levels
 
-| Level | Score Range | Behavior |
-|-------|-------------|----------|
-| **High** | 80-100 | Auto-download enabled, no warnings |
-| **Medium** | 50-79 | Download proceeds with warning, logged for review |
-| **Low** | 0-49 | Result skipped, fallback attempted |
+| Level      | Score Range | Behavior                                          |
+| ---------- | ----------- | ------------------------------------------------- |
+| **High**   | 80-100      | Auto-download enabled, no warnings                |
+| **Medium** | 50-79       | Download proceeds with warning, logged for review |
+| **Low**    | 0-49        | Result skipped, fallback attempted                |
 
 ### Example Scoring
 
 **Request:**
+
 - Title: "The Hobbit"
 - Author: "J.R.R. Tolkien"
 - ISBN-13: 9780547928227
 - Year: 2012
 
 **Search Result:**
+
 - Title: "The Hobbit: 75th Anniversary Edition"
 - Author: "J. R. R. Tolkien"
 - ISBN-13: 9780547928227
 - Year: 2012
 
 **Score Breakdown:**
+
 - ISBN: 50/50 (exact match)
 - Title: 23/25 (95% similarity, subtitle is acceptable)
 - Author: 14/15 (95% similarity, initials vs full middle names)
@@ -287,22 +293,23 @@ When Prowlarr returns search results, Bookrequestarr scores each result based on
 #### Automatic Trigger
 
 When auto-download is enabled:
+
 - Request status changes from `pending` → `approved`
 - Download orchestrator automatically initiates download based on configured mode
 
 ### Download States
 
-| State | Description | Next Steps |
-|-------|-------------|------------|
-| `pending` | Download record created, not started | Prowlarr search triggered |
-| `searching` | Searching indexers via Prowlarr | Awaiting results |
-| `found` | NZB found, sending to SABnzbd | SABnzbd queuing |
-| `queued` | In SABnzbd queue | Awaiting download start |
-| `downloading` | Actively downloading from Usenet | Monitor progress in SABnzbd |
-| `post_processing` | SABnzbd post-processing (rare for books) | Finalizing |
-| `completed` | Downloaded and moved to final location | Request status → `completed` |
-| `failed` | Download failed (bad NZB, incomplete, etc.) | Retry or fallback triggered |
-| `cancelled` | User or system cancelled | No further action |
+| State             | Description                                 | Next Steps                   |
+| ----------------- | ------------------------------------------- | ---------------------------- |
+| `pending`         | Download record created, not started        | Prowlarr search triggered    |
+| `searching`       | Searching indexers via Prowlarr             | Awaiting results             |
+| `found`           | NZB found, sending to SABnzbd               | SABnzbd queuing              |
+| `queued`          | In SABnzbd queue                            | Awaiting download start      |
+| `downloading`     | Actively downloading from Usenet            | Monitor progress in SABnzbd  |
+| `post_processing` | SABnzbd post-processing (rare for books)    | Finalizing                   |
+| `completed`       | Downloaded and moved to final location      | Request status → `completed` |
+| `failed`          | Download failed (bad NZB, incomplete, etc.) | Retry or fallback triggered  |
+| `cancelled`       | User or system cancelled                    | No further action            |
 
 ### File Handling
 
@@ -328,10 +335,12 @@ When auto-download is enabled:
 #### 1. "Prowlarr connection failed"
 
 **Symptoms:**
+
 - Test connection button shows error
 - Downloads never start
 
 **Solutions:**
+
 - Verify Prowlarr URL is correct (include `http://` or `https://`)
 - Check Prowlarr API key is valid (Settings → General → Security)
 - Ensure Prowlarr is running and accessible from Bookrequestarr server
@@ -339,6 +348,7 @@ When auto-download is enabled:
 - If using Docker: verify containers are on same network or can communicate
 
 **Test manually:**
+
 ```bash
 curl -H "X-Api-Key: YOUR_API_KEY" http://prowlarr:9696/api/v1/indexer
 ```
@@ -348,10 +358,12 @@ Expected: JSON array of indexers
 #### 2. "SABnzbd connection failed"
 
 **Symptoms:**
+
 - Test connection button shows error
 - Downloads stuck in `queued` state
 
 **Solutions:**
+
 - Verify SABnzbd URL is correct
 - Check SABnzbd API key is valid (Config → General → Security)
 - Ensure SABnzbd is running
@@ -359,6 +371,7 @@ Expected: JSON array of indexers
 - Check SABnzbd has at least one Usenet provider configured
 
 **Test manually:**
+
 ```bash
 curl "http://sabnzbd:8080/api?mode=version&apikey=YOUR_API_KEY&output=json"
 ```
@@ -368,10 +381,12 @@ Expected: `{"version": "x.x.x"}`
 #### 3. "No results found"
 
 **Symptoms:**
+
 - Prowlarr search returns 0 results
 - All requests fail with "no results"
 
 **Solutions:**
+
 - Verify Prowlarr has indexers configured and enabled
 - Check indexers are healthy (Prowlarr → Indexers → Test)
 - Search manually in Prowlarr for the same book to verify coverage
@@ -385,10 +400,12 @@ Expected: `{"version": "x.x.x"}`
 #### 4. "Low confidence score, skipping result"
 
 **Symptoms:**
+
 - Download logs show results found but skipped
 - Request ends with `download_problem` status
 
 **Solutions:**
+
 - Review confidence score breakdown in logs
 - Check book metadata accuracy:
   - ISBN may be incorrect (verify against Hardcover or Google Books)
@@ -400,10 +417,12 @@ Expected: `{"version": "x.x.x"}`
 #### 5. "Download stuck in 'downloading' state"
 
 **Symptoms:**
+
 - SABnzbd shows download progressing but Bookrequestarr doesn't update
 - Download completes in SABnzbd but status doesn't change
 
 **Solutions:**
+
 - Check SABnzbd category matches configured category
 - Verify download directory permissions (Bookrequestarr must have write access)
 - Check SABnzbd post-processing settings (should be minimal/none for books)
@@ -416,16 +435,19 @@ Restart Bookrequestarr to trigger immediate status poll.
 #### 6. "File not found after download"
 
 **Symptoms:**
+
 - SABnzbd shows "completed"
 - Bookrequestarr can't find file to move
 
 **Solutions:**
+
 - Check SABnzbd download directory configuration
 - Verify `DOWNLOAD_TEMP_DIRECTORY` matches SABnzbd's category folder
 - Ensure Bookrequestarr has read permissions on SABnzbd download directory
 - If using Docker: verify volume mounts are shared between containers
 
 **Example Docker volume sharing:**
+
 ```yaml
 services:
   bookrequestarr:
@@ -451,6 +473,7 @@ Prowlarr searches use the following query format:
 Example: `J.R.R. Tolkien The Hobbit`
 
 **Customization (Future):**
+
 - Configurable query templates
 - Support for advanced Prowlarr search parameters (category, year range, etc.)
 
@@ -469,6 +492,7 @@ When multiple sources are configured, download orchestrator uses this priority:
    - Dependent on indexer coverage
 
 **Fallback Logic:**
+
 - If primary source fails, next source is tried automatically
 - Maximum 2 retry attempts per source
 - After all sources exhausted, request marked as `download_problem`
@@ -479,19 +503,21 @@ All download operations are logged with structured logging:
 
 ```typescript
 logger.info('Prowlarr search completed', {
-  requestId: 'abc123',
-  resultsFound: 5,
-  bestScore: 95
+	requestId: 'abc123',
+	resultsFound: 5,
+	bestScore: 95
 });
 ```
 
 **Log Levels:**
+
 - `debug`: Detailed API requests/responses, score breakdowns
 - `info`: Download state changes, search results
 - `warn`: Low confidence scores, retry attempts
 - `error`: API failures, download errors
 
 **Viewing Logs:**
+
 ```bash
 # Docker
 docker logs bookrequestarr -f
@@ -510,11 +536,13 @@ npm run dev  # logs to console
 SABnzbd status polling runs every 30 seconds by default.
 
 **Adjust in `src/hooks.server.ts`:**
+
 ```typescript
 const POLLING_INTERVAL = 30000; // milliseconds
 ```
 
 **Recommendations:**
+
 - Faster polling (10-20s): Real-time status updates, higher server load
 - Slower polling (60s+): Lower server load, delayed status updates
 
@@ -523,6 +551,7 @@ const POLLING_INTERVAL = 30000; // milliseconds
 Currently, Bookrequestarr processes downloads sequentially per request.
 
 **Future Enhancement:**
+
 - Configure max concurrent downloads
 - Queue management for high-volume setups
 
@@ -531,6 +560,7 @@ Currently, Bookrequestarr processes downloads sequentially per request.
 Prowlarr search timeout: **30 seconds** (hard-coded in Prowlarr)
 
 If indexers are slow, consider:
+
 - Disabling slow/unreliable indexers
 - Using indexer priority settings in Prowlarr
 - Increasing Prowlarr's internal timeout (if supported)
@@ -575,21 +605,23 @@ If indexers are slow, consider:
 **Function:** `src/lib/server/prowlarr.ts` → `searchBook()`
 
 **Parameters:**
+
 - `title`: Book title
 - `author`: Book author
 - `isbn`: ISBN-10 or ISBN-13 (optional but recommended)
 
 **Returns:**
+
 ```typescript
 {
-  results: Array<{
-    title: string;
-    author: string;
-    indexer: string;
-    guid: string;
-    size: number;
-    publishDate: string;
-  }>;
+	results: Array<{
+		title: string;
+		author: string;
+		indexer: string;
+		guid: string;
+		size: number;
+		publishDate: string;
+	}>;
 }
 ```
 
@@ -600,11 +632,13 @@ If indexers are slow, consider:
 **Function:** `src/lib/server/sabnzbd.ts` → `addNzbDownload()`
 
 **Parameters:**
+
 - `nzbUrl`: URL to NZB file (from Prowlarr result)
 - `category`: SABnzbd category (default: `books`)
 - `priority`: Download priority (default: `Normal`)
 
 **Returns:**
+
 ```typescript
 {
   nzo_ids: string[];  // SABnzbd download IDs
@@ -618,16 +652,18 @@ If indexers are slow, consider:
 **Function:** `src/lib/server/sabnzbd.ts` → `getDownloadStatus()`
 
 **Parameters:**
+
 - `nzbId`: SABnzbd download ID
 
 **Returns:**
+
 ```typescript
 {
-  status: 'queued' | 'downloading' | 'paused' | 'completed' | 'failed';
-  progress: number;  // 0-100
-  filename: string;
-  size: number;
-  timeLeft: number;  // seconds
+	status: 'queued' | 'downloading' | 'paused' | 'completed' | 'failed';
+	progress: number; // 0-100
+	filename: string;
+	size: number;
+	timeLeft: number; // seconds
 }
 ```
 
@@ -658,6 +694,7 @@ For issues with arr stack integration:
 4. Open an issue on [GitHub](https://github.com/yourusername/bookrequestarr/issues)
 
 **When reporting issues, include:**
+
 - Bookrequestarr version
 - Prowlarr version
 - SABnzbd version

@@ -130,7 +130,9 @@
 			// Show appropriate toast message
 			if (successCount === formats.length) {
 				const msg =
-					formats.length > 1 ? 'Both formats requested successfully!' : 'Book requested successfully!';
+					formats.length > 1
+						? 'Both formats requested successfully!'
+						: 'Book requested successfully!';
 				toast.show(msg, 'success');
 				handleClose();
 				onRequestSubmitted?.();
@@ -171,7 +173,9 @@
 	{#if isLoading}
 		<div class="flex h-full items-center justify-center">
 			<div class="text-center">
-				<div class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+				<div
+					class="border-primary mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-t-transparent"
+				></div>
 				<p class="text-muted-foreground">Loading book details...</p>
 			</div>
 		</div>
@@ -218,7 +222,8 @@
 										<button
 											type="button"
 											class="text-sm font-medium text-purple-400 transition-colors hover:text-purple-300"
-											onclick={() => book && onViewSeries?.(series.series.id, series.series.name, book)}
+											onclick={() =>
+												book && onViewSeries?.(series.series.id, series.series.name, book)}
 										>
 											{series.series.name}
 											{#if series.position}
@@ -238,9 +243,7 @@
 										<span class="font-medium">Rating:</span>
 										<span>⭐ {Number(book.rating).toFixed(1)}</span>
 										{#if book.ratings_count}
-											<span class="text-xs"
-												>({book.ratings_count.toLocaleString()} ratings)</span
-											>
+											<span class="text-xs">({book.ratings_count.toLocaleString()} ratings)</span>
 										{/if}
 									</div>
 								{/if}
@@ -388,13 +391,13 @@
 							<button
 								type="button"
 								onclick={handleClose}
-								class="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+								class="border-border hover:bg-muted flex-1 rounded-md border px-4 py-2 text-sm font-medium transition-colors"
 							>
 								Cancel
 							</button>
 							<button
 								type="submit"
-								class="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+								class="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors"
 							>
 								Submit Request
 							</button>
