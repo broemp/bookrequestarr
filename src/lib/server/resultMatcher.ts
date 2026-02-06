@@ -156,16 +156,15 @@ export function calculateConfidence(
 		if (normalizeLanguage(candidate.language) === normalizeLanguage(request.preferredLanguage)) {
 			breakdown.language = WEIGHTS.LANGUAGE;
 		} else {
-			warnings.push(
-				`Language mismatch: ${candidate.language} vs ${request.preferredLanguage}`
-			);
+			warnings.push(`Language mismatch: ${candidate.language} vs ${request.preferredLanguage}`);
 		}
 	} else if (!candidate.language && request.preferredLanguage) {
 		// Unknown language - give partial credit
 		breakdown.language = Math.round(WEIGHTS.LANGUAGE * 0.5);
 	}
 
-	const score = breakdown.isbn + breakdown.title + breakdown.author + breakdown.year + breakdown.language;
+	const score =
+		breakdown.isbn + breakdown.title + breakdown.author + breakdown.year + breakdown.language;
 
 	const level =
 		score >= THRESHOLDS.HIGH
@@ -639,7 +638,11 @@ export function selectBestMatch(
 /**
  * Create BookMatchRequest from a Book entity
  */
-export function bookToMatchRequest(book: Book, authorName: string, preferredLanguage?: string | null): BookMatchRequest {
+export function bookToMatchRequest(
+	book: Book,
+	authorName: string,
+	preferredLanguage?: string | null
+): BookMatchRequest {
 	return {
 		title: book.title,
 		author: authorName,

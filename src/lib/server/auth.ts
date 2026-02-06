@@ -106,7 +106,9 @@ export async function validateSession(token: string): Promise<UserSession | null
 			username: users.username,
 			displayName: users.displayName,
 			role: users.role,
-			preferredLanguage: users.preferredLanguage
+			preferredLanguage: users.preferredLanguage,
+			lastUsedLanguage: users.lastUsedLanguage,
+			lastUsedFormat: users.lastUsedFormat
 		})
 		.from(sessions)
 		.innerJoin(users, eq(sessions.userId, users.id))
@@ -123,7 +125,9 @@ export async function validateSession(token: string): Promise<UserSession | null
 		username: session.username,
 		displayName: session.displayName,
 		role: session.role as 'user' | 'admin',
-		preferredLanguage: session.preferredLanguage || undefined
+		preferredLanguage: session.preferredLanguage || undefined,
+		lastUsedLanguage: session.lastUsedLanguage,
+		lastUsedFormat: session.lastUsedFormat
 	};
 }
 

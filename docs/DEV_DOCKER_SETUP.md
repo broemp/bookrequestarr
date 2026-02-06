@@ -16,13 +16,16 @@ All services run in Docker containers with persistent data stored in the `dev-da
 
 ## Quick Start
 
+**📦 The `docker-compose.dev.yml` file is included in the repository and ready to use!**
+
 ### Prerequisites
 
 - Docker and Docker Compose installed
 - At least 4GB of free disk space
 - Ports 3000, 8080, 9091, and 9696 available
+- Hardcover API key (get from https://hardcover.app/settings/api)
 
-### Automated Setup
+### One-Command Setup ✨
 
 Run the setup script to create everything automatically:
 
@@ -31,22 +34,29 @@ Run the setup script to create everything automatically:
 ```
 
 This script will:
+
 1. Create the `dev-data/` directory structure
 2. Generate secure secrets for Authelia and JWT tokens
-3. Configure Authelia with test users
+3. Configure Authelia with test users (admin/admin123, user/user123)
 4. Create a `.env` file from the template
-5. Start all Docker containers
+5. **Prompt for your Hardcover API key** (interactive)
+6. Start all Docker containers with `docker-compose.dev.yml`
+7. Display access URLs and next steps
+
+**That's it!** Your complete dev environment is ready in under 2 minutes.
 
 ### Manual Setup
 
 If you prefer to set up manually:
 
 1. **Create directories:**
+
    ```bash
    mkdir -p dev-data/{app,authelia,redis,prowlarr,sabnzbd,downloads}
    ```
 
 2. **Generate secrets:**
+
    ```bash
    # Generate secrets (save these for later)
    openssl rand -base64 48  # JWT_SECRET
@@ -54,12 +64,14 @@ If you prefer to set up manually:
    ```
 
 3. **Copy and configure .env:**
+
    ```bash
    cp env.dev.template .env
    # Edit .env and replace placeholders with generated secrets
    ```
 
 4. **Configure Authelia:**
+
    ```bash
    cp dev-config/authelia/configuration.yml dev-data/authelia/configuration.yml
    # Edit dev-data/authelia/configuration.yml and replace placeholders
@@ -93,10 +105,10 @@ After running the setup script, edit `.env` to configure:
 
 The development environment includes two pre-configured test users:
 
-| Username | Password  | Role  | Groups                                    |
-|----------|-----------|-------|-------------------------------------------|
-| `admin`  | `admin123`| Admin | `bookrequestarr`, `bookrequestarr_admin` |
-| `user`   | `user123` | User  | `bookrequestarr`                          |
+| Username | Password   | Role  | Groups                                   |
+| -------- | ---------- | ----- | ---------------------------------------- |
+| `admin`  | `admin123` | Admin | `bookrequestarr`, `bookrequestarr_admin` |
+| `user`   | `user123`  | User  | `bookrequestarr`                         |
 
 **Note:** These credentials are only for development and should NEVER be used in production.
 
@@ -120,6 +132,7 @@ The main application. No additional configuration needed after setting up the `.
 **URL:** http://localhost:9091
 
 OIDC authentication provider. Pre-configured with:
+
 - Test users (admin/user)
 - OIDC client for Bookrequestarr
 - Redis session storage
@@ -134,19 +147,21 @@ Edit `dev-data/authelia/users_database.yml`:
 ```yaml
 users:
   newuser:
-    displayname: "New User"
-    password: "$argon2id$v=19$m=65536,t=3,p=4$..."  # See below
+    displayname: 'New User'
+    password: '$argon2id$v=19$m=65536,t=3,p=4$...' # See below
     email: newuser@localhost
     groups:
       - bookrequestarr
 ```
 
 Generate password hash:
+
 ```bash
 docker compose -f docker-compose.dev.yml exec authelia authelia crypto hash generate argon2 --password 'yourpassword'
 ```
 
 Restart Authelia:
+
 ```bash
 docker compose -f docker-compose.dev.yml restart authelia
 ```
@@ -177,6 +192,7 @@ Indexer aggregator for searching Usenet and torrent sites.
 4. Test and save
 
 **Recommended Categories:**
+
 - Books (7000)
 - Books/Ebook (7020)
 - Books/Technical (7030)
@@ -208,6 +224,7 @@ Usenet download client.
 #### Usenet Server
 
 You'll need access to a Usenet server. Options include:
+
 - **Free trials:** Eweka, UsenetServer (limited time)
 - **Paid:** Newshosting, Easynews, Frugal Usenet
 - **Test mode:** Skip Usenet setup and use Anna's Archive only
@@ -278,6 +295,7 @@ dev-data/
 ### Backup
 
 To backup your development data:
+
 ```bash
 tar -czf dev-data-backup.tar.gz dev-data/
 ```
@@ -285,6 +303,7 @@ tar -czf dev-data-backup.tar.gz dev-data/
 ### Reset
 
 To completely reset the environment:
+
 ```bash
 docker compose -f docker-compose.dev.yml down -v
 rm -rf dev-data/
@@ -357,11 +376,13 @@ sudo lsof -i :3000  # or :8080, :9091, :9696
 ### Authelia Login Not Working
 
 1. Check Authelia logs:
+
    ```bash
    docker compose -f docker-compose.dev.yml logs authelia
    ```
 
 2. Verify users database exists:
+
    ```bash
    cat dev-data/authelia/users_database.yml
    ```
@@ -468,6 +489,7 @@ This setup is **FOR DEVELOPMENT ONLY**. Do not use in production:
 ### Production Deployment
 
 For production, see:
+
 - [DEPLOYMENT.md](DEPLOYMENT.md) - Production Docker setup
 - [CONFIGURATION.md](CONFIGURATION.md) - Production OIDC providers
 

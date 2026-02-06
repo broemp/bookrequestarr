@@ -40,16 +40,13 @@ setTimeout(async () => {
 }, 60 * 1000);
 
 // Run SABnzbd status polling every 30 seconds
-setInterval(
-	async () => {
-		try {
-			await updateSabnzbdDownloadStatuses();
-		} catch (error) {
-			logger.error('SABnzbd status polling failed', error instanceof Error ? error : undefined);
-		}
-	},
-	30 * 1000
-); // 30 seconds
+setInterval(async () => {
+	try {
+		await updateSabnzbdDownloadStatuses();
+	} catch (error) {
+		logger.error('SABnzbd status polling failed', error instanceof Error ? error : undefined);
+	}
+}, 30 * 1000); // 30 seconds
 
 // Run SABnzbd status polling on startup (after 10 seconds delay to allow server to fully initialize)
 setTimeout(async () => {

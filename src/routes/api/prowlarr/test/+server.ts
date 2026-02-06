@@ -26,7 +26,10 @@ export const POST: RequestHandler = async ({ locals }) => {
 			logger.info('Prowlarr connection test successful', { userId: locals.user.id });
 			return json({ success: true });
 		} else {
-			logger.warn('Prowlarr connection test failed', { userId: locals.user.id, error: result.error });
+			logger.warn('Prowlarr connection test failed', {
+				userId: locals.user.id,
+				error: result.error
+			});
 			return json({ success: false, error: result.error });
 		}
 	} catch (error) {

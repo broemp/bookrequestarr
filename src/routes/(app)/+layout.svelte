@@ -52,7 +52,7 @@
 		<div class="flex h-full flex-col">
 			<!-- Logo -->
 			<div class="border-border flex items-center justify-between border-b px-6 py-4">
-				<h1 class="text-xl font-bold">📚 Bookrequestarr</h1>
+				<h1 class="text-xl font-bold">Bookrequestarr</h1>
 				<button
 					class="lg:hidden"
 					onclick={() => {
@@ -64,19 +64,121 @@
 			</div>
 
 			<!-- Navigation -->
-			<nav class="flex-1 space-y-1 p-4">
-				{#each navigation as item}
-					<a
-						href={item.href}
-						class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
-							.url.pathname === item.href
-							? 'bg-accent text-accent-foreground'
-							: 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}"
-					>
-						<item.icon class="h-5 w-5" />
-						{item.name}
-					</a>
-				{/each}
+			<nav class="flex-1 overflow-y-auto p-4">
+				<!-- User Section -->
+				<div class="mb-6">
+					<div class="px-3 mb-2">
+						<p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+							Discover
+						</p>
+					</div>
+					<div class="space-y-1">
+						<a
+							href="/dashboard"
+							class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors relative {$page
+								.url.pathname === '/dashboard'
+								? 'bg-accent text-accent-foreground border-l-2 border-primary'
+								: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
+						>
+							<Home class="h-5 w-5" />
+							Dashboard
+						</a>
+						<a
+							href="/browse"
+							class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors relative {$page
+								.url.pathname === '/browse'
+								? 'bg-accent text-accent-foreground border-l-2 border-primary'
+								: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
+						>
+							<Search class="h-5 w-5" />
+							Browse Books
+						</a>
+						<a
+							href="/requests"
+							class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors relative {$page
+								.url.pathname === '/requests'
+								? 'bg-accent text-accent-foreground border-l-2 border-primary'
+								: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
+						>
+							<FileText class="h-5 w-5" />
+							My Requests
+						</a>
+					</div>
+				</div>
+
+				<div class="mb-6">
+					<div class="px-3 mb-2">
+						<p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+							Settings
+						</p>
+					</div>
+					<div class="space-y-1">
+						<a
+							href="/settings"
+							class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors relative {$page
+								.url.pathname === '/settings'
+								? 'bg-accent text-accent-foreground border-l-2 border-primary'
+								: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
+						>
+							<Settings class="h-5 w-5" />
+							User Settings
+						</a>
+					</div>
+				</div>
+
+				<!-- Admin Section -->
+				{#if data.user?.role === 'admin'}
+					<div class="border-t border-border pt-4 mb-4"></div>
+					<div>
+						<div class="px-3 mb-2">
+							<p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+								Administration
+							</p>
+						</div>
+						<div class="space-y-1">
+							<a
+								href="/admin/requests"
+								class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors relative {$page
+									.url.pathname === '/admin/requests'
+									? 'bg-accent text-accent-foreground border-l-2 border-primary'
+									: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
+							>
+								<FileText class="h-5 w-5" />
+								Requests
+							</a>
+							<a
+								href="/admin/downloads"
+								class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors relative {$page
+									.url.pathname === '/admin/downloads'
+									? 'bg-accent text-accent-foreground border-l-2 border-primary'
+									: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
+							>
+								<Download class="h-5 w-5" />
+								Downloads
+							</a>
+							<a
+								href="/admin/users"
+								class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors relative {$page
+									.url.pathname === '/admin/users'
+									? 'bg-accent text-accent-foreground border-l-2 border-primary'
+									: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
+							>
+								<Users class="h-5 w-5" />
+								Users
+							</a>
+							<a
+								href="/admin/config"
+								class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors relative {$page
+									.url.pathname === '/admin/config'
+									? 'bg-accent text-accent-foreground border-l-2 border-primary'
+									: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
+							>
+								<Settings class="h-5 w-5" />
+								Configuration
+							</a>
+						</div>
+					</div>
+				{/if}
 			</nav>
 
 			<!-- User section -->

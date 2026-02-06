@@ -12,4 +12,6 @@ export interface UserSession {
 	displayName: string;
 	role: UserRole;
 	preferredLanguage?: string;
+	lastUsedLanguage?: string | null;
+	lastUsedFormat?: 'ebook' | 'audiobook' | null;
 }

@@ -114,10 +114,10 @@ Bookrequestarr uses a two-tier caching system to optimize performance and reduce
 
 #### Cache Settings (Configurable in Admin UI)
 
-| Setting                        | Default | Description                                                                                                    |
-| ------------------------------ | ------- | -------------------------------------------------------------------------------------------------------------- |
-| **API Cache TTL**              | 7 days  | How long to cache Hardcover API responses before refetching. Reduces API calls and improves search performance |
-| **Local Book Cache TTL**       | 6 hours | How long to keep book details in local database cache for instant loading. Lower values = fresher data         |
+| Setting                  | Default | Description                                                                                                    |
+| ------------------------ | ------- | -------------------------------------------------------------------------------------------------------------- |
+| **API Cache TTL**        | 7 days  | How long to cache Hardcover API responses before refetching. Reduces API calls and improves search performance |
+| **Local Book Cache TTL** | 6 hours | How long to keep book details in local database cache for instant loading. Lower values = fresher data         |
 
 **How it works:**
 
@@ -186,20 +186,21 @@ Bookrequestarr supports multiple notification backends. Configure the ones you w
 
 Bookrequestarr can automatically download books from Anna's Archive when requests are approved.
 
-| Variable                   | Required                | Default                                              | Description                                                                                                         |
-| -------------------------- | ----------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `ANNAS_ARCHIVE_API_KEY`    | **Yes** (for downloads) | -                                                    | **Required for downloads.** Anna's Archive API key. Get one at [annas-archive.org/account](https://annas-archive.org/account) |
-| `ANNAS_ARCHIVE_DOMAIN`     | No                      | `.li`, `.pm`, `.in` (automatic fallback)             | Custom domain for Anna's Archive. If not set, automatically tries multiple domains (.li, .pm, .in) to work around blocking |
-| `DOWNLOAD_DIRECTORY`       | No                      | `./data/downloads`                                   | Directory where completed downloads will be stored (e.g., Calibre ingest folder). Can also be configured via Admin Settings UI. Environment variable takes precedence. |
-| `DOWNLOAD_TEMP_DIRECTORY`  | No                      | `./data/downloads-temp`                              | Temporary directory for in-progress downloads. Files are moved to `DOWNLOAD_DIRECTORY` when complete. Can also be configured via Admin Settings UI. |
-| `DOWNLOAD_DAILY_LIMIT`     | No                      | `25`                                                 | Maximum number of downloads per day to respect rate limits                                                          |
-| `CALIBRE_BASE_URL`         | No                      | -                                                    | Base URL for Calibre-Web instance (e.g., `https://calibre.example.com`). Enables Calibre-Web Automated integration  |
+| Variable                  | Required                | Default                                  | Description                                                                                                                                                            |
+| ------------------------- | ----------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANNAS_ARCHIVE_API_KEY`   | **Yes** (for downloads) | -                                        | **Required for downloads.** Anna's Archive API key. Get one at [annas-archive.org/account](https://annas-archive.org/account)                                          |
+| `ANNAS_ARCHIVE_DOMAIN`    | No                      | `.li`, `.pm`, `.in` (automatic fallback) | Custom domain for Anna's Archive. If not set, automatically tries multiple domains (.li, .pm, .in) to work around blocking                                             |
+| `DOWNLOAD_DIRECTORY`      | No                      | `./data/downloads`                       | Directory where completed downloads will be stored (e.g., Calibre ingest folder). Can also be configured via Admin Settings UI. Environment variable takes precedence. |
+| `DOWNLOAD_TEMP_DIRECTORY` | No                      | `./data/downloads-temp`                  | Temporary directory for in-progress downloads. Files are moved to `DOWNLOAD_DIRECTORY` when complete. Can also be configured via Admin Settings UI.                    |
+| `DOWNLOAD_DAILY_LIMIT`    | No                      | `25`                                     | Maximum number of downloads per day to respect rate limits                                                                                                             |
+| `CALIBRE_BASE_URL`        | No                      | -                                        | Base URL for Calibre-Web instance (e.g., `https://calibre.example.com`). Enables Calibre-Web Automated integration                                                     |
 
 **Important:** The `ANNAS_ARCHIVE_API_KEY` is **required** for automated downloads. Without it, you can search for books but downloads will fail with a 400 error. The API key is free and can be obtained by creating an account at [annas-archive.org/account](https://annas-archive.org/account).
 
 **Domain Fallback:**
 
 The application automatically tries multiple Anna's Archive domains in order:
+
 1. `annas-archive.li`
 2. `annas-archive.pm`
 3. `annas-archive.in`
@@ -209,6 +210,7 @@ This helps work around regional blocking or temporary unavailability. If you set
 **Configuration Priority:**
 
 Settings can be configured in three ways (in order of precedence):
+
 1. **Environment variables** - Highest priority, cannot be changed via UI
 2. **Admin Settings UI** - Can be changed at runtime (if not set via environment)
 3. **Default values** - Used if neither environment variable nor UI setting is set
@@ -277,15 +279,17 @@ If you use Calibre-Web Automated for managing your ebook library:
 
 Bookrequestarr can integrate with Prowlarr (indexer manager) and SABnzbd (Usenet download client) as the primary download source, with Anna's Archive as fallback.
 
-| Variable                   | Required | Default          | Description                                                                                          |
-| -------------------------- | -------- | ---------------- | ---------------------------------------------------------------------------------------------------- |
-| `PROWLARR_URL`             | No       | -                | Base URL for Prowlarr instance (e.g., `http://localhost:9696`)                                       |
-| `PROWLARR_API_KEY`         | No       | -                | Prowlarr API key from Settings → General → Security                                                  |
-| `SABNZBD_URL`              | No       | -                | Base URL for SABnzbd instance (e.g., `http://localhost:8080`)                                        |
-| `SABNZBD_API_KEY`          | No       | -                | SABnzbd API key from Config → General → Security → API Key                                           |
-| `SABNZBD_CATEGORY`         | No       | `books`          | SABnzbd category for book downloads (must exist in SABnzbd settings)                                 |
+**📖 See [ARR_STACK.md](ARR_STACK.md) for comprehensive setup guide, confidence scoring details, and troubleshooting.**
+
+| Variable                   | Required | Default          | Description                                                                                              |
+| -------------------------- | -------- | ---------------- | -------------------------------------------------------------------------------------------------------- |
+| `PROWLARR_URL`             | No       | -                | Base URL for Prowlarr instance (e.g., `http://localhost:9696`)                                           |
+| `PROWLARR_API_KEY`         | No       | -                | Prowlarr API key from Settings → General → Security                                                      |
+| `SABNZBD_URL`              | No       | -                | Base URL for SABnzbd instance (e.g., `http://localhost:8080`)                                            |
+| `SABNZBD_API_KEY`          | No       | -                | SABnzbd API key from Config → General → Security → API Key                                               |
+| `SABNZBD_CATEGORY`         | No       | `books`          | SABnzbd category for book downloads (must exist in SABnzbd settings)                                     |
 | `DOWNLOAD_SOURCE_PRIORITY` | No       | `prowlarr_first` | Download source priority: `prowlarr_first`, `annas_archive_first`, `prowlarr_only`, `annas_archive_only` |
-| `MIN_CONFIDENCE_SCORE`     | No       | `50`             | Minimum confidence score (0-100) required to auto-download from Prowlarr                            |
+| `MIN_CONFIDENCE_SCORE`     | No       | `50`             | Minimum confidence score (0-100) required to auto-download from Prowlarr                                 |
 
 **Setup:**
 
@@ -345,6 +349,46 @@ Bookrequestarr can integrate with Prowlarr (indexer manager) and SABnzbd (Usenet
 - Automatic quality selection based on file size and popularity
 - Support for multiple indexers simultaneously
 - Detailed metadata extraction from release names
+
+### Booklore Integration
+
+Bookrequestarr can integrate with [Booklore](https://github.com/booklore-app/booklore) to automatically add downloaded books to your library via the BookDrop folder.
+
+**📖 See [BOOKLORE.md](BOOKLORE.md) for comprehensive setup guide and troubleshooting.**
+
+| Variable                    | Required | Default | Description                                                                                                    |
+| --------------------------- | -------- | ------- | -------------------------------------------------------------------------------------------------------------- |
+| `BOOKLORE_ENABLED`          | No       | `false` | Enable Booklore integration (true/false)                                                                       |
+| `BOOKLORE_BOOKDROP_PATH`    | No       | -       | Full path to Booklore's BookDrop folder (e.g., `/var/lib/booklore/bookdrop`)                                  |
+| `BOOKLORE_BASE_URL`         | No       | -       | Booklore API base URL for health checks (e.g., `http://localhost:3001`) - optional                            |
+| `BOOKLORE_API_KEY`          | No       | -       | Booklore API key for authentication (optional, only if Booklore requires it)                                   |
+| `BOOKLORE_VERIFY_IMPORTS`   | No       | `false` | Verify imports via Booklore API after copying to BookDrop (requires base URL and API key)                     |
+
+**Setup:**
+
+1. **Install Booklore**:
+   - Follow [Booklore installation guide](https://github.com/booklore-app/booklore)
+   - Configure the BookDrop folder in Booklore settings
+
+2. **Configure in Bookrequestarr**:
+   - Go to Admin Settings → Booklore Integration
+   - Enable integration and enter BookDrop folder path
+   - Test connection to verify path is writable
+   - Optional: Enter Booklore API URL and key for health checks
+
+**How It Works:**
+
+1. When a download completes (Anna's Archive or Prowlarr/SABnzbd), the file is automatically copied to the Booklore BookDrop folder
+2. Booklore detects the new file and automatically imports it into your library
+3. The original file remains in the downloads directory
+4. If Booklore API verification is enabled, Bookrequestarr confirms successful import
+
+**Important Notes:**
+
+- BookDrop folder path is the primary requirement - API settings are optional
+- Bookrequestarr needs write permissions on the BookDrop folder
+- Files are copied (not moved), so ensure sufficient disk space
+- If Docker is used, ensure volumes are shared between containers
 
 ### Application
 

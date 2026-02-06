@@ -51,14 +51,14 @@ flowchart TD
 
 **Status Mappings**:
 
-| SABnzbd Status | Download Status | Request Status | Actions |
-|----------------|-----------------|----------------|---------|
-| `completed` | `completed` | `completed` | Store file path, size, timestamp; increment stats |
-| `failed` | `failed` | `download_problem` | Store error message |
-| `downloading` | `downloading` | `approved` | Continue monitoring |
-| `processing` | `downloading` | `approved` | Continue monitoring (extracting, verifying, etc.) |
-| `queued` | `downloading` | `approved` | Continue monitoring |
-| `paused` | `downloading` | `approved` | Continue monitoring |
+| SABnzbd Status | Download Status | Request Status     | Actions                                           |
+| -------------- | --------------- | ------------------ | ------------------------------------------------- |
+| `completed`    | `completed`     | `completed`        | Store file path, size, timestamp; increment stats |
+| `failed`       | `failed`        | `download_problem` | Store error message                               |
+| `downloading`  | `downloading`   | `approved`         | Continue monitoring                               |
+| `processing`   | `downloading`   | `approved`         | Continue monitoring (extracting, verifying, etc.) |
+| `queued`       | `downloading`   | `approved`         | Continue monitoring                               |
+| `paused`       | `downloading`   | `approved`         | Continue monitoring                               |
 
 ### Helper Function: `getActiveSabnzbdDownloads()`
 
@@ -67,18 +67,20 @@ flowchart TD
 **Purpose**: Get all active SABnzbd downloads with book information for monitoring/admin dashboards
 
 **Returns**:
+
 ```typescript
 {
-  downloadId: string;
-  requestId: string;
-  bookTitle: string;
-  nzoId: string;
-  nzbName: string;
-  indexer: string;
-  status: string;
-  confidenceScore: number;
-  createdAt: Date;
-}[]
+	downloadId: string;
+	requestId: string;
+	bookTitle: string;
+	nzoId: string;
+	nzbName: string;
+	indexer: string;
+	status: string;
+	confidenceScore: number;
+	createdAt: Date;
+}
+[];
 ```
 
 ## API Endpoints
@@ -90,16 +92,18 @@ flowchart TD
 **Authentication**: Required (admin role)
 
 **Usage**:
+
 ```bash
 curl -X POST http://localhost:5173/api/downloads/poll \
   -H "Cookie: session=YOUR_SESSION_TOKEN"
 ```
 
 **Response**:
+
 ```json
 {
-  "success": true,
-  "message": "SABnzbd status polling completed"
+	"success": true,
+	"message": "SABnzbd status polling completed"
 }
 ```
 
@@ -110,28 +114,30 @@ curl -X POST http://localhost:5173/api/downloads/poll \
 **Authentication**: Required (admin role)
 
 **Usage**:
+
 ```bash
 curl http://localhost:5173/api/downloads/active \
   -H "Cookie: session=YOUR_SESSION_TOKEN"
 ```
 
 **Response**:
+
 ```json
 {
-  "downloads": [
-    {
-      "downloadId": "uuid-123",
-      "requestId": "uuid-456",
-      "bookTitle": "The Great Book",
-      "nzoId": "SABnzbd_nzo_abc123",
-      "nzbName": "Book.Title.2024.EPUB-GROUP",
-      "indexer": "NZBGeek",
-      "status": "downloading",
-      "confidenceScore": 95,
-      "createdAt": "2024-01-15T10:30:00Z"
-    }
-  ],
-  "count": 1
+	"downloads": [
+		{
+			"downloadId": "uuid-123",
+			"requestId": "uuid-456",
+			"bookTitle": "The Great Book",
+			"nzoId": "SABnzbd_nzo_abc123",
+			"nzbName": "Book.Title.2024.EPUB-GROUP",
+			"indexer": "NZBGeek",
+			"status": "downloading",
+			"confidenceScore": 95,
+			"createdAt": "2024-01-15T10:30:00Z"
+		}
+	],
+	"count": 1
 }
 ```
 
@@ -140,6 +146,7 @@ curl http://localhost:5173/api/downloads/active \
 ### Download Not Found in SABnzbd
 
 If a download is not found in SABnzbd queue or history:
+
 - Warning is logged
 - Download status is NOT changed (may reappear later)
 - Continues checking other downloads
@@ -147,6 +154,7 @@ If a download is not found in SABnzbd queue or history:
 ### SABnzbd API Errors
 
 If SABnzbd API call fails:
+
 - Error is logged with download ID
 - Download status is NOT changed
 - Continues checking other downloads
@@ -155,6 +163,7 @@ If SABnzbd API call fails:
 ### Database Errors
 
 If database update fails:
+
 - Error is logged
 - Other downloads continue processing
 - Next polling cycle will retry
@@ -170,6 +179,7 @@ npm run test:sabnzbd
 ```
 
 This will:
+
 1. Check SABnzbd configuration
 2. Display current queue and history
 3. Show active downloads from database
@@ -224,6 +234,7 @@ npm run dev
 ### Polling Not Running
 
 Check `src/hooks.server.ts` is loaded:
+
 ```bash
 # Should see this in logs on startup:
 # "Initial SABnzbd status check failed" or success message

@@ -15,13 +15,20 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	try {
 		const body = await request.json();
-		const { requestId, md5, fileType, pathIndex, domainIndex, manual, prowlarrGuid, forceSource } = body;
+		const { requestId, md5, fileType, pathIndex, domainIndex, manual, prowlarrGuid, forceSource } =
+			body;
 
 		if (!requestId) {
 			return json({ error: 'Request ID is required' }, { status: 400 });
 		}
 
-		logger.info('Initiating download via API', { requestId, md5, fileType, prowlarrGuid, forceSource });
+		logger.info('Initiating download via API', {
+			requestId,
+			md5,
+			fileType,
+			prowlarrGuid,
+			forceSource
+		});
 
 		const result = await initiateDownload(requestId, {
 			md5,

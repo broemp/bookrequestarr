@@ -182,6 +182,27 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		}
 
+		// Update user's last used preferences for quick request feature
+		try {
+			await db
+				.update(users)
+				.set({
+					lastUsedLanguage: language || null,
+					lastUsedFormat: formatsToCreate[0] || null // Use the first format created
+				})
+				.where(eq(users.id, locals.user.id));
+			logger.debug('Updated user preferences', {
+				userId: locals.user.id,
+				language,
+				format: formatsToCreate[0]
+			});
+		} catch (updateError) {
+			// Log error but don't fail the request
+			logger.warn('Failed to update user preferences', updateError as Error, {
+				userId: locals.user.id
+			});
+		}
+
 		throw redirect(303, '/requests');
 	} catch (error) {
 		// Re-throw redirects (they're not errors)

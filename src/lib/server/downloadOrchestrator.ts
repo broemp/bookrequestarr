@@ -11,11 +11,16 @@ import {
 import { eq, sql } from 'drizzle-orm';
 import { logger } from './logger';
 import type { Book } from '$lib/types/book';
-import type { DownloadSource, DownloadSourcePriority, AnnasArchiveSearchResult } from '$lib/types/download';
+import type {
+	DownloadSource,
+	DownloadSourcePriority,
+	AnnasArchiveSearchResult
+} from '$lib/types/download';
 import { DOWNLOAD_SETTINGS_KEYS, DOWNLOAD_SETTINGS_DEFAULTS } from '$lib/types/download';
 import * as prowlarr from './prowlarr';
 import * as sabnzbd from './sabnzbd';
 import * as annasArchive from './annasarchive';
+import { copyToBookdrop } from './booklore';
 import {
 	calculateConfidence,
 	bookToMatchRequest,
@@ -85,11 +90,7 @@ export interface InitiateDownloadOptions {
  */
 async function getSetting(key: string): Promise<string> {
 	try {
-		const [setting] = await db
-			.select()
-			.from(settings)
-			.where(eq(settings.key, key))
-			.limit(1);
+		const [setting] = await db.select().from(settings).where(eq(settings.key, key)).limit(1);
 
 		return setting?.value || DOWNLOAD_SETTINGS_DEFAULTS[key] || '';
 	} catch (error) {
@@ -120,7 +121,11 @@ async function getMinConfidenceScore(): Promise<number> {
  */
 async function getDownloadDirectory(): Promise<string> {
 	try {
-		const directory = await getSettingWithFallback('download_directory', 'DOWNLOAD_DIRECTORY', './data/downloads');
+		const directory = await getSettingWithFallback(
+			'download_directory',
+			'DOWNLOAD_DIRECTORY',
+			'./data/downloads'
+		);
 		return directory || './data/downloads';
 	} catch (error) {
 		logger.error('Error fetching download directory', error instanceof Error ? error : undefined);
@@ -133,10 +138,17 @@ async function getDownloadDirectory(): Promise<string> {
  */
 async function getDownloadTempDirectory(): Promise<string> {
 	try {
-		const directory = await getSettingWithFallback('download_temp_directory', 'DOWNLOAD_TEMP_DIRECTORY', './data/downloads-temp');
+		const directory = await getSettingWithFallback(
+			'download_temp_directory',
+			'DOWNLOAD_TEMP_DIRECTORY',
+			'./data/downloads-temp'
+		);
 		return directory || './data/downloads-temp';
 	} catch (error) {
-		logger.error('Error fetching temp download directory', error instanceof Error ? error : undefined);
+		logger.error(
+			'Error fetching temp download directory',
+			error instanceof Error ? error : undefined
+		);
 		return './data/downloads-temp';
 	}
 }
@@ -269,7 +281,11 @@ async function searchProwlarr(
 			type: 'book'
 		});
 
-		if (titleAuthorResult.success && titleAuthorResult.results && titleAuthorResult.results.length > 0) {
+		if (
+			titleAuthorResult.success &&
+			titleAuthorResult.results &&
+			titleAuthorResult.results.length > 0
+		) {
 			const usenetResults = prowlarr.filterUsenetResults(titleAuthorResult.results);
 			const scoredResults = scoreAndFilterResults(usenetResults, matchRequest, minScore);
 
@@ -511,20 +527,65 @@ async function downloadViaAnnasArchive(
 			downloadStatus: 'pending'
 		});
 
-		// Process download asynchronously
-		processAnnasArchiveDownload(downloadId, md5, fileType, pathIndex, domainIndex).catch(
-			(error) => {
-				logger.error('Background Anna\'s Archive download failed', error instanceof Error ? error : undefined, {
-					downloadId
-				});
-			}
+		// Process download asynchronously with timeout protection
+		const timeoutMs = 5 * 60 * 1000; // 5 minutes
+		const timeoutPromise = new Promise<never>((_, reject) =>
+			setTimeout(() => reject(new Error('Download timeout after 5 minutes')), timeoutMs)
 		);
+
+		Promise.race([
+			processAnnasArchiveDownload(downloadId, md5, fileType, pathIndex, domainIndex),
+			timeoutPromise
+		]).catch(async (error) => {
+			logger.error(
+				"Background Anna's Archive download failed or timed out",
+				error instanceof Error ? error : undefined,
+				{
+					downloadId
+				}
+			);
+
+			// Ensure DB state is always updated even on timeout/error
+			try {
+				await db
+					.update(downloads)
+					.set({
+						downloadStatus: 'failed',
+						errorMessage: error instanceof Error ? error.message : 'Unknown error'
+					})
+					.where(eq(downloads.id, downloadId));
+
+				// Also update request status if applicable
+				const [download] = await db
+					.select()
+					.from(downloads)
+					.where(eq(downloads.id, downloadId))
+					.limit(1);
+
+				if (download?.requestId) {
+					await db
+						.update(requests)
+						.set({ status: 'download_problem', updatedAt: new Date() })
+						.where(eq(requests.id, download.requestId));
+				}
+			} catch (dbError) {
+				logger.error(
+					'Failed to update database after download timeout/error',
+					dbError instanceof Error ? dbError : undefined,
+					{ downloadId }
+				);
+			}
+		});
 
 		return { success: true, downloadId };
 	} catch (error) {
-		logger.error("Error initiating Anna's Archive download", error instanceof Error ? error : undefined, {
-			requestId
-		});
+		logger.error(
+			"Error initiating Anna's Archive download",
+			error instanceof Error ? error : undefined,
+			{
+				requestId
+			}
+		);
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : 'Unknown error'
@@ -561,19 +622,19 @@ async function processAnnasArchiveDownload(
 
 		// If path_index and domain_index not provided, fetch file details to get them
 		if (pathIndex === undefined || domainIndex === undefined) {
-			logger.info("Fetching file details to get download indices", { md5 });
+			logger.info('Fetching file details to get download indices', { md5 });
 			const fileInfo = await annasArchive.getAvailableFiles(md5);
 
 			if (!fileInfo || !fileInfo.download_urls || fileInfo.download_urls.length === 0) {
 				throw new Error(
-					"Could not find download options for this file. The file may not be available for fast download."
+					'Could not find download options for this file. The file may not be available for fast download.'
 				);
 			}
 
 			// Use the first available download option
 			pathIndex = fileInfo.download_urls[0].path_index;
 			domainIndex = fileInfo.download_urls[0].domain_index;
-			logger.info("Using download indices from file details", {
+			logger.info('Using download indices from file details', {
 				md5,
 				pathIndex,
 				domainIndex,
@@ -581,30 +642,33 @@ async function processAnnasArchiveDownload(
 			});
 		}
 
-	// Get fast download URL
-	const downloadResponse = await annasArchive.getFastDownloadUrl(md5, pathIndex, domainIndex);
+		// Get fast download URL
+		const downloadResponse = await annasArchive.getFastDownloadUrl(md5, pathIndex, domainIndex);
 
-	if (!downloadResponse.download_url) {
-		const errorMsg = downloadResponse.error || 'Failed to get download URL';
-		
-		// Provide more helpful error messages for common issues
-		if (errorMsg.toLowerCase().includes('invalid md5')) {
-			throw new Error(
-				`Invalid MD5 hash: The file with MD5 "${md5}" does not exist in Anna's Archive or is not available for fast download. ` +
-				`This may happen if the file was removed or if the search result is outdated. ` +
-				`Try searching for the book again or use a different edition.`
-			);
+		if (!downloadResponse.download_url) {
+			const errorMsg = downloadResponse.error || 'Failed to get download URL';
+
+			// Provide more helpful error messages for common issues
+			if (errorMsg.toLowerCase().includes('invalid md5')) {
+				throw new Error(
+					`Invalid MD5 hash: The file with MD5 "${md5}" does not exist in Anna's Archive or is not available for fast download. ` +
+						`This may happen if the file was removed or if the search result is outdated. ` +
+						`Try searching for the book again or use a different edition.`
+				);
+			}
+
+			if (
+				errorMsg.toLowerCase().includes('membership') ||
+				errorMsg.toLowerCase().includes('account')
+			) {
+				throw new Error(
+					`Anna's Archive membership issue: ${errorMsg}. ` +
+						`Please verify your API key is valid and your account has an active membership at https://annas-archive.org/account`
+				);
+			}
+
+			throw new Error(errorMsg);
 		}
-		
-		if (errorMsg.toLowerCase().includes('membership') || errorMsg.toLowerCase().includes('account')) {
-			throw new Error(
-				`Anna's Archive membership issue: ${errorMsg}. ` +
-				`Please verify your API key is valid and your account has an active membership at https://annas-archive.org/account`
-			);
-		}
-		
-		throw new Error(errorMsg);
-	}
 
 		// Ensure both directories exist
 		const tempDir = await ensureDownloadTempDirectory();
@@ -655,22 +719,46 @@ async function processAnnasArchiveDownload(
 				.where(eq(requests.id, download.requestId));
 		}
 
-		logger.info("Anna's Archive download completed successfully", { downloadId, filePath: finalFilePath });
-	} catch (error) {
-		logger.error("Anna's Archive download processing failed", error instanceof Error ? error : undefined, {
-			downloadId
+		// Copy to Booklore BookDrop if enabled
+		try {
+			await copyToBookdrop(finalFilePath);
+		} catch (bookloreError) {
+			logger.warn(
+				'Failed to copy file to Booklore BookDrop (non-critical)',
+				bookloreError instanceof Error ? bookloreError : undefined,
+				{ filePath: finalFilePath }
+			);
+		}
+
+		logger.info("Anna's Archive download completed successfully", {
+			downloadId,
+			filePath: finalFilePath
 		});
+	} catch (error) {
+		logger.error(
+			"Anna's Archive download processing failed",
+			error instanceof Error ? error : undefined,
+			{
+				downloadId
+			}
+		);
+
+		// Fetch download record once for cleanup and status updates
+		const [download] = await db
+			.select()
+			.from(downloads)
+			.where(eq(downloads.id, downloadId))
+			.limit(1);
+
+		if (!download) {
+			logger.error('Download record not found in error handler', undefined, { downloadId });
+			return; // Exit gracefully instead of crashing
+		}
 
 		// Clean up temp file if it exists
 		try {
 			const tempDir = await getDownloadTempDirectory();
-			const [download] = await db
-				.select()
-				.from(downloads)
-				.where(eq(downloads.id, downloadId))
-				.limit(1);
-			
-			if (download?.annasArchiveMd5 && download?.fileType) {
+			if (download.annasArchiveMd5 && download.fileType) {
 				const tempFilePath = join(tempDir, `${download.annasArchiveMd5}.${download.fileType}`);
 				const fs = await import('fs/promises');
 				if (existsSync(tempFilePath)) {
@@ -679,7 +767,8 @@ async function processAnnasArchiveDownload(
 				}
 			}
 		} catch (cleanupError) {
-			const errorMsg = cleanupError instanceof Error ? cleanupError.message : 'Unknown cleanup error';
+			const errorMsg =
+				cleanupError instanceof Error ? cleanupError.message : 'Unknown cleanup error';
 			logger.warn('Failed to clean up temp file', { error: errorMsg });
 		}
 
@@ -693,13 +782,7 @@ async function processAnnasArchiveDownload(
 			.where(eq(downloads.id, downloadId));
 
 		// Update request status to download_problem
-		const [download] = await db
-			.select()
-			.from(downloads)
-			.where(eq(downloads.id, downloadId))
-			.limit(1);
-
-		if (download) {
+		if (download.requestId) {
 			await db
 				.update(requests)
 				.set({ status: 'download_problem', updatedAt: new Date() })
@@ -799,7 +882,9 @@ export async function initiateDownload(
 
 		// Determine download source order based on priority setting and force option
 		const priority = options.forceSource
-			? (options.forceSource === 'prowlarr' ? 'prowlarr_only' : 'annas_archive_only')
+			? options.forceSource === 'prowlarr'
+				? 'prowlarr_only'
+				: 'annas_archive_only'
 			: await getDownloadSourcePriority();
 
 		logger.info('Using download source priority', { priority });
@@ -871,7 +956,7 @@ async function orchestrateProwlarrFirst(
 				}
 
 				// If SABnzbd fails, fall through to Anna's Archive
-				logger.warn('SABnzbd download failed, falling back to Anna\'s Archive', {
+				logger.warn("SABnzbd download failed, falling back to Anna's Archive", {
 					requestId,
 					error: downloadResult.error
 				});
@@ -889,9 +974,9 @@ async function orchestrateProwlarrFirst(
 			}
 		}
 
-		logger.info('No suitable Prowlarr results, falling back to Anna\'s Archive', { requestId });
+		logger.info("No suitable Prowlarr results, falling back to Anna's Archive", { requestId });
 	} else {
-		logger.info('Prowlarr/SABnzbd not configured, using Anna\'s Archive', { requestId });
+		logger.info("Prowlarr/SABnzbd not configured, using Anna's Archive", { requestId });
 	}
 
 	// Fallback to Anna's Archive
@@ -912,7 +997,12 @@ async function orchestrateAnnasArchiveFirst(
 
 	if (allowed) {
 		// Try Anna's Archive
-		const annasResult = await tryAnnasArchiveDownload(requestId, book, authorName, preferredLanguage);
+		const annasResult = await tryAnnasArchiveDownload(
+			requestId,
+			book,
+			authorName,
+			preferredLanguage
+		);
 
 		if (annasResult.success) {
 			return annasResult;
@@ -922,9 +1012,9 @@ async function orchestrateAnnasArchiveFirst(
 			return annasResult;
 		}
 
-		logger.info('Anna\'s Archive download failed, trying Prowlarr', { requestId });
+		logger.info("Anna's Archive download failed, trying Prowlarr", { requestId });
 	} else {
-		logger.info('Anna\'s Archive daily limit reached, trying Prowlarr', { requestId });
+		logger.info("Anna's Archive daily limit reached, trying Prowlarr", { requestId });
 	}
 
 	// Fallback to Prowlarr
@@ -1033,7 +1123,7 @@ async function tryAnnasArchiveDownload(
 			.set({ status: 'download_problem', updatedAt: new Date() })
 			.where(eq(requests.id, requestId));
 
-		return { success: false, error: 'Book not found on Anna\'s Archive' };
+		return { success: false, error: "Book not found on Anna's Archive" };
 	}
 
 	const autoSelect = await getAutoSelectSetting();
@@ -1164,8 +1254,7 @@ export async function updateSabnzbdDownloadStatuses(): Promise<void> {
 
 		const inProgressDownloads = activeDownloads.filter(
 			(d) =>
-				d.sabnzbdNzoId &&
-				(d.downloadStatus === 'pending' || d.downloadStatus === 'downloading')
+				d.sabnzbdNzoId && (d.downloadStatus === 'pending' || d.downloadStatus === 'downloading')
 		);
 
 		if (inProgressDownloads.length === 0) {
@@ -1216,6 +1305,19 @@ export async function updateSabnzbdDownloadStatuses(): Promise<void> {
 
 					// Update download stats
 					await updateDownloadStats();
+
+					// Copy to Booklore BookDrop if enabled
+					if (status.storagePath) {
+						try {
+							await copyToBookdrop(status.storagePath);
+						} catch (bookloreError) {
+							logger.warn(
+								'Failed to copy file to Booklore BookDrop (non-critical)',
+								bookloreError instanceof Error ? bookloreError : undefined,
+								{ filePath: status.storagePath }
+							);
+						}
+					}
 				} else if (status.status === 'failed') {
 					logger.warn('SABnzbd download failed', {
 						downloadId: download.id,
@@ -1251,7 +1353,10 @@ export async function updateSabnzbdDownloadStatuses(): Promise<void> {
 			}
 		}
 	} catch (error) {
-		logger.error('Error updating SABnzbd download statuses', error instanceof Error ? error : undefined);
+		logger.error(
+			'Error updating SABnzbd download statuses',
+			error instanceof Error ? error : undefined
+		);
 	}
 }
 
@@ -1311,7 +1416,10 @@ export async function getActiveSabnzbdDownloads() {
 			createdAt: d.download.createdAt
 		}));
 	} catch (error) {
-		logger.error('Error getting active SABnzbd downloads', error instanceof Error ? error : undefined);
+		logger.error(
+			'Error getting active SABnzbd downloads',
+			error instanceof Error ? error : undefined
+		);
 		return [];
 	}
 }
@@ -1342,7 +1450,7 @@ export async function retryDownload(
 		if (download.downloadSource === 'annas_archive') {
 			// Retry Anna's Archive download
 			if (!download.annasArchiveMd5) {
-				return { success: false, error: 'Missing Anna\'s Archive MD5 hash' };
+				return { success: false, error: "Missing Anna's Archive MD5 hash" };
 			}
 
 			// Check daily limit

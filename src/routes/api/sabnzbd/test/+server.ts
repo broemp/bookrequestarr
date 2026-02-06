@@ -29,7 +29,10 @@ export const POST: RequestHandler = async ({ locals }) => {
 			});
 			return json({ success: true, version: result.version });
 		} else {
-			logger.warn('SABnzbd connection test failed', { userId: locals.user.id, error: result.error });
+			logger.warn('SABnzbd connection test failed', {
+				userId: locals.user.id,
+				error: result.error
+			});
 			return json({ success: false, error: result.error });
 		}
 	} catch (error) {

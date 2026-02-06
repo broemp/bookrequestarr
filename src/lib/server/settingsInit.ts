@@ -33,7 +33,6 @@ const SETTING_DEFAULTS: Record<string, string> = {
 	download_daily_limit: '25',
 	download_auto_mode: 'disabled',
 	download_auto_select: 'true',
-	api_cache_ttl_days: '7',
 	local_book_cache_ttl_hours: '6',
 	annas_archive_domain: 'annas-archive.org',
 	calibre_cleanup_hours: '24',
@@ -41,7 +40,12 @@ const SETTING_DEFAULTS: Record<string, string> = {
 	prowlarr_enabled: 'false',
 	min_confidence_score: '50',
 	sabnzbd_category: 'books',
-	download_source_priority: 'prowlarr_first'
+	download_source_priority: 'prowlarr_first',
+	booklore_enabled: 'false',
+	booklore_base_url: '',
+	booklore_bookdrop_path: '',
+	booklore_api_key: '',
+	booklore_verify_imports: 'false'
 };
 
 /**

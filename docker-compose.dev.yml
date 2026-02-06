@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # Main application
+  bookrequestarr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bookrequestarr-dev
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:3000'
+    environment:
+      - DATABASE_URL=/app/data/bookrequestarr.db
+      - OIDC_ISSUER=http://authelia:9091
+      - OIDC_CLIENT_ID=bookrequestarr
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_REDIRECT_URI=http://localhost:3000/api/auth/callback
+      - OIDC_ADMIN_GROUP=bookrequestarr_admin
+      - JWT_SECRET=${JWT_SECRET}
+      - HARDCOVER_API_KEY=${HARDCOVER_API_KEY}
+      - PUBLIC_APP_URL=http://localhost:3000
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+      - DISABLE_AUTH=${DISABLE_AUTH:-false}
+      - PROWLARR_URL=http://prowlarr:9696
+      - PROWLARR_API_KEY=${PROWLARR_API_KEY:-}
+      - SABNZBD_URL=http://sabnzbd:8080
+      - SABNZBD_API_KEY=${SABNZBD_API_KEY:-}
+      - DOWNLOAD_DIRECTORY=/app/data/downloads
+      - DOWNLOAD_TEMP_DIRECTORY=/app/data/downloads-temp
+    volumes:
+      - ./dev-data/app:/app/data
+      - ./dev-data/downloads:/app/data/downloads
+    depends_on:
+      - authelia
+      - prowlarr
+      - sabnzbd
+    networks:
+      - bookrequestarr-dev
+
+  # Authelia OIDC provider
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia-dev
+    restart: unless-stopped
+    ports:
+      - '9091:9091'
+    volumes:
+      - ./dev-config/authelia:/config
+    environment:
+      - AUTHELIA_JWT_SECRET_FILE=/config/jwt_secret
+      - AUTHELIA_SESSION_SECRET_FILE=/config/session_secret
+      - AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE=/config/encryption_key
+    networks:
+      - bookrequestarr-dev
+
+  # Prowlarr indexer manager
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr-dev
+    restart: unless-stopped
+    ports:
+      - '9696:9696'
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+    volumes:
+      - ./dev-data/prowlarr:/config
+    networks:
+      - bookrequestarr-dev
+
+  # SABnzbd download client
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd-dev
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+    volumes:
+      - ./dev-data/sabnzbd:/config
+      - ./dev-data/downloads:/downloads
+    networks:
+      - bookrequestarr-dev
+
+networks:
+  bookrequestarr-dev:
+    driver: bridge

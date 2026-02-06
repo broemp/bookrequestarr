@@ -178,7 +178,40 @@ create_env_file() {
     fi
     
     print_success "Created .env file from template"
-    print_warning "Don't forget to add your HARDCOVER_API_KEY to .env!"
+}
+
+# Prompt for Hardcover API key
+prompt_hardcover_key() {
+    print_header "Hardcover API Key Setup"
+
+    # Check if already set in .env
+    if [ -f .env ] && grep -q "^HARDCOVER_API_KEY=..*" .env; then
+        print_success "HARDCOVER_API_KEY already set in .env"
+        return
+    fi
+
+    echo -e "${YELLOW}A Hardcover API key is required for book metadata.${NC}"
+    echo -e "${BLUE}Get your API key at: ${GREEN}https://hardcover.app/settings/api${NC}\n"
+
+    read -p "Enter your Hardcover API key (or press Enter to skip): " HARDCOVER_KEY
+
+    if [ -z "$HARDCOVER_KEY" ]; then
+        print_warning "Skipping Hardcover API key setup"
+        print_info "You can add it later by editing the .env file"
+        return
+    fi
+
+    # Add to .env file
+    if [ -f .env ]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            sed -i '' "s/^HARDCOVER_API_KEY=.*/HARDCOVER_API_KEY=$HARDCOVER_KEY/" .env
+        else
+            # Linux
+            sed -i "s/^HARDCOVER_API_KEY=.*/HARDCOVER_API_KEY=$HARDCOVER_KEY/" .env
+        fi
+        print_success "Added HARDCOVER_API_KEY to .env"
+    fi
 }
 
 # Start Docker containers
@@ -214,18 +247,32 @@ display_info() {
     echo -e "  • User:   username=${GREEN}user${NC}   password=${GREEN}user123${NC}"
     
     echo -e "\n${YELLOW}Next Steps:${NC}"
-    echo -e "  1. Add your ${GREEN}HARDCOVER_API_KEY${NC} to the .env file"
-    echo -e "  2. Configure Prowlarr at ${GREEN}http://localhost:9696${NC}"
+
+    # Check if Hardcover API key is set
+    STEP_NUM=1
+    if [ -f .env ] && ! grep -q "^HARDCOVER_API_KEY=..*" .env; then
+        echo -e "  ${STEP_NUM}. Add your ${GREEN}HARDCOVER_API_KEY${NC} to the .env file"
+        echo -e "     Get it at: ${GREEN}https://hardcover.app/settings/api${NC}"
+        STEP_NUM=$((STEP_NUM + 1))
+    fi
+
+    echo -e "  ${STEP_NUM}. Configure Prowlarr at ${GREEN}http://localhost:9696${NC}"
     echo -e "     - Add indexers"
     echo -e "     - Copy API key from Settings → General → Security"
     echo -e "     - Add API key to .env as ${GREEN}PROWLARR_API_KEY${NC}"
-    echo -e "  3. Configure SABnzbd at ${GREEN}http://localhost:8080${NC}"
+    STEP_NUM=$((STEP_NUM + 1))
+
+    echo -e "  ${STEP_NUM}. Configure SABnzbd at ${GREEN}http://localhost:8080${NC}"
     echo -e "     - Complete initial setup wizard"
     echo -e "     - Create 'books' category"
     echo -e "     - Copy API key from Config → General → Security"
     echo -e "     - Add API key to .env as ${GREEN}SABNZBD_API_KEY${NC}"
-    echo -e "  4. Restart Bookrequestarr: ${GREEN}docker compose -f docker-compose.dev.yml restart bookrequestarr${NC}"
-    echo -e "  5. Access Bookrequestarr at ${GREEN}http://localhost:3000${NC}"
+    STEP_NUM=$((STEP_NUM + 1))
+
+    echo -e "  ${STEP_NUM}. Restart Bookrequestarr: ${GREEN}docker compose -f docker-compose.dev.yml restart bookrequestarr${NC}"
+    STEP_NUM=$((STEP_NUM + 1))
+
+    echo -e "  ${STEP_NUM}. Access Bookrequestarr at ${GREEN}http://localhost:3000${NC}"
     
     echo -e "\n${BLUE}Useful Commands:${NC}"
     echo -e "  • View logs:        ${GREEN}docker compose -f docker-compose.dev.yml logs -f${NC}"
@@ -242,11 +289,12 @@ display_info() {
 # Main execution
 main() {
     print_header "Bookrequestarr Development Setup"
-    
+
     check_docker
     create_directories
     generate_authelia_secrets
     create_env_file
+    prompt_hardcover_key
     start_containers
     display_info
 }

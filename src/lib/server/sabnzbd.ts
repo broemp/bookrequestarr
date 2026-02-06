@@ -232,10 +232,7 @@ export async function isSabnzbdConfigured(): Promise<boolean> {
 /**
  * Make a request to the SABnzbd API
  */
-async function sabnzbdRequest<T>(
-	mode: string,
-	params: Record<string, string> = {}
-): Promise<T> {
+async function sabnzbdRequest<T>(mode: string, params: Record<string, string> = {}): Promise<T> {
 	const config = await getSabnzbdConfig();
 	if (!config) {
 		throw new Error('SABnzbd is not configured');
@@ -293,7 +290,11 @@ async function sabnzbdRequest<T>(
  * Test connection to SABnzbd
  * @returns SABnzbd version if successful
  */
-export async function testConnection(): Promise<{ success: boolean; version?: string; error?: string }> {
+export async function testConnection(): Promise<{
+	success: boolean;
+	version?: string;
+	error?: string;
+}> {
 	try {
 		const response = await sabnzbdRequest<SABnzbdVersionResponse>('version');
 		logger.info('SABnzbd connection test successful', { version: response.version });
@@ -418,7 +419,10 @@ export async function addNzbByContent(
 
 		return nzoId;
 	} catch (error) {
-		logger.error('Failed to add NZB content to SABnzbd', error instanceof Error ? error : undefined);
+		logger.error(
+			'Failed to add NZB content to SABnzbd',
+			error instanceof Error ? error : undefined
+		);
 		throw error;
 	}
 }
@@ -539,7 +543,10 @@ export async function getDownloadStatus(nzoId: string): Promise<SABnzbdDownloadS
  * @param nzoId - The nzo_id of the download to delete
  * @param deleteFiles - Whether to delete downloaded files (for completed downloads)
  */
-export async function deleteDownload(nzoId: string, deleteFiles: boolean = false): Promise<boolean> {
+export async function deleteDownload(
+	nzoId: string,
+	deleteFiles: boolean = false
+): Promise<boolean> {
 	logger.info('Deleting download from SABnzbd', { nzoId, deleteFiles });
 
 	// Try to remove from queue first
@@ -611,7 +618,9 @@ export async function resumeDownload(nzoId: string): Promise<boolean> {
 		logger.info('Download resumed', { nzoId });
 		return true;
 	} catch (error) {
-		logger.error('Failed to resume download', error instanceof Error ? error : undefined, { nzoId });
+		logger.error('Failed to resume download', error instanceof Error ? error : undefined, {
+			nzoId
+		});
 		return false;
 	}
 }

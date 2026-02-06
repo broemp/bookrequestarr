@@ -8,19 +8,19 @@
 server:
   host: 0.0.0.0
   port: 9091
-  path: ""
+  path: ''
   enable_pprof: false
   enable_expvars: false
   disable_healthcheck: false
   tls:
-    key: ""
-    certificate: ""
+    key: ''
+    certificate: ''
 
 # Log Configuration
 log:
   level: debug
   format: text
-  file_path: ""
+  file_path: ''
   keep_stdout: true
 
 # Theme
@@ -63,7 +63,7 @@ access_control:
     # Allow all authenticated users to access Bookrequestarr
     - domain: localhost
       policy: one_factor
-    - domain: "*.localhost"
+    - domain: '*.localhost'
       policy: one_factor
 
 # Session Configuration
@@ -75,13 +75,13 @@ session:
   expiration: 1h
   inactivity: 5m
   remember_me_duration: 1M
-  
+
   # Redis Configuration for session storage
   redis:
     host: redis
     port: 6379
-    username: ""
-    password: ""
+    username: ''
+    password: ''
     database_index: 0
     maximum_active_connections: 8
     minimum_idle_connections: 0
@@ -112,15 +112,15 @@ identity_providers:
       -----BEGIN RSA PRIVATE KEY-----
       ISSUER_PRIVATE_KEY_PLACEHOLDER
       -----END RSA PRIVATE KEY-----
-    
+
     access_token_lifespan: 1h
     authorize_code_lifespan: 1m
     id_token_lifespan: 1h
     refresh_token_lifespan: 90m
-    
+
     enable_client_debug_messages: true
     enforce_pkce: public_clients_only
-    
+
     cors:
       endpoints:
         - authorization
@@ -130,33 +130,33 @@ identity_providers:
       allowed_origins:
         - http://localhost:3000
       allowed_origins_from_client_redirect_uris: false
-    
+
     clients:
       - id: bookrequestarr
         description: Bookrequestarr Development Client
         secret: BOOKREQUESTARR_CLIENT_SECRET_PLACEHOLDER
         public: false
         authorization_policy: one_factor
-        
+
         redirect_uris:
           - http://localhost:3000/auth/callback
-        
+
         scopes:
           - openid
           - profile
           - email
           - groups
-        
+
         grant_types:
           - authorization_code
           - refresh_token
-        
+
         response_types:
           - code
-        
+
         response_modes:
           - form_post
           - query
           - fragment
-        
+
         userinfo_signing_algorithm: none

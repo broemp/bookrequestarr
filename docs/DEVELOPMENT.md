@@ -1,5 +1,21 @@
 # Development Guide
 
+## Development Options
+
+Bookrequestarr offers two development approaches:
+
+1. **🐳 Full Stack Docker** (Recommended for testing integrations)
+   - Includes Authelia, Prowlarr, SABnzbd, and all services
+   - One-command setup with `./dev-setup.sh`
+   - See [DEV_DOCKER_SETUP.md](DEV_DOCKER_SETUP.md) for details
+
+2. **⚡ Local Development** (Recommended for rapid coding)
+   - Bypass OIDC for faster iteration
+   - Direct SvelteKit dev server
+   - Documented below
+
+---
+
 ## Quick Start Without OIDC
 
 For rapid development and testing, you can bypass the OIDC authentication system entirely.
@@ -151,12 +167,14 @@ The application runs several background jobs automatically:
 - **Function**: `updateSabnzbdDownloadStatuses()` in `src/lib/server/downloadOrchestrator.ts`
 
 When a download completes:
+
 1. Download status is updated to `completed`
 2. Request status is updated to `completed`
 3. Download stats are incremented
 4. File path and size are recorded
 
 When a download fails:
+
 1. Download status is updated to `failed`
 2. Request status is updated to `download_problem`
 3. Error message is stored for debugging
@@ -187,6 +205,7 @@ curl http://localhost:5173/api/downloads/active \
 ```
 
 Response includes:
+
 - Download ID and request ID
 - Book title
 - SABnzbd job ID (nzo_id)

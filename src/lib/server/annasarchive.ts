@@ -66,10 +66,10 @@ async function fetchWithDomainFallback(
 	for (const domain of domains) {
 		const url = `https://${domain}${path}`;
 		let timeout: NodeJS.Timeout | undefined;
-		
+
 		try {
-			logger.debug('Attempting to fetch from Anna\'s Archive', { domain, path });
-			
+			logger.debug("Attempting to fetch from Anna's Archive", { domain, path });
+
 			const controller = new AbortController();
 			timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
@@ -86,16 +86,16 @@ async function fetchWithDomainFallback(
 			clearTimeout(timeout);
 
 			if (response.ok) {
-				logger.info('Successfully connected to Anna\'s Archive', { domain });
+				logger.info("Successfully connected to Anna's Archive", { domain });
 				return response;
 			}
 
 			// For API endpoints, 4xx errors contain valid error responses
 			// Return them instead of trying other domains
 			if (acceptClientErrors && response.status >= 400 && response.status < 500) {
-				logger.info('Received client error from Anna\'s Archive API', { 
-					domain, 
-					status: response.status 
+				logger.info("Received client error from Anna's Archive API", {
+					domain,
+					status: response.status
 				});
 				return response;
 			}
@@ -105,7 +105,7 @@ async function fetchWithDomainFallback(
 				domain,
 				error: `HTTP ${response.status} ${response.statusText}`
 			});
-			logger.warn('Anna\'s Archive domain returned error, trying next', {
+			logger.warn("Anna's Archive domain returned error, trying next", {
 				domain,
 				status: response.status
 			});
@@ -113,11 +113,11 @@ async function fetchWithDomainFallback(
 			if (timeout) {
 				clearTimeout(timeout);
 			}
-			
+
 			const errorMessage = error instanceof Error ? error.message : String(error);
 			errors.push({ domain, error: errorMessage });
-			
-			logger.warn('Failed to connect to Anna\'s Archive domain, trying next', {
+
+			logger.warn("Failed to connect to Anna's Archive domain, trying next", {
 				domain,
 				error: errorMessage
 			});
@@ -374,7 +374,7 @@ export async function searchByIsbn(isbn: string): Promise<AnnasArchiveSearchResu
 
 		// If no results with fast download filter, try without it
 		if (results.length === 0) {
-			logger.info("No fast download results, searching all files", { isbn: cleanIsbn });
+			logger.info('No fast download results, searching all files', { isbn: cleanIsbn });
 			const params = new URLSearchParams({
 				q: cleanIsbn
 			});
@@ -410,7 +410,7 @@ export async function searchByTitleAuthor(
 
 	try {
 		const query = `${title} ${author}`.trim();
-		
+
 		// First try with fast download filter
 		const paramsWithFast = new URLSearchParams({
 			q: query,
@@ -423,7 +423,7 @@ export async function searchByTitleAuthor(
 
 		// If no results with fast download filter, try without it
 		if (results.length === 0) {
-			logger.info("No fast download results, searching all files", { title, author });
+			logger.info('No fast download results, searching all files', { title, author });
 			const params = new URLSearchParams({
 				q: query
 			});
@@ -455,18 +455,18 @@ export async function searchByTitleAuthor(
 export async function getAvailableFiles(md5: string): Promise<AnnasArchiveFileInfo | null> {
 	// Normalize MD5 to lowercase
 	const normalizedMd5 = md5.toLowerCase().trim();
-	
+
 	logger.info("Getting available files from Anna's Archive", { md5: normalizedMd5 });
 
 	try {
 		const response = await fetchWithDomainFallback(`/md5/${normalizedMd5}`);
-		
+
 		// Check if the page exists (404 means invalid MD5)
 		if (response.status === 404) {
 			logger.warn("MD5 not found in Anna's Archive", { md5: normalizedMd5 });
 			return null;
 		}
-		
+
 		const html = await response.text();
 		const $ = cheerio.load(html);
 
@@ -493,7 +493,7 @@ export async function getAvailableFiles(md5: string): Promise<AnnasArchiveFileIn
 			}
 		}
 
-	// Extract download URLs with path_index and domain_index
+		// Extract download URLs with path_index and domain_index
 		// Look for fast download links in the format: /fast_download/{md5}/{path_index}/{domain_index}
 		const download_urls: Array<{ path_index: number; domain_index: number; domain_name: string }> =
 			[];
@@ -510,21 +510,21 @@ export async function getAvailableFiles(md5: string): Promise<AnnasArchiveFileIn
 			}
 		});
 
-	logger.info("Retrieved file details from Anna's Archive", {
-		md5: normalizedMd5,
-		title,
-		extension,
-		downloadOptionsCount: download_urls.length
-	});
+		logger.info("Retrieved file details from Anna's Archive", {
+			md5: normalizedMd5,
+			title,
+			extension,
+			downloadOptionsCount: download_urls.length
+		});
 
-	return {
-		md5: normalizedMd5,
-		title,
-		author,
-		extension,
-		filesize,
-		download_urls: download_urls.length > 0 ? download_urls : undefined
-	};
+		return {
+			md5: normalizedMd5,
+			title,
+			author,
+			extension,
+			filesize,
+			download_urls: download_urls.length > 0 ? download_urls : undefined
+		};
 	} catch (error) {
 		logger.error('Error getting available files', error instanceof Error ? error : undefined, {
 			md5
@@ -551,7 +551,7 @@ export async function getFastDownloadUrl(
 	try {
 		// Normalize MD5 to lowercase (Anna's Archive expects lowercase)
 		const normalizedMd5 = md5.toLowerCase().trim();
-		
+
 		const params = new URLSearchParams({
 			md5: normalizedMd5,
 			key: apiKey,
@@ -560,7 +560,7 @@ export async function getFastDownloadUrl(
 		});
 
 		const response = await fetchWithDomainFallback(
-			`/dyn/api/fast_download.json?${params}`, 
+			`/dyn/api/fast_download.json?${params}`,
 			{
 				headers: {
 					'User-Agent': 'Bookrequestarr/1.0',
@@ -573,8 +573,8 @@ export async function getFastDownloadUrl(
 		const data: AnnasArchiveFastDownloadResponse = await response.json();
 
 		if (data.error) {
-			logger.warn("Anna's Archive fast download error", { 
-				md5: normalizedMd5, 
+			logger.warn("Anna's Archive fast download error", {
+				md5: normalizedMd5,
 				pathIndex,
 				domainIndex,
 				error: data.error,
@@ -621,6 +621,14 @@ export async function downloadFile(downloadUrl: string, destinationPath: string)
 				throw new Error('Response body is null');
 			}
 
+			// Validate body is streamable before casting
+			if (
+				typeof response.body !== 'object' ||
+				(!('pipeTo' in response.body) && !('getReader' in response.body))
+			) {
+				throw new Error('Response body is not a readable stream');
+			}
+
 			// Stream the download to file
 			const fileStream = createWriteStream(destinationPath);
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -629,11 +637,11 @@ export async function downloadFile(downloadUrl: string, destinationPath: string)
 			logger.info('File download completed', { destinationPath });
 		} catch (fetchError) {
 			clearTimeout(timeout);
-			
+
 			if (fetchError instanceof Error && fetchError.name === 'AbortError') {
 				throw new Error('File download timed out after 5 minutes');
 			}
-			
+
 			throw fetchError;
 		}
 	} catch (error) {

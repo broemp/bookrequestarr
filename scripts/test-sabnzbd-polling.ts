@@ -1,17 +1,20 @@
 /**
  * Test script for SABnzbd status polling
- * 
+ *
  * This script tests the SABnzbd status polling functionality by:
  * 1. Checking if SABnzbd is configured
  * 2. Getting active downloads
  * 3. Running a status update cycle
  * 4. Displaying results
- * 
+ *
  * Usage:
  *   npx tsx scripts/test-sabnzbd-polling.ts
  */
 
-import { updateSabnzbdDownloadStatuses, getActiveSabnzbdDownloads } from '../src/lib/server/downloadOrchestrator';
+import {
+	updateSabnzbdDownloadStatuses,
+	getActiveSabnzbdDownloads
+} from '../src/lib/server/downloadOrchestrator';
 import { isSabnzbdConfigured, getQueue, getHistory } from '../src/lib/server/sabnzbd';
 import { logger } from '../src/lib/server/logger';
 
@@ -23,7 +26,9 @@ async function main() {
 	console.log(`SABnzbd Configured: ${isConfigured ? '✓' : '✗'}`);
 
 	if (!isConfigured) {
-		console.log('\n❌ SABnzbd is not configured. Please configure it in settings or environment variables.');
+		console.log(
+			'\n❌ SABnzbd is not configured. Please configure it in settings or environment variables.'
+		);
 		process.exit(1);
 	}
 
@@ -32,7 +37,7 @@ async function main() {
 	try {
 		const queue = await getQueue();
 		console.log(`Queue items: ${queue.length}`);
-		
+
 		if (queue.length > 0) {
 			queue.forEach((item, index) => {
 				console.log(`  ${index + 1}. ${item.filename}`);
@@ -51,7 +56,7 @@ async function main() {
 	try {
 		const history = await getHistory(5);
 		console.log(`History items: ${history.length}`);
-		
+
 		if (history.length > 0) {
 			history.forEach((item, index) => {
 				console.log(`  ${index + 1}. ${item.name}`);
@@ -73,7 +78,7 @@ async function main() {
 	try {
 		const activeDownloads = await getActiveSabnzbdDownloads();
 		console.log(`Active downloads: ${activeDownloads.length}`);
-		
+
 		if (activeDownloads.length > 0) {
 			activeDownloads.forEach((download, index) => {
 				console.log(`  ${index + 1}. ${download.bookTitle}`);
@@ -87,7 +92,10 @@ async function main() {
 			console.log('  (no active downloads)');
 		}
 	} catch (error) {
-		console.error('Error getting active downloads:', error instanceof Error ? error.message : error);
+		console.error(
+			'Error getting active downloads:',
+			error instanceof Error ? error.message : error
+		);
 	}
 
 	// Run status update
@@ -104,7 +112,7 @@ async function main() {
 	try {
 		const activeDownloads = await getActiveSabnzbdDownloads();
 		console.log(`Active downloads: ${activeDownloads.length}`);
-		
+
 		if (activeDownloads.length > 0) {
 			activeDownloads.forEach((download, index) => {
 				console.log(`  ${index + 1}. ${download.bookTitle}`);
@@ -114,7 +122,10 @@ async function main() {
 			console.log('  (no active downloads)');
 		}
 	} catch (error) {
-		console.error('Error getting active downloads:', error instanceof Error ? error.message : error);
+		console.error(
+			'Error getting active downloads:',
+			error instanceof Error ? error.message : error
+		);
 	}
 
 	console.log('\n=== Test Complete ===');

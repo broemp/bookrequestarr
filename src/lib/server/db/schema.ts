@@ -19,6 +19,8 @@ export const users = sqliteTable('users', {
 	autoDownloadEnabled: integer('auto_download_enabled', { mode: 'boolean' })
 		.notNull()
 		.default(false),
+	lastUsedLanguage: text('last_used_language'),
+	lastUsedFormat: text('last_used_format', { enum: ['ebook', 'audiobook'] }),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.default(sql`(unixepoch())`),
@@ -212,16 +214,6 @@ export const newReleases = sqliteTable('new_releases', {
 /**
  * API cache table - stores API request/response pairs with TTL
  */
-export const apiCache = sqliteTable('api_cache', {
-	requestHash: text('request_hash').primaryKey(), // SHA-256 hash of request
-	requestData: text('request_data').notNull(), // Original request (query + variables)
-	responseData: text('response_data').notNull(), // API response as JSON
-	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-	createdAt: integer('created_at', { mode: 'timestamp' })
-		.notNull()
-		.default(sql`(unixepoch())`)
-});
-
 /**
  * Downloads table - tracks book downloads from various sources
  * Supports: Anna's Archive (direct), Prowlarr/SABnzbd (Usenet)

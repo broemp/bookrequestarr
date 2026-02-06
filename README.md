@@ -12,12 +12,13 @@ A modern, self-hosted web application for managing book requests. Similar to Ove
 - 👥 **User Management** - Admin panel for managing users and permissions
 - 📊 **Dashboard** - Overview of requests, statistics, and new releases
 - 🔔 **Notifications** - Discord and Telegram notifications for new requests
-- 📥 **Automatic Downloads** - Download books from Anna's Archive when requests are approved
+- 📥 **Automatic Downloads** - Multi-source downloads from Anna's Archive or Usenet (Prowlarr + SABnzbd)
+- 🎯 **Intelligent Matching** - Confidence-based scoring prevents downloading wrong editions
 - 📚 **Calibre-Web Automated Integration** - Seamless integration with Calibre-Web Automated for automatic book ingestion
 - 🎨 **Modern UI** - Clean, dark theme with responsive design
 - 🐳 **Docker Ready** - Easy deployment with Docker and Docker Compose
 - 🔄 **Reverse Proxy Support** - Works seamlessly behind Traefik, Nginx, or Caddy
-- ⚡ **API Caching** - Smart caching system to reduce API calls and improve performance
+- ⚡ **Local Book Caching** - Smart caching system to reduce API calls and improve performance
 
 ## 📸 Screenshots
 
@@ -138,7 +139,26 @@ docker run -d \
 
 **Note:** The application runs as your current user to avoid permission issues. The database and data directory are created automatically with the correct permissions.
 
-### Local Development
+### Full-Stack Development Environment (Docker) ✨
+
+For a complete development setup with all services (Authelia, Prowlarr, SABnzbd), use the one-command setup:
+
+```bash
+./dev-setup.sh
+```
+
+This sets up everything automatically:
+- Creates all necessary directories and config files
+- Generates secure secrets
+- Configures test users (admin/admin123, user/user123)
+- Prompts for your Hardcover API key
+- Starts all services with Docker Compose
+
+**See [DEV_DOCKER_SETUP.md](docs/DEV_DOCKER_SETUP.md) for detailed documentation.**
+
+### Local Development (Fast Iteration)
+
+For rapid development without Docker:
 
 1. **Install dependencies**
 

@@ -1,9 +1,9 @@
 /**
  * Compatibility layer for the download orchestrator
- * 
+ *
  * This module re-exports functions from downloadOrchestrator.ts and provides
  * backward-compatible wrappers for legacy API endpoints.
- * 
+ *
  * @deprecated Most functions are now in downloadOrchestrator.ts
  */
 
@@ -32,7 +32,7 @@ export {
 
 /**
  * Search for book on Anna's Archive using ISBN first, then title/author
- * 
+ *
  * @deprecated This function is kept for backward compatibility with the search API endpoint.
  * New code should use the orchestrator's internal search logic.
  */
@@ -93,7 +93,7 @@ export async function searchForBook(
 
 /**
  * Select best file from available results
- * 
+ *
  * @deprecated This function is kept for backward compatibility.
  * The orchestrator has its own file selection logic.
  */

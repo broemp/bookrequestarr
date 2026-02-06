@@ -1,11 +1,11 @@
 /**
  * Test script for download directory configuration
- * 
+ *
  * This script tests the priority order of download directory configuration:
  * 1. Environment variable (DOWNLOAD_DIRECTORY)
  * 2. Database setting (download_directory)
  * 3. Default value (./data/downloads)
- * 
+ *
  * Run with: npx tsx scripts/test-download-directory-config.ts
  */
 
@@ -60,9 +60,13 @@ async function testDownloadDirectoryConfig() {
 	// Test 4: Test getSetting with fallback chain
 	console.log('Test 4: Test getSetting with fallback chain');
 	try {
-		const directory = await getSetting('download_directory', 'DOWNLOAD_DIRECTORY', './data/downloads');
+		const directory = await getSetting(
+			'download_directory',
+			'DOWNLOAD_DIRECTORY',
+			'./data/downloads'
+		);
 		console.log(`✓ getSetting returned: ${directory}`);
-		
+
 		// Verify the priority order
 		if (envValue) {
 			if (directory === envValue) {
@@ -77,7 +81,7 @@ async function testDownloadDirectoryConfig() {
 				.from(settings)
 				.where(eq(settings.key, 'download_directory'))
 				.limit(1);
-			
+
 			if (dbSetting && directory === dbSetting.value) {
 				console.log('✓ Correctly using database setting (second priority)');
 			} else if (!dbSetting && directory === './data/downloads') {
@@ -142,8 +146,12 @@ async function testDownloadDirectoryConfig() {
 	// Test 6: Verify priority order with database setting
 	console.log('Test 6: Verify priority order with database setting');
 	try {
-		const directory = await getSetting('download_directory', 'DOWNLOAD_DIRECTORY', './data/downloads');
-		
+		const directory = await getSetting(
+			'download_directory',
+			'DOWNLOAD_DIRECTORY',
+			'./data/downloads'
+		);
+
 		if (envValue) {
 			// Environment variable should still take precedence
 			if (directory === envValue) {
@@ -175,7 +183,10 @@ async function testDownloadDirectoryConfig() {
 	console.log('2. Database setting (download_directory):', testValue);
 	console.log('3. Default value: ./data/downloads');
 	console.log();
-	console.log('Current effective value:', await getSetting('download_directory', 'DOWNLOAD_DIRECTORY', './data/downloads'));
+	console.log(
+		'Current effective value:',
+		await getSetting('download_directory', 'DOWNLOAD_DIRECTORY', './data/downloads')
+	);
 }
 
 // Run the tests

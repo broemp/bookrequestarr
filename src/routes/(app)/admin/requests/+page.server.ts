@@ -28,7 +28,7 @@ export const load: PageServerLoad = async () => {
 
 	const calibreBaseUrl = calibreBaseUrlSetting?.value || null;
 
-	// Get all requests with book and user details
+	// Get all requests with book, user details, and download information
 	const allRequests = await db
 		.select({
 			id: requests.id,
@@ -63,32 +63,28 @@ export const load: PageServerLoad = async () => {
 				id: users.id,
 				displayName: users.displayName,
 				email: users.email
+			},
+			download: {
+				id: downloads.id,
+				downloadStatus: downloads.downloadStatus,
+				fileType: downloads.fileType,
+				fileSize: downloads.fileSize,
+				errorMessage: downloads.errorMessage,
+				downloadSource: downloads.downloadSource,
+				searchMethod: downloads.searchMethod,
+				confidenceScore: downloads.confidenceScore,
+				sabnzbdNzoId: downloads.sabnzbdNzoId,
+				downloadedAt: downloads.downloadedAt
 			}
 		})
 		.from(requests)
 		.innerJoin(books, eq(requests.bookId, books.id))
 		.innerJoin(users, eq(requests.userId, users.id))
+		.leftJoin(downloads, eq(downloads.requestId, requests.id))
 		.orderBy(desc(requests.createdAt));
 
-	// Get download info for each request
-	const requestsWithDownloads = await Promise.all(
-		allRequests.map(async (request) => {
-			const [download] = await db
-				.select()
-				.from(downloads)
-				.where(eq(downloads.requestId, request.id))
-				.orderBy(desc(downloads.createdAt))
-				.limit(1);
-
-			return {
-				...request,
-				download: download || null
-			};
-		})
-	);
-
 	return {
-		requests: requestsWithDownloads,
+		requests: allRequests,
 		annasArchiveEnabled,
 		calibreBaseUrl
 	};

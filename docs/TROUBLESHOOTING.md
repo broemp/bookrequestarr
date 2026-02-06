@@ -283,11 +283,13 @@ docker compose up -d
 The application automatically tries multiple Anna's Archive domains (.li, .pm, .in) to work around blocking. If all domains fail:
 
 1. **Check your internet connection:**
+
    ```bash
    ping 1.1.1.1
    ```
 
 2. **Check if HTTPS is blocked:**
+
    ```bash
    curl -I https://annas-archive.li
    ```
@@ -295,6 +297,7 @@ The application automatically tries multiple Anna's Archive domains (.li, .pm, .
 3. **Try using a VPN** if Anna's Archive is blocked in your region
 
 4. **Check the logs** for specific error messages:
+
    ```bash
    docker compose logs -f bookrequestarr | grep -i "anna"
    ```
@@ -325,17 +328,20 @@ The application automatically tries multiple Anna's Archive domains (.li, .pm, .
 2. **Configure the API key:**
 
    Add to your `.env` file:
+
    ```env
    ANNAS_ARCHIVE_API_KEY=your_api_key_here
    ```
 
    Or for Docker:
+
    ```yaml
    environment:
      - ANNAS_ARCHIVE_API_KEY=your_api_key_here
    ```
 
 3. **Restart the application:**
+
    ```bash
    docker compose down
    docker compose up -d

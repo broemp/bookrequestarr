@@ -18,9 +18,9 @@ users:
   # Password: admin123
   # Groups: bookrequestarr, bookrequestarr_admin
   admin:
-    displayname: "Admin User"
+    displayname: 'Admin User'
     # Generated with: echo -n "admin123" | argon2 somesalt -id -t 1 -m 16 -p 8 -l 32
-    password: "$argon2id$v=19$m=65536$c29tZXNhbHQ$8BtHcroxKOXLKYFJxNRF0A"
+    password: '$argon2id$v=19$m=65536$c29tZXNhbHQ$8BtHcroxKOXLKYFJxNRF0A'
     email: admin@localhost
     groups:
       - bookrequestarr
@@ -31,8 +31,8 @@ users:
   # Password: user123
   # Groups: bookrequestarr
   user:
-    displayname: "Regular User"
-    password: "$argon2id$v=19$m=65536$dXNlcnNhbHQ$VZlR4Kl+oz42gbcoDXohOw"
+    displayname: 'Regular User'
+    password: '$argon2id$v=19$m=65536$dXNlcnNhbHQ$VZlR4Kl+oz42gbcoDXohOw'
     email: user@localhost
     groups:
       - bookrequestarr
@@ -42,8 +42,8 @@ users:
   # Password: test123
   # Groups: bookrequestarr
   testuser:
-    displayname: "Test User"
-    password: "$argon2id$v=19$m=65536$dGVzdHNhbHQ$7x7R5Lm/pz53hcdpEYpiPx"
+    displayname: 'Test User'
+    password: '$argon2id$v=19$m=65536$dGVzdHNhbHQ$7x7R5Lm/pz53hcdpEYpiPx'
     email: testuser@localhost
     groups:
       - bookrequestarr
@@ -53,8 +53,8 @@ users:
   # Password: super123
   # Groups: bookrequestarr_admin
   superadmin:
-    displayname: "Super Admin"
-    password: "$argon2id$v=19$m=65536$c3VwZXJzYWx0$9y8S6Mn0qz64idepFZqjQy"
+    displayname: 'Super Admin'
+    password: '$argon2id$v=19$m=65536$c3VwZXJzYWx0$9y8S6Mn0qz64idepFZqjQy'
     email: superadmin@localhost
     groups:
       - bookrequestarr

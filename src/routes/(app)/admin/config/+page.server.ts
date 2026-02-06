@@ -3,7 +3,6 @@ import { db } from '$lib/server/db';
 import { settings, users, requests } from '$lib/server/db/schema';
 import { eq, count } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
-import { getCacheStats, cleanupExpiredCache, clearAllCache } from '$lib/server/cache';
 import { logger } from '$lib/server/logger';
 import { env } from '$env/dynamic/private';
 
@@ -19,7 +18,6 @@ export const load: PageServerLoad = async () => {
 	// Get stats
 	const [totalUsers] = await db.select({ count: count() }).from(users);
 	const [totalRequests] = await db.select({ count: count() }).from(requests);
-	const cacheStats = await getCacheStats();
 
 	// Check which settings are set via environment variables
 	const envOverrides = {
@@ -35,7 +33,10 @@ export const load: PageServerLoad = async () => {
 		prowlarrApiKey: !!env.PROWLARR_API_KEY,
 		sabnzbdUrl: !!env.SABNZBD_URL,
 		sabnzbdApiKey: !!env.SABNZBD_API_KEY,
-		sabnzbdCategory: !!env.SABNZBD_CATEGORY
+		sabnzbdCategory: !!env.SABNZBD_CATEGORY,
+		bookloreBaseUrl: !!env.BOOKLORE_BASE_URL,
+		bookloreBookdropPath: !!env.BOOKLORE_BOOKDROP_PATH,
+		bookloreApiKey: !!env.BOOKLORE_API_KEY
 	};
 
 	return {
@@ -44,12 +45,16 @@ export const load: PageServerLoad = async () => {
 			discordWebhook: env.DISCORD_WEBHOOK_URL || settingsMap['discord_webhook_url'] || '',
 			telegramBotToken: env.TELEGRAM_BOT_TOKEN || settingsMap['telegram_bot_token'] || '',
 			telegramChatId: env.TELEGRAM_CHAT_ID || settingsMap['telegram_chat_id'] || '',
-			apiCacheTtlDays: settingsMap['api_cache_ttl_days'] || '7',
 			localBookCacheTtlHours: settingsMap['local_book_cache_ttl_hours'] || '6',
-			annasArchiveDomain: env.ANNAS_ARCHIVE_DOMAIN || settingsMap['annas_archive_domain'] || 'annas-archive.org',
+			annasArchiveDomain:
+				env.ANNAS_ARCHIVE_DOMAIN || settingsMap['annas_archive_domain'] || 'annas-archive.org',
 			annasArchiveApiKey: env.ANNAS_ARCHIVE_API_KEY || settingsMap['annas_archive_api_key'] || '',
-			downloadDirectory: env.DOWNLOAD_DIRECTORY || settingsMap['download_directory'] || './data/downloads',
-			downloadTempDirectory: env.DOWNLOAD_TEMP_DIRECTORY || settingsMap['download_temp_directory'] || './data/downloads-temp',
+			downloadDirectory:
+				env.DOWNLOAD_DIRECTORY || settingsMap['download_directory'] || './data/downloads',
+			downloadTempDirectory:
+				env.DOWNLOAD_TEMP_DIRECTORY ||
+				settingsMap['download_temp_directory'] ||
+				'./data/downloads-temp',
 			downloadAutoMode: settingsMap['download_auto_mode'] || 'disabled',
 			downloadDailyLimit: settingsMap['download_daily_limit'] || '25',
 			downloadAutoSelect: settingsMap['download_auto_select'] === 'true',
@@ -63,14 +68,18 @@ export const load: PageServerLoad = async () => {
 			sabnzbdUrl: env.SABNZBD_URL || settingsMap['sabnzbd_url'] || '',
 			sabnzbdApiKey: env.SABNZBD_API_KEY || settingsMap['sabnzbd_api_key'] || '',
 			sabnzbdCategory: env.SABNZBD_CATEGORY || settingsMap['sabnzbd_category'] || 'books',
-			downloadSourcePriority: settingsMap['download_source_priority'] || 'prowlarr_first'
+			downloadSourcePriority: settingsMap['download_source_priority'] || 'prowlarr_first',
+			bookloreEnabled: settingsMap['booklore_enabled'] === 'true',
+			bookloreBaseUrl: env.BOOKLORE_BASE_URL || settingsMap['booklore_base_url'] || '',
+			bookloreBookdropPath:
+				env.BOOKLORE_BOOKDROP_PATH || settingsMap['booklore_bookdrop_path'] || '',
+			bookloreApiKey: env.BOOKLORE_API_KEY || settingsMap['booklore_api_key'] || '',
+			bookloreVerifyImports: settingsMap['booklore_verify_imports'] === 'true'
 		},
 		envOverrides,
 		stats: {
 			totalUsers: totalUsers?.count || 0,
-			totalRequests: totalRequests?.count || 0,
-			cacheEntries: cacheStats.totalEntries,
-			expiredCacheEntries: cacheStats.expiredEntries
+			totalRequests: totalRequests?.count || 0
 		}
 	};
 };
@@ -102,6 +111,11 @@ export const actions: Actions = {
 		const sabnzbdApiKey = formData.get('sabnzbdApiKey') as string;
 		const sabnzbdCategory = formData.get('sabnzbdCategory') as string;
 		const downloadSourcePriority = formData.get('downloadSourcePriority') as string;
+		const bookloreEnabled = formData.get('bookloreEnabled') === 'on';
+		const bookloreBaseUrl = formData.get('bookloreBaseUrl') as string;
+		const bookloreBookdropPath = formData.get('bookloreBookdropPath') as string;
+		const bookloreApiKey = formData.get('bookloreApiKey') as string;
+		const bookloreVerifyImports = formData.get('bookloreVerifyImports') === 'on';
 
 		try {
 			// Update or insert settings
@@ -129,7 +143,12 @@ export const actions: Actions = {
 				{ key: 'sabnzbd_url', value: sabnzbdUrl || '' },
 				{ key: 'sabnzbd_api_key', value: sabnzbdApiKey || '' },
 				{ key: 'sabnzbd_category', value: sabnzbdCategory || 'books' },
-				{ key: 'download_source_priority', value: downloadSourcePriority || 'prowlarr_first' }
+				{ key: 'download_source_priority', value: downloadSourcePriority || 'prowlarr_first' },
+				{ key: 'booklore_enabled', value: bookloreEnabled ? 'true' : 'false' },
+				{ key: 'booklore_base_url', value: bookloreBaseUrl || '' },
+				{ key: 'booklore_bookdrop_path', value: bookloreBookdropPath || '' },
+				{ key: 'booklore_api_key', value: bookloreApiKey || '' },
+				{ key: 'booklore_verify_imports', value: bookloreVerifyImports ? 'true' : 'false' }
 			];
 
 			for (const setting of settingsToUpdate) {
@@ -161,6 +180,9 @@ export const actions: Actions = {
 			if (sabnzbdUrl) process.env.SABNZBD_URL = sabnzbdUrl;
 			if (sabnzbdApiKey) process.env.SABNZBD_API_KEY = sabnzbdApiKey;
 			if (sabnzbdCategory) process.env.SABNZBD_CATEGORY = sabnzbdCategory;
+			if (bookloreBaseUrl) process.env.BOOKLORE_BASE_URL = bookloreBaseUrl;
+			if (bookloreBookdropPath) process.env.BOOKLORE_BOOKDROP_PATH = bookloreBookdropPath;
+			if (bookloreApiKey) process.env.BOOKLORE_API_KEY = bookloreApiKey;
 
 			return { success: true };
 		} catch (error) {
@@ -169,23 +191,27 @@ export const actions: Actions = {
 		}
 	},
 
-	cleanupCache: async () => {
+	testBookloreConnection: async () => {
 		try {
-			const deletedCount = await cleanupExpiredCache();
-			return { success: true, message: `Cleaned up ${deletedCount} expired cache entries` };
-		} catch (error) {
-			logger.error('Error cleaning up cache', error instanceof Error ? error : undefined);
-			return fail(500, { error: 'Failed to cleanup cache' });
-		}
-	},
+			const { testBookloreConnection } = await import('$lib/server/booklore');
+			const result = await testBookloreConnection();
 
-	clearCache: async () => {
-		try {
-			await clearAllCache();
-			return { success: true, message: 'All cache entries cleared' };
+			if (result.success) {
+				return {
+					success: true,
+					message: result.error || 'Booklore connection successful'
+				};
+			} else {
+				return fail(400, { error: result.error || 'Connection failed' });
+			}
 		} catch (error) {
-			logger.error('Error clearing cache', error instanceof Error ? error : undefined);
-			return fail(500, { error: 'Failed to clear cache' });
+			logger.error(
+				'Error testing Booklore connection',
+				error instanceof Error ? error : undefined
+			);
+			return fail(500, {
+				error: `Connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+			});
 		}
 	}
 };

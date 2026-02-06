@@ -12,12 +12,12 @@ This directory contains the Authelia configuration files for the Bookrequestarr 
 
 The following test users are pre-configured:
 
-| Username    | Password   | Groups                                    | Description                    |
-|-------------|------------|-------------------------------------------|--------------------------------|
-| `admin`     | `admin123` | `bookrequestarr`, `bookrequestarr_admin` | Full admin access              |
-| `user`      | `user123`  | `bookrequestarr`                         | Regular user access            |
-| `testuser`  | `test123`  | `bookrequestarr`                         | Additional test user           |
-| `superadmin`| `super123` | `bookrequestarr`, `bookrequestarr_admin` | Alternative admin account      |
+| Username     | Password   | Groups                                   | Description               |
+| ------------ | ---------- | ---------------------------------------- | ------------------------- |
+| `admin`      | `admin123` | `bookrequestarr`, `bookrequestarr_admin` | Full admin access         |
+| `user`       | `user123`  | `bookrequestarr`                         | Regular user access       |
+| `testuser`   | `test123`  | `bookrequestarr`                         | Additional test user      |
+| `superadmin` | `super123` | `bookrequestarr`, `bookrequestarr_admin` | Alternative admin account |
 
 ## Configuration Placeholders
 
@@ -85,6 +85,7 @@ Authelia uses Redis for session storage in the development environment. The Redi
 ## Access Control
 
 The configuration allows all authenticated users (one-factor authentication) to access:
+
 - `localhost` domain
 - `*.localhost` subdomains
 
@@ -97,6 +98,7 @@ In the development environment, Authelia uses file-based notifications instead o
 ## Storage
 
 Authelia uses SQLite for storage in development:
+
 - Database file: `/config/db.sqlite3` (mapped to `dev-data/authelia/db.sqlite3`)
 - Encryption key: Generated during setup
 
