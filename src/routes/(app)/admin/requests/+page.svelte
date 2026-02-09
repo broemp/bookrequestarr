@@ -314,7 +314,7 @@
 	<!-- Requests list -->
 	{#if filteredRequests().length === 0}
 		<Card class="p-12 text-center">
-			<BookOpen class="text-muted-foreground mx-auto mb-3 h-12 w-12 opacity-50" />
+			<BookOpen class="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
 			<p class="text-muted-foreground">
 				{#if searchValue.trim()}
 					No requests found matching "{searchValue}"

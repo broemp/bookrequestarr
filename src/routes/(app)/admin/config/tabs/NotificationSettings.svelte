@@ -74,7 +74,7 @@
 					✓ This value is set via environment variable and cannot be changed here
 				</p>
 			{:else}
-				<p class="text-muted-foreground mt-1 text-xs">
+				<p class="mt-1 text-xs text-muted-foreground">
 					Enter your Discord webhook URL to receive notifications
 				</p>
 			{/if}
@@ -97,7 +97,7 @@
 					✓ This value is set via environment variable and cannot be changed here
 				</p>
 			{:else}
-				<p class="text-muted-foreground mt-1 text-xs">
+				<p class="mt-1 text-xs text-muted-foreground">
 					Enter your Telegram bot token from @BotFather
 				</p>
 			{/if}
@@ -118,7 +118,7 @@
 					✓ This value is set via environment variable and cannot be changed here
 				</p>
 			{:else}
-				<p class="text-muted-foreground mt-1 text-xs">
+				<p class="mt-1 text-xs text-muted-foreground">
 					Enter the chat ID where notifications should be sent
 				</p>
 			{/if}
@@ -139,7 +139,7 @@
 		{/if}
 
 		{#if form?.error}
-			<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+			<div class="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
 				{form.error}
 			</div>
 		{/if}
@@ -157,7 +157,7 @@
 							{result.backend}: <span class="text-green-500">Success</span>
 						</span>
 					{:else}
-						<XCircle class="text-destructive h-5 w-5" />
+						<XCircle class="h-5 w-5 text-destructive" />
 						<span class="text-sm">
 							{result.backend}: <span class="text-destructive">Failed</span>
 						</span>

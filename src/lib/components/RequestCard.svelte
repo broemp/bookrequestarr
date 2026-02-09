@@ -79,7 +79,7 @@
 	}
 </script>
 
-<div class="bg-card border-border hover:border-primary/50 rounded-lg border p-5 transition-colors">
+<div class="rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/50">
 	<div class="flex gap-4">
 		<!-- Book Cover -->
 		<div class="flex-shrink-0">
@@ -90,9 +90,9 @@
 					class="h-28 w-20 rounded-md object-cover shadow-sm"
 				/>
 			{:else}
-				<div class="bg-muted flex h-28 w-20 items-center justify-center rounded-md">
+				<div class="flex h-28 w-20 items-center justify-center rounded-md bg-muted">
 					<svg
-						class="text-muted-foreground h-8 w-8"
+						class="h-8 w-8 text-muted-foreground"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -111,15 +111,15 @@
 		<!-- Request Details -->
 		<div class="min-w-0 flex-1">
 			<!-- Title and Author -->
-			<h3 class="text-foreground mb-1 line-clamp-2 text-lg font-semibold">
+			<h3 class="mb-1 line-clamp-2 text-lg font-semibold text-foreground">
 				{request.bookTitle}
 			</h3>
 			{#if request.bookAuthor}
-				<p class="text-muted-foreground mb-2 text-sm">by {request.bookAuthor}</p>
+				<p class="mb-2 text-sm text-muted-foreground">by {request.bookAuthor}</p>
 			{/if}
 
 			<!-- Meta info -->
-			<div class="text-muted-foreground mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+			<div class="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
 				{#if showUserInfo && request.userName}
 					<span>Requested by {request.userName}</span>
 				{/if}
@@ -141,9 +141,9 @@
 
 			<!-- Special Notes -->
 			{#if request.specialNotes}
-				<div class="bg-muted/50 mb-3 rounded-md p-3">
-					<p class="text-muted-foreground text-sm">
-						<span class="text-foreground font-medium">Notes:</span>
+				<div class="mb-3 rounded-md bg-muted/50 p-3">
+					<p class="text-sm text-muted-foreground">
+						<span class="font-medium text-foreground">Notes:</span>
 						{request.specialNotes}
 					</p>
 				</div>
@@ -181,7 +181,7 @@
 								{/if}
 							</div>
 							{#if request.download.progress}
-								<div class="bg-muted h-2 w-full rounded-full">
+								<div class="h-2 w-full rounded-full bg-muted">
 									<div
 										class="h-2 rounded-full bg-blue-600 transition-all duration-300"
 										style="width: {request.download.progress}%"
@@ -219,7 +219,7 @@
 						<button
 							type="button"
 							onclick={() => onDownload(request)}
-							class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+							class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 						>
 							Download
 						</button>

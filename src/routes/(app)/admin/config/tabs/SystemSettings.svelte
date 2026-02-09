@@ -23,7 +23,7 @@
 		<div class="flex items-center justify-between">
 			<div>
 				<p class="font-medium">Application Version</p>
-				<p class="text-muted-foreground text-sm">Current version of Bookrequestarr</p>
+				<p class="text-sm text-muted-foreground">Current version of Bookrequestarr</p>
 			</div>
 			<Badge>v0.0.1</Badge>
 		</div>
@@ -31,7 +31,7 @@
 		<div class="flex items-center justify-between">
 			<div>
 				<p class="font-medium">Database</p>
-				<p class="text-muted-foreground text-sm">SQLite with Drizzle ORM</p>
+				<p class="text-sm text-muted-foreground">SQLite with Drizzle ORM</p>
 			</div>
 			<Badge variant="secondary">Active</Badge>
 		</div>
@@ -39,7 +39,7 @@
 		<div class="flex items-center justify-between">
 			<div>
 				<p class="font-medium">Total Users</p>
-				<p class="text-muted-foreground text-sm">Registered user accounts</p>
+				<p class="text-sm text-muted-foreground">Registered user accounts</p>
 			</div>
 			<Badge variant="secondary">{stats.totalUsers}</Badge>
 		</div>
@@ -47,7 +47,7 @@
 		<div class="flex items-center justify-between">
 			<div>
 				<p class="font-medium">Total Requests</p>
-				<p class="text-muted-foreground text-sm">All book requests</p>
+				<p class="text-sm text-muted-foreground">All book requests</p>
 			</div>
 			<Badge variant="secondary">{stats.totalRequests}</Badge>
 		</div>

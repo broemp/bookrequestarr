@@ -54,7 +54,7 @@
 				<div class="flex items-start justify-between gap-4">
 					<div class="flex min-w-0 flex-1 items-start gap-4">
 						<div
-							class="bg-primary text-primary-foreground flex h-12 w-12 items-center justify-center rounded-full text-lg font-semibold"
+							class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground"
 						>
 							{user.displayName.charAt(0).toUpperCase()}
 						</div>
@@ -67,7 +67,7 @@
 								</Badge>
 							</div>
 
-							<div class="text-muted-foreground space-y-1 text-sm">
+							<div class="space-y-1 text-sm text-muted-foreground">
 								<div class="flex items-center gap-2">
 									<Mail class="h-4 w-4" />
 									<span class="truncate">{user.email}</span>
@@ -132,7 +132,7 @@
 {#if showCreateModal}
 	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<div
-		class="bg-background/80 fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+		class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
 		onclick={handleBackdropClick}
 	>
 		<div
@@ -166,7 +166,7 @@
 						<select
 							id="role"
 							name="role"
-							class="border-input ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+							class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 							style="background-color: hsl(var(--input));"
 						>
 							<option value="user">User</option>

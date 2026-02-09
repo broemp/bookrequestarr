@@ -90,10 +90,10 @@
 		<Card class="p-6">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-muted-foreground text-sm font-medium">Total Downloads</p>
+					<p class="text-sm font-medium text-muted-foreground">Total Downloads</p>
 					<p class="text-2xl font-bold">{data.stats.total}</p>
 				</div>
-				<div class="bg-primary/10 text-primary rounded-full p-3">
+				<div class="rounded-full bg-primary/10 p-3 text-primary">
 					<Download class="h-5 w-5" />
 				</div>
 			</div>
@@ -103,9 +103,9 @@
 		<Card class="p-6">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-muted-foreground text-sm font-medium">Completed</p>
+					<p class="text-sm font-medium text-muted-foreground">Completed</p>
 					<p class="text-2xl font-bold">{data.stats.completed}</p>
-					<p class="text-muted-foreground text-xs">{successRate}% success rate</p>
+					<p class="text-xs text-muted-foreground">{successRate}% success rate</p>
 				</div>
 				<div class="rounded-full bg-green-500/10 p-3 text-green-500">
 					<CheckCircle class="h-5 w-5" />
@@ -117,7 +117,7 @@
 		<Card class="p-6">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-muted-foreground text-sm font-medium">Failed</p>
+					<p class="text-sm font-medium text-muted-foreground">Failed</p>
 					<p class="text-2xl font-bold">{data.stats.failed}</p>
 				</div>
 				<div class="rounded-full bg-red-500/10 p-3 text-red-500">
@@ -130,10 +130,10 @@
 		<Card class="p-6">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-muted-foreground text-sm font-medium">Total Storage</p>
+					<p class="text-sm font-medium text-muted-foreground">Total Storage</p>
 					<p class="text-2xl font-bold">{formatFileSize(data.stats.totalSize)}</p>
 				</div>
-				<div class="bg-primary/10 text-primary rounded-full p-3">
+				<div class="rounded-full bg-primary/10 p-3 text-primary">
 					<HardDrive class="h-5 w-5" />
 				</div>
 			</div>
@@ -150,7 +150,7 @@
 						<Download class="h-5 w-5 text-blue-500" />
 						<div>
 							<p class="font-medium">Downloading</p>
-							<p class="text-muted-foreground text-sm">In progress</p>
+							<p class="text-sm text-muted-foreground">In progress</p>
 						</div>
 					</div>
 					<p class="text-2xl font-bold">{data.stats.downloading}</p>
@@ -160,7 +160,7 @@
 						<Clock class="h-5 w-5 text-yellow-500" />
 						<div>
 							<p class="font-medium">Pending</p>
-							<p class="text-muted-foreground text-sm">Waiting to start</p>
+							<p class="text-sm text-muted-foreground">Waiting to start</p>
 						</div>
 					</div>
 					<p class="text-2xl font-bold">{data.stats.pending}</p>
@@ -181,7 +181,7 @@
 				{#each data.downloadsByFileType as { fileType, count } (fileType)}
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-2">
-							<File class="text-muted-foreground h-4 w-4" />
+							<File class="h-4 w-4 text-muted-foreground" />
 							<span class="font-medium uppercase">{fileType}</span>
 						</div>
 						<Badge variant="secondary">{count}</Badge>
@@ -221,7 +221,7 @@
 					<div class="flex items-center justify-between">
 						<div class="min-w-0 flex-1">
 							<p class="truncate text-sm font-medium">{user.userDisplayName}</p>
-							<p class="text-muted-foreground truncate text-xs">{user.userEmail}</p>
+							<p class="truncate text-xs text-muted-foreground">{user.userEmail}</p>
 						</div>
 						<Badge variant="secondary">{user.downloadCount}</Badge>
 					</div>
@@ -242,11 +242,11 @@
 			<div class="space-y-2">
 				{#each data.dailyStats.slice(0, 10) as stat (stat.date)}
 					<div class="flex items-center gap-4">
-						<div class="text-muted-foreground w-24 text-sm">{stat.date}</div>
+						<div class="w-24 text-sm text-muted-foreground">{stat.date}</div>
 						<div class="flex-1">
-							<div class="bg-primary/20 h-6 rounded-full">
+							<div class="h-6 rounded-full bg-primary/20">
 								<div
-									class="bg-primary h-full rounded-full transition-all"
+									class="h-full rounded-full bg-primary transition-all"
 									style="width: {Math.min(
 										(stat.downloadCount /
 											Math.max(...data.dailyStats.map((s) => s.downloadCount))) *
@@ -309,7 +309,7 @@
 
 		<div class="space-y-4">
 			{#each filteredDownloads as download (download.id)}
-				<div class="border-border flex items-start gap-4 rounded-lg border p-4">
+				<div class="flex items-start gap-4 rounded-lg border border-border p-4">
 					<!-- Book Cover -->
 					{#if download.bookCoverImage}
 						<img
@@ -318,8 +318,8 @@
 							class="h-24 w-16 rounded object-cover"
 						/>
 					{:else}
-						<div class="bg-muted flex h-24 w-16 items-center justify-center rounded">
-							<FileText class="text-muted-foreground h-8 w-8" />
+						<div class="flex h-24 w-16 items-center justify-center rounded bg-muted">
+							<FileText class="h-8 w-8 text-muted-foreground" />
 						</div>
 					{/if}
 
@@ -328,7 +328,7 @@
 						<div class="mb-2 flex items-start justify-between gap-4">
 							<div class="min-w-0 flex-1">
 								<h3 class="mb-1 font-semibold">{download.bookTitle}</h3>
-								<p class="text-muted-foreground mb-2 text-sm">
+								<p class="mb-2 text-sm text-muted-foreground">
 									{download.bookAuthors.join(', ') || 'Unknown Author'}
 								</p>
 								<div class="flex flex-wrap gap-2">
@@ -354,7 +354,7 @@
 						</div>
 
 						<!-- User and Date Info -->
-						<div class="text-muted-foreground flex flex-wrap items-center gap-4 text-sm">
+						<div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
 							<div class="flex items-center gap-1">
 								<Users class="h-4 w-4" />
 								<span>{download.userDisplayName}</span>
@@ -400,17 +400,17 @@
 									<!-- eslint-enable svelte/no-navigation-without-resolve -->
 								</div>
 								{#if download.filePath}
-									<div class="text-muted-foreground mt-1 text-xs">
+									<div class="mt-1 text-xs text-muted-foreground">
 										<strong>Original path:</strong>
 										{download.filePath}
 									</div>
 								{:else}
-									<div class="text-muted-foreground mt-1 text-xs">
+									<div class="mt-1 text-xs text-muted-foreground">
 										(File cleaned up after ingestion)
 									</div>
 								{/if}
 							{:else if download.filePath}
-								<div class="text-muted-foreground mt-2 text-xs">
+								<div class="mt-2 text-xs text-muted-foreground">
 									<strong>Path:</strong>
 									{download.filePath}
 								</div>

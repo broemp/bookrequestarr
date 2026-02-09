@@ -40,7 +40,7 @@
 	});
 </script>
 
-<div class="border-border mb-6 border-b">
+<div class="mb-6 border-b border-border">
 	<nav class="flex space-x-8" aria-label="Tabs">
 		{#each tabs as tab (tab.id)}
 			<button

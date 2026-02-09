@@ -120,7 +120,7 @@
 				placeholder="Search by title or author..."
 				value={searchValue}
 				oninput={handleSearchInput}
-				class="bg-background border-border focus:ring-primary w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none"
+				class="w-full rounded-lg border border-border bg-background px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
 			/>
 		</div>
 
@@ -129,7 +129,7 @@
 			<select
 				value={sortBy}
 				onchange={handleSortChange}
-				class="bg-background border-border focus:ring-primary w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none"
+				class="w-full rounded-lg border border-border bg-background px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
 			>
 				{#each sortOptions as option (option.value)}
 					<option value={option.value}>{option.label}</option>

@@ -121,7 +121,7 @@
 								✓ This value is set via environment variable and cannot be changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								Base domain for Anna's Archive (e.g., annas-archive.org, annas-archive.se)
 							</p>
 						{/if}
@@ -144,7 +144,7 @@
 								✓ This value is set via environment variable and cannot be changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								Enter your Anna's Archive API key for fast downloads
 							</p>
 						{/if}
@@ -168,7 +168,7 @@
 								changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								Path where completed downloads will be stored (e.g., Calibre ingest folder)
 							</p>
 						{/if}
@@ -192,7 +192,7 @@
 								changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								Temporary directory for in-progress downloads. Files are moved to the download
 								directory when complete.
 							</p>
@@ -207,14 +207,14 @@
 							id="downloadAutoMode"
 							name="downloadAutoMode"
 							value={settings.downloadAutoMode || 'disabled'}
-							class="border-input ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+							class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 							style="background-color: hsl(var(--input));"
 						>
 							<option value="disabled">Disabled (Manual only)</option>
 							<option value="all_users">All Users</option>
 							<option value="selected_users">Selected Users Only</option>
 						</select>
-						<p class="text-muted-foreground mt-1 text-xs">
+						<p class="mt-1 text-xs text-muted-foreground">
 							Control which users' requests trigger automatic downloads
 						</p>
 					</div>
@@ -232,7 +232,7 @@
 							placeholder="25"
 							value={settings.downloadDailyLimit || '25'}
 						/>
-						<p class="text-muted-foreground mt-1 text-xs">
+						<p class="mt-1 text-xs text-muted-foreground">
 							Maximum number of downloads per day (default: 25)
 						</p>
 					</div>
@@ -248,7 +248,7 @@
 					{/if}
 
 					{#if form?.error}
-						<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+						<div class="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
 							{form.error}
 						</div>
 					{/if}
@@ -302,7 +302,7 @@
 								✓ This value is set via environment variable and cannot be changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								Base URL for your Prowlarr instance (e.g., http://localhost:9696)
 							</p>
 						{/if}
@@ -325,7 +325,7 @@
 								✓ This value is set via environment variable and cannot be changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								API key from Prowlarr Settings → General → Security
 							</p>
 						{/if}
@@ -344,7 +344,7 @@
 							placeholder="50"
 							value={settings.minConfidenceScore || '50'}
 						/>
-						<p class="text-muted-foreground mt-1 text-xs">
+						<p class="mt-1 text-xs text-muted-foreground">
 							Minimum match confidence (0-100) required to auto-download from Prowlarr. Higher
 							values are more strict. (default: 50)
 						</p>
@@ -387,7 +387,7 @@
 					{/if}
 
 					{#if form?.error}
-						<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+						<div class="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
 							{form.error}
 						</div>
 					{/if}
@@ -427,7 +427,7 @@
 								✓ This value is set via environment variable and cannot be changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								Base URL for your SABnzbd instance (e.g., http://localhost:8080)
 							</p>
 						{/if}
@@ -450,7 +450,7 @@
 								✓ This value is set via environment variable and cannot be changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								API key from SABnzbd Config → General → Security → API Key
 							</p>
 						{/if}
@@ -473,7 +473,7 @@
 								✓ This value is set via environment variable and cannot be changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								SABnzbd category for book downloads (must exist in SABnzbd settings)
 							</p>
 						{/if}
@@ -516,7 +516,7 @@
 					{/if}
 
 					{#if form?.error}
-						<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+						<div class="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
 							{form.error}
 						</div>
 					{/if}
@@ -546,7 +546,7 @@
 							Enable Booklore Integration
 						</label>
 					</div>
-					<p class="text-muted-foreground text-xs">
+					<p class="text-xs text-muted-foreground">
 						Automatically copy downloaded books to Booklore's BookDrop folder for library ingestion
 					</p>
 
@@ -567,7 +567,7 @@
 								✓ This value is set via environment variable and cannot be changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								Full path to Booklore's BookDrop folder (required for auto-import)
 							</p>
 						{/if}
@@ -590,7 +590,7 @@
 								✓ This value is set via environment variable and cannot be changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								Booklore API URL for health checks (optional)
 							</p>
 						{/if}
@@ -613,7 +613,7 @@
 								✓ This value is set via environment variable and cannot be changed here
 							</p>
 						{:else}
-							<p class="text-muted-foreground mt-1 text-xs">
+							<p class="mt-1 text-xs text-muted-foreground">
 								API key for Booklore (if authentication is required)
 							</p>
 						{/if}
@@ -632,7 +632,7 @@
 							Verify imports via API
 						</label>
 					</div>
-					<p class="text-muted-foreground text-xs">
+					<p class="text-xs text-muted-foreground">
 						Check Booklore API to verify successful import (requires API URL and key)
 					</p>
 
@@ -647,7 +647,7 @@
 					{/if}
 
 					{#if form?.error}
-						<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+						<div class="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
 							{form.error}
 						</div>
 					{/if}
@@ -690,7 +690,7 @@
 							id="downloadSourcePriority"
 							name="downloadSourcePriority"
 							value={settings.downloadSourcePriority || 'prowlarr_first'}
-							class="border-input ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+							class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 							style="background-color: hsl(var(--input));"
 						>
 							<option value="prowlarr_first">Prowlarr First (fallback to Anna's Archive)</option>
@@ -700,7 +700,7 @@
 							<option value="prowlarr_only">Prowlarr Only</option>
 							<option value="annas_archive_only">Anna's Archive Only</option>
 						</select>
-						<p class="text-muted-foreground mt-1 text-xs">
+						<p class="mt-1 text-xs text-muted-foreground">
 							Control which download source is tried first when a request is approved
 						</p>
 					</div>
@@ -718,7 +718,7 @@
 							Auto-Select Best File
 						</label>
 					</div>
-					<p class="text-muted-foreground text-xs">
+					<p class="text-xs text-muted-foreground">
 						Automatically choose the best file format, or prompt for manual selection
 					</p>
 
@@ -733,7 +733,7 @@
 							placeholder="https://calibre.example.com"
 							value={settings.calibreBaseUrl || ''}
 						/>
-						<p class="text-muted-foreground mt-1 text-xs">
+						<p class="mt-1 text-xs text-muted-foreground">
 							Base URL for Calibre-Web interface to link downloaded books
 						</p>
 					</div>
@@ -770,7 +770,7 @@
 										placeholder="24"
 										value={settings.calibreCleanupHours || '24'}
 									/>
-									<p class="text-muted-foreground mt-1 text-xs">
+									<p class="mt-1 text-xs text-muted-foreground">
 										Files in the download directory will be automatically removed after this many
 										hours, assuming Calibre-Web has imported them
 									</p>
@@ -790,7 +790,7 @@
 					{/if}
 
 					{#if form?.error}
-						<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+						<div class="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
 							{form.error}
 						</div>
 					{/if}

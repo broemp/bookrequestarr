@@ -106,17 +106,17 @@
 		<Card class="p-6">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-muted-foreground text-sm font-medium">Total Requests</p>
+					<p class="text-sm font-medium text-muted-foreground">Total Requests</p>
 					<p class="text-2xl font-bold">{data.stats.total}</p>
 				</div>
-				<BookOpen class="text-muted-foreground h-8 w-8" />
+				<BookOpen class="h-8 w-8 text-muted-foreground" />
 			</div>
 		</Card>
 
 		<Card class="p-6">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-muted-foreground text-sm font-medium">Pending</p>
+					<p class="text-sm font-medium text-muted-foreground">Pending</p>
 					<p class="text-2xl font-bold">{data.stats.pending}</p>
 				</div>
 				<Clock class="h-8 w-8 text-yellow-500" />
@@ -126,7 +126,7 @@
 		<Card class="p-6">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-muted-foreground text-sm font-medium">Approved</p>
+					<p class="text-sm font-medium text-muted-foreground">Approved</p>
 					<p class="text-2xl font-bold">{data.stats.approved}</p>
 				</div>
 				<CheckCircle class="h-8 w-8 text-green-500" />
@@ -136,7 +136,7 @@
 		<Card class="p-6">
 			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-muted-foreground text-sm font-medium">Completed</p>
+					<p class="text-sm font-medium text-muted-foreground">Completed</p>
 					<p class="text-2xl font-bold">{data.stats.completed}</p>
 				</div>
 				<CheckCircle class="h-8 w-8 text-blue-500" />

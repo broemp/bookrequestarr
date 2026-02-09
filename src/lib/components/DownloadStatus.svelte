@@ -84,7 +84,7 @@
 	{/if}
 
 	{#if status === 'completed' && fileSize != null}
-		<span class="text-muted-foreground text-xs">{formatFileSize(fileSize)}</span>
+		<span class="text-xs text-muted-foreground">{formatFileSize(fileSize)}</span>
 	{/if}
 
 	{#if status === 'completed' && calibreUrl}
@@ -92,7 +92,7 @@
 			href={resolve(calibreUrl)}
 			target="_blank"
 			rel="external noopener noreferrer"
-			class="text-primary hover:text-primary/80 flex items-center gap-1 text-xs"
+			class="flex items-center gap-1 text-xs text-primary hover:text-primary/80"
 		>
 			<ExternalLink class="h-3 w-3" />
 			Search in Calibre-Web
@@ -100,7 +100,7 @@
 	{/if}
 
 	{#if status === 'failed' && errorMessage}
-		<span class="text-destructive text-xs" title={errorMessage}>
+		<span class="text-xs text-destructive" title={errorMessage}>
 			{errorMessage.substring(0, 50)}{errorMessage.length > 50 ? '...' : ''}
 		</span>
 	{/if}

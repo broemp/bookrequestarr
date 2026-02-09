@@ -40,7 +40,7 @@
 					bind:value={preferredLanguage}
 					placeholder="Select or type a language..."
 				/>
-				<p class="text-muted-foreground mt-1 text-xs">
+				<p class="mt-1 text-xs text-muted-foreground">
 					This will be the default language when requesting books
 				</p>
 			</div>
@@ -59,7 +59,7 @@
 			{/if}
 
 			{#if form?.error}
-				<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+				<div class="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
 					{form.error}
 				</div>
 			{/if}
@@ -77,21 +77,21 @@
 			<div class="flex items-center justify-between">
 				<div>
 					<p class="font-medium">Display Name</p>
-					<p class="text-muted-foreground text-sm">{data.user?.displayName}</p>
+					<p class="text-sm text-muted-foreground">{data.user?.displayName}</p>
 				</div>
 			</div>
 
 			<div class="flex items-center justify-between">
 				<div>
 					<p class="font-medium">Username</p>
-					<p class="text-muted-foreground text-sm">{data.user?.username}</p>
+					<p class="text-sm text-muted-foreground">{data.user?.username}</p>
 				</div>
 			</div>
 
 			<div class="flex items-center justify-between">
 				<div>
 					<p class="font-medium">Email</p>
-					<p class="text-muted-foreground text-sm">{data.user?.email}</p>
+					<p class="text-sm text-muted-foreground">{data.user?.email}</p>
 				</div>
 			</div>
 		</div>

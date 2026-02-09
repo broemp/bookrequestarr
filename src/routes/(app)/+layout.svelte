@@ -28,17 +28,17 @@
 	}
 </script>
 
-<div class="bg-background min-h-screen">
+<div class="min-h-screen bg-background">
 	<!-- Sidebar -->
 	<aside
-		class="bg-card border-border fixed inset-y-0 left-0 z-50 w-64 border-r transition-transform duration-300 {sidebarOpen
+		class="fixed inset-y-0 left-0 z-50 w-64 border-r border-border bg-card transition-transform duration-300 {sidebarOpen
 			? 'translate-x-0'
 			: '-translate-x-full'}"
 		style="background-color: hsl(var(--card));"
 	>
 		<div class="flex h-full flex-col">
 			<!-- Logo -->
-			<div class="border-border flex items-center justify-between border-b px-6 py-4">
+			<div class="flex items-center justify-between border-b border-border px-6 py-4">
 				<h1 class="text-xl font-bold">Bookrequestarr</h1>
 				<button
 					class="lg:hidden"
@@ -55,7 +55,7 @@
 				<!-- User Section -->
 				<div class="mb-6">
 					<div class="mb-2 px-3">
-						<p class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+						<p class="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
 							Discover
 						</p>
 					</div>
@@ -64,7 +64,7 @@
 							href={resolve('/dashboard')}
 							class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 								.url.pathname === '/dashboard'
-								? 'bg-accent text-accent-foreground border-primary border-l-2'
+								? 'border-l-2 border-primary bg-accent text-accent-foreground'
 								: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
 						>
 							<Home class="h-5 w-5" />
@@ -74,7 +74,7 @@
 							href={resolve('/browse')}
 							class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 								.url.pathname === '/browse'
-								? 'bg-accent text-accent-foreground border-primary border-l-2'
+								? 'border-l-2 border-primary bg-accent text-accent-foreground'
 								: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
 						>
 							<Search class="h-5 w-5" />
@@ -84,7 +84,7 @@
 							href={resolve('/requests')}
 							class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 								.url.pathname === '/requests'
-								? 'bg-accent text-accent-foreground border-primary border-l-2'
+								? 'border-l-2 border-primary bg-accent text-accent-foreground'
 								: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
 						>
 							<FileText class="h-5 w-5" />
@@ -95,7 +95,7 @@
 
 				<div class="mb-6">
 					<div class="mb-2 px-3">
-						<p class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+						<p class="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
 							Settings
 						</p>
 					</div>
@@ -104,7 +104,7 @@
 							href={resolve('/settings')}
 							class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 								.url.pathname === '/settings'
-								? 'bg-accent text-accent-foreground border-primary border-l-2'
+								? 'border-l-2 border-primary bg-accent text-accent-foreground'
 								: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
 						>
 							<Settings class="h-5 w-5" />
@@ -115,10 +115,10 @@
 
 				<!-- Admin Section -->
 				{#if data.user?.role === 'admin'}
-					<div class="border-border mb-4 border-t pt-4"></div>
+					<div class="mb-4 border-t border-border pt-4"></div>
 					<div>
 						<div class="mb-2 px-3">
-							<p class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+							<p class="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
 								Administration
 							</p>
 						</div>
@@ -127,7 +127,7 @@
 								href={resolve('/admin/requests')}
 								class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 									.url.pathname === '/admin/requests'
-									? 'bg-accent text-accent-foreground border-primary border-l-2'
+									? 'border-l-2 border-primary bg-accent text-accent-foreground'
 									: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
 							>
 								<FileText class="h-5 w-5" />
@@ -137,7 +137,7 @@
 								href={resolve('/admin/downloads')}
 								class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 									.url.pathname === '/admin/downloads'
-									? 'bg-accent text-accent-foreground border-primary border-l-2'
+									? 'border-l-2 border-primary bg-accent text-accent-foreground'
 									: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
 							>
 								<Download class="h-5 w-5" />
@@ -147,7 +147,7 @@
 								href={resolve('/admin/users')}
 								class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 									.url.pathname === '/admin/users'
-									? 'bg-accent text-accent-foreground border-primary border-l-2'
+									? 'border-l-2 border-primary bg-accent text-accent-foreground'
 									: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
 							>
 								<Users class="h-5 w-5" />
@@ -157,7 +157,7 @@
 								href={resolve('/admin/config')}
 								class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 									.url.pathname === '/admin/config'
-									? 'bg-accent text-accent-foreground border-primary border-l-2'
+									? 'border-l-2 border-primary bg-accent text-accent-foreground'
 									: 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
 							>
 								<Settings class="h-5 w-5" />
@@ -169,16 +169,16 @@
 			</nav>
 
 			<!-- User section -->
-			<div class="border-border border-t p-4">
+			<div class="border-t border-border p-4">
 				<div class="mb-3 flex items-center gap-3">
 					<div
-						class="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-full font-semibold"
+						class="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground"
 					>
 						{data.user?.displayName?.charAt(0).toUpperCase() || 'U'}
 					</div>
 					<div class="min-w-0 flex-1">
 						<p class="truncate text-sm font-medium">{data.user?.displayName}</p>
-						<p class="text-muted-foreground truncate text-xs">{data.user?.email}</p>
+						<p class="truncate text-xs text-muted-foreground">{data.user?.email}</p>
 					</div>
 				</div>
 				<Button variant="outline" size="sm" class="w-full" onclick={handleLogout}>
@@ -194,7 +194,7 @@
 		<!-- Mobile menu button (only visible on mobile when sidebar is closed) -->
 		{#if !sidebarOpen}
 			<button
-				class="hover:bg-accent fixed top-6 left-6 z-50 rounded-md p-2 lg:hidden"
+				class="fixed top-6 left-6 z-50 rounded-md p-2 hover:bg-accent lg:hidden"
 				onclick={() => {
 					sidebarOpen = true;
 				}}
@@ -205,10 +205,10 @@
 		{/if}
 
 		<!-- Notifications button (top right) -->
-		<button class="hover:bg-accent fixed top-6 right-6 z-50 rounded-md p-2">
+		<button class="fixed top-6 right-6 z-50 rounded-md p-2 hover:bg-accent">
 			<Bell class="h-5 w-5" />
 			<span
-				class="bg-destructive absolute top-1 right-1 h-2 w-2 rounded-full"
+				class="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive"
 				aria-label="Notifications"
 			></span>
 		</button>
@@ -223,7 +223,7 @@
 <!-- Overlay for mobile -->
 {#if sidebarOpen}
 	<button
-		class="bg-background/80 fixed inset-0 z-40 backdrop-blur-sm lg:hidden"
+		class="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
 		onclick={() => {
 			sidebarOpen = false;
 		}}

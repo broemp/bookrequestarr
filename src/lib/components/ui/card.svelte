@@ -12,7 +12,7 @@
 </script>
 
 <div
-	class={cn('text-card-foreground rounded-lg border shadow-sm', className)}
+	class={cn('rounded-lg border text-card-foreground shadow-sm', className)}
 	style="background-color: hsl(var(--card));"
 	{onclick}
 	{...restProps}

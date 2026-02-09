@@ -166,7 +166,7 @@
 		</div>
 		<a
 			href={resolve('/browse')}
-			class="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center rounded-md px-4 py-2 text-sm font-medium transition-colors"
+			class="inline-flex h-10 items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 		>
 			<Plus class="mr-2 h-4 w-4" />
 			Request a Book
@@ -189,8 +189,8 @@
 	<!-- Requests list -->
 	{#if filteredRequests().length === 0}
 		<Card class="p-12 text-center">
-			<BookOpen class="text-muted-foreground mx-auto mb-3 h-12 w-12 opacity-50" />
-			<p class="text-muted-foreground mb-4">
+			<BookOpen class="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
+			<p class="mb-4 text-muted-foreground">
 				{#if searchValue.trim()}
 					No requests found matching "{searchValue}"
 				{:else if activeFilter === 'all'}

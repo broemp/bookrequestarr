@@ -320,7 +320,7 @@
 	<Card class="p-4">
 		<div class="space-y-3">
 			<div class="relative">
-				<Search class="text-muted-foreground absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+				<Search class="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
 				<Input bind:value={searchQuery} placeholder="Search by title or author..." class="pl-10" />
 			</div>
 
@@ -347,12 +347,12 @@
 	<!-- Search results -->
 	{#if isSearching}
 		<div class="flex items-center justify-center py-12">
-			<Loader2 class="text-muted-foreground h-8 w-8 animate-spin" />
+			<Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
 		</div>
 	{:else if searchQuery.length >= 2}
 		{#if displayedResults.length === 0}
 			<Card class="p-12 text-center">
-				<BookOpen class="text-muted-foreground mx-auto mb-3 h-12 w-12 opacity-50" />
+				<BookOpen class="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
 				<p class="text-muted-foreground">No books found. Try a different search term.</p>
 			</Card>
 		{:else}
@@ -381,7 +381,7 @@
 				<!-- Show total count -->
 				{#if allSearchResults.length > displayedResults.length}
 					<div class="py-4 text-center">
-						<p class="text-muted-foreground text-sm">
+						<p class="text-sm text-muted-foreground">
 							Showing {displayedResults.length} of {allSearchResults.length} results
 						</p>
 					</div>
@@ -390,7 +390,7 @@
 		{/if}
 	{:else}
 		<Card class="p-12 text-center">
-			<Search class="text-muted-foreground mx-auto mb-3 h-12 w-12 opacity-50" />
+			<Search class="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
 			<p class="text-muted-foreground">Start typing to search for books</p>
 		</Card>
 	{/if}
@@ -433,7 +433,7 @@
 				<div class="mb-6 flex items-center justify-between">
 					<div>
 						<h2 class="text-2xl font-bold">{selectedSeries.name}</h2>
-						<p class="text-muted-foreground text-sm">
+						<p class="text-sm text-muted-foreground">
 							{sortedSeriesBooks.length}
 							{sortedSeriesBooks.length === 1 ? 'book' : 'books'} in this series
 						</p>
@@ -463,11 +463,11 @@
 
 				{#if isLoadingSeries}
 					<div class="flex items-center justify-center py-12">
-						<Loader2 class="text-muted-foreground h-8 w-8 animate-spin" />
+						<Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
 					</div>
 				{:else if sortedSeriesBooks.length === 0}
 					<div class="py-12 text-center">
-						<BookOpen class="text-muted-foreground mx-auto mb-3 h-12 w-12 opacity-50" />
+						<BookOpen class="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
 						<p class="text-muted-foreground">No books found in this series.</p>
 					</div>
 				{:else}

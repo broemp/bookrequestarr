@@ -95,7 +95,7 @@
 		role="dialog"
 		aria-modal="true"
 		tabindex="-1"
-		class="bg-background border-border fixed z-50 overflow-y-auto border-l"
+		class="fixed z-50 overflow-y-auto border-l border-border bg-background"
 		class:slide-right={actualPosition === 'right'}
 		class:slide-bottom={actualPosition === 'bottom'}
 		style:width={actualPosition === 'right' ? width : '100%'}
@@ -105,7 +105,7 @@
 		<!-- Close button -->
 		<button
 			onclick={close}
-			class="hover:bg-muted absolute top-4 right-4 z-10 rounded-lg p-2 transition-colors"
+			class="absolute top-4 right-4 z-10 rounded-lg p-2 transition-colors hover:bg-muted"
 			aria-label="Close panel"
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

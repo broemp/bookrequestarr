@@ -52,12 +52,12 @@
 					✓ This value is set via environment variable and cannot be changed here
 				</p>
 			{:else}
-				<p class="text-muted-foreground mt-1 text-xs">
+				<p class="mt-1 text-xs text-muted-foreground">
 					Enter your Hardcover API key to fetch book metadata. Get one at <a
 						href="https://hardcover.app/settings/api"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="hover:text-foreground underline">hardcover.app/settings/api</a
+						class="underline hover:text-foreground">hardcover.app/settings/api</a
 					>
 				</p>
 			{/if}
@@ -76,7 +76,7 @@
 				placeholder="6"
 				value={settings.localBookCacheTtlHours || '6'}
 			/>
-			<p class="text-muted-foreground mt-1 text-xs">
+			<p class="mt-1 text-xs text-muted-foreground">
 				How long to keep book details in local database cache for instant loading (default: 6 hours)
 			</p>
 		</div>
@@ -92,7 +92,7 @@
 		{/if}
 
 		{#if form?.error}
-			<div class="bg-destructive/10 text-destructive rounded-md p-4 text-sm">
+			<div class="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
 				{form.error}
 			</div>
 		{/if}

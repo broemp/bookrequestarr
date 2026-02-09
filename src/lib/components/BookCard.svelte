@@ -47,14 +47,14 @@
 	}}
 >
 	<div
-		class="bg-card border-border hover:border-primary/50 overflow-hidden rounded-lg border transition-all hover:shadow-lg"
+		class="overflow-hidden rounded-lg border border-border bg-card transition-all hover:border-primary/50 hover:shadow-lg"
 	>
 		<!-- Cover Image -->
-		<div class="bg-muted relative aspect-[2/3]">
+		<div class="relative aspect-[2/3] bg-muted">
 			{#if book.coverImageUrl}
 				<img src={book.coverImageUrl} alt={book.title} class="h-full w-full object-cover" />
 			{:else}
-				<div class="text-muted-foreground flex h-full w-full items-center justify-center">
+				<div class="flex h-full w-full items-center justify-center text-muted-foreground">
 					<svg class="h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
@@ -69,7 +69,7 @@
 			<!-- Requested badge -->
 			{#if requested}
 				<div
-					class="bg-primary text-primary-foreground absolute top-2 right-2 rounded-md px-2 py-1 text-xs font-semibold"
+					class="absolute top-2 right-2 rounded-md bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground"
 				>
 					Requested
 				</div>
@@ -80,7 +80,7 @@
 				<button
 					type="button"
 					onclick={handleQuickRequest}
-					class="bg-primary text-primary-foreground hover:bg-primary/90 absolute right-2 bottom-2 rounded-md px-2.5 py-1.5 text-xs font-medium shadow-md transition-colors"
+					class="absolute right-2 bottom-2 rounded-md bg-primary px-2.5 py-1.5 text-xs font-medium text-primary-foreground shadow-md transition-colors hover:bg-primary/90"
 				>
 					Request
 				</button>
@@ -103,18 +103,18 @@
 
 		<!-- Book info -->
 		<div class="p-3">
-			<h3 class="text-foreground mb-1 line-clamp-2 text-sm font-semibold">
+			<h3 class="mb-1 line-clamp-2 text-sm font-semibold text-foreground">
 				{book.title}
 			</h3>
 
 			{#if book.authors && book.authors.length > 0}
-				<p class="text-muted-foreground mb-1 line-clamp-1 text-xs">
+				<p class="mb-1 line-clamp-1 text-xs text-muted-foreground">
 					{book.authors.join(', ')}
 				</p>
 			{/if}
 
 			{#if book.releaseYear}
-				<p class="text-muted-foreground text-xs">
+				<p class="text-xs text-muted-foreground">
 					{book.releaseYear}
 				</p>
 			{/if}

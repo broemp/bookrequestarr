@@ -16,7 +16,7 @@
 	<title>Login - Bookrequestarr</title>
 </svelte:head>
 
-<div class="dark bg-background flex min-h-screen items-center justify-center p-4">
+<div class="dark flex min-h-screen items-center justify-center bg-background p-4">
 	<Card class="w-full max-w-md p-8">
 		<div class="mb-8 text-center">
 			<h1 class="mb-2 text-3xl font-bold">📚 Bookrequestarr</h1>
@@ -24,7 +24,7 @@
 		</div>
 
 		{#if error}
-			<div class="bg-destructive/10 text-destructive mb-6 rounded-md p-4 text-sm">
+			<div class="mb-6 rounded-md bg-destructive/10 p-4 text-sm text-destructive">
 				{errorMessages[error] || 'An error occurred. Please try again.'}
 			</div>
 		{/if}
@@ -33,7 +33,7 @@
 			<Button type="submit" class="w-full" size="lg">Sign in with OIDC</Button>
 		</form>
 
-		<p class="text-muted-foreground mt-6 text-center text-sm">
+		<p class="mt-6 text-center text-sm text-muted-foreground">
 			You need to be a member of the authorized group to access this application.
 		</p>
 	</Card>

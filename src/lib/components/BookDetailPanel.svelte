@@ -174,7 +174,7 @@
 		<div class="flex h-full items-center justify-center">
 			<div class="text-center">
 				<div
-					class="border-primary mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-t-transparent"
+					class="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"
 				></div>
 				<p class="text-muted-foreground">Loading book details...</p>
 			</div>
@@ -195,24 +195,24 @@
 							/>
 						{:else}
 							<div
-								class="bg-muted flex h-80 w-56 flex-shrink-0 items-center justify-center rounded-lg"
+								class="flex h-80 w-56 flex-shrink-0 items-center justify-center rounded-lg bg-muted"
 							>
-								<BookOpen class="text-muted-foreground h-20 w-20" />
+								<BookOpen class="h-20 w-20 text-muted-foreground" />
 							</div>
 						{/if}
 
 						<div class="flex min-w-0 flex-1 flex-col items-center text-center">
 							<h2 class="mb-2 text-3xl leading-tight font-bold">{book.title}</h2>
 							{#if book.subtitle}
-								<p class="text-muted-foreground mb-3 text-lg">{book.subtitle}</p>
+								<p class="mb-3 text-lg text-muted-foreground">{book.subtitle}</p>
 							{/if}
 
 							{#if book.contributions && book.contributions.length > 0}
-								<p class="text-muted-foreground mb-4 text-base">
+								<p class="mb-4 text-base text-muted-foreground">
 									by {book.contributions.map((c) => c.author.name).join(', ')}
 								</p>
 							{:else if book.author}
-								<p class="text-muted-foreground mb-4 text-base">by {book.author}</p>
+								<p class="mb-4 text-base text-muted-foreground">by {book.author}</p>
 							{/if}
 
 							<!-- Series information -->
@@ -236,7 +236,7 @@
 
 							<!-- Book details -->
 							<div
-								class="text-muted-foreground mb-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm"
+								class="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground"
 							>
 								{#if book.rating}
 									<div class="flex items-center gap-1.5">
@@ -328,9 +328,9 @@
 
 					<!-- Summary section -->
 					{#if book.description}
-						<div class="border-border border-t pt-6">
+						<div class="border-t border-border pt-6">
 							<h3 class="mb-3 text-lg font-semibold">Summary</h3>
-							<p class="text-muted-foreground text-sm leading-relaxed">
+							<p class="text-sm leading-relaxed text-muted-foreground">
 								{book.description}
 							</p>
 						</div>
@@ -339,7 +339,7 @@
 
 				<!-- Right side: Request form -->
 				<div
-					class="border-border flex w-full flex-shrink-0 flex-col lg:w-[420px] lg:border-l lg:pl-8"
+					class="flex w-full flex-shrink-0 flex-col border-border lg:w-[420px] lg:border-l lg:pl-8"
 				>
 					<h3 class="mb-4 text-xl font-semibold">Request This Book</h3>
 
@@ -363,7 +363,7 @@
 									id="formatType"
 									name="formatType"
 									bind:value={selectedFormat}
-									class="border-input ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+									class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
 									style="background-color: hsl(var(--input));"
 								>
 									<option value="ebook">Ebook</option>
@@ -380,7 +380,7 @@
 									id="specialNotes"
 									name="specialNotes"
 									rows="4"
-									class="border-input ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+									class="flex w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
 									style="background-color: hsl(var(--input));"
 									placeholder="Any special requests or notes..."
 								></textarea>
@@ -391,13 +391,13 @@
 							<button
 								type="button"
 								onclick={handleClose}
-								class="border-border hover:bg-muted flex-1 rounded-md border px-4 py-2 text-sm font-medium transition-colors"
+								class="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
 							>
 								Cancel
 							</button>
 							<button
 								type="submit"
-								class="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors"
+								class="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 							>
 								Submit Request
 							</button>

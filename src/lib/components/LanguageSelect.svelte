@@ -85,7 +85,7 @@
 		onfocus={handleFocus}
 		onblur={handleBlur}
 		class={cn(
-			'border-input ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+			'flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
 			className
 		)}
 		style="background-color: hsl(var(--input));"
@@ -94,7 +94,7 @@
 
 	{#if showDropdown && filteredLanguages.length > 0}
 		<div
-			class="border-border bg-card z-[100] rounded-md border shadow-lg"
+			class="z-[100] rounded-md border border-border bg-card shadow-lg"
 			style="{dropdownStyle} background-color: hsl(var(--card));"
 		>
 			<ul class="max-h-48 overflow-y-auto py-1">
@@ -102,7 +102,7 @@
 					<li>
 						<button
 							type="button"
-							class="hover:bg-accent hover:text-accent-foreground w-full px-3 py-2 text-left text-sm transition-colors"
+							class="w-full px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
 							onmousedown={(e) => {
 								e.preventDefault();
 								selectLanguage(language);
