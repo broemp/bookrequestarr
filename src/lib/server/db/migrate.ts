@@ -20,7 +20,6 @@ const REQUIRED_TABLES = [
 	'notifications',
 	'settings',
 	'new_releases',
-	'api_cache',
 	'downloads',
 	'download_stats'
 ];

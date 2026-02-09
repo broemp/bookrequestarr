@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition';
 
 	interface Props {
 		open?: boolean;
@@ -72,6 +72,11 @@
 
 	// Responsive position
 	let actualPosition = $derived(browser && window.innerWidth < 768 ? 'bottom' : position);
+
+	// Transition parameters based on position
+	let transitionParams = $derived(
+		actualPosition === 'right' ? { x: 400, duration: 300 } : { y: 400, duration: 300 }
+	);
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -80,8 +85,6 @@
 	<!-- Backdrop -->
 	<div
 		class="fixed inset-0 z-40 bg-black/50 transition-opacity duration-300"
-		class:opacity-100={open}
-		class:opacity-0={!open}
 		onclick={handleBackdropClick}
 		role="presentation"
 	></div>
@@ -92,11 +95,12 @@
 		role="dialog"
 		aria-modal="true"
 		tabindex="-1"
-		class="bg-background border-border fixed z-50 overflow-y-auto border-l transition-transform duration-300 ease-out"
+		class="bg-background border-border fixed z-50 overflow-y-auto border-l"
 		class:slide-right={actualPosition === 'right'}
 		class:slide-bottom={actualPosition === 'bottom'}
 		style:width={actualPosition === 'right' ? width : '100%'}
 		style:height={actualPosition === 'bottom' ? '85vh' : '100vh'}
+		transition:fly={transitionParams}
 	>
 		<!-- Close button -->
 		<button
@@ -126,11 +130,6 @@
 		top: 0;
 		right: 0;
 		bottom: 0;
-		transform: translateX(0);
-	}
-
-	.slide-right:not(.open) {
-		transform: translateX(100%);
 	}
 
 	.slide-bottom {
@@ -140,10 +139,5 @@
 		border-radius: 1rem 1rem 0 0;
 		border-left: none;
 		border-top: 1px solid hsl(var(--border));
-		transform: translateY(0);
-	}
-
-	.slide-bottom:not(.open) {
-		transform: translateY(100%);
 	}
 </style>

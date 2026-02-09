@@ -24,8 +24,6 @@
 		onClick
 	}: Props = $props();
 
-	let isHovered = $state(false);
-
 	function handleClick() {
 		onClick?.(book);
 	}
@@ -38,8 +36,6 @@
 
 <div
 	class="group relative cursor-pointer"
-	onmouseenter={() => (isHovered = true)}
-	onmouseleave={() => (isHovered = false)}
 	onclick={handleClick}
 	role="button"
 	tabindex="0"
@@ -79,19 +75,15 @@
 				</div>
 			{/if}
 
-			<!-- Quick request overlay (desktop only) -->
-			{#if showQuickRequest && !requested && isHovered}
-				<div
-					class="absolute inset-0 flex items-center justify-center bg-black/60 transition-opacity"
+			<!-- Quick request button -->
+			{#if showQuickRequest && !requested}
+				<button
+					type="button"
+					onclick={handleQuickRequest}
+					class="bg-primary text-primary-foreground hover:bg-primary/90 absolute right-2 bottom-2 rounded-md px-2.5 py-1.5 text-xs font-medium shadow-md transition-colors"
 				>
-					<button
-						type="button"
-						onclick={handleQuickRequest}
-						class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-3 font-medium shadow-lg transition-colors"
-					>
-						Quick Request
-					</button>
-				</div>
+					Request
+				</button>
 			{/if}
 
 			<!-- Rating badge -->
