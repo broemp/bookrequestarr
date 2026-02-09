@@ -25,7 +25,16 @@
 		<h2 class="text-xl font-semibold">API Settings</h2>
 	</div>
 
-	<form method="POST" action="?/updateSettings" use:enhance class="space-y-4">
+	<form
+		method="POST"
+		action="?/updateSettings"
+		use:enhance={() => {
+			return async ({ update }) => {
+				await update({ reset: false });
+			};
+		}}
+		class="space-y-4"
+	>
 		<div>
 			<label for="hardcoverApiKey" class="mb-2 block text-sm font-medium">
 				Hardcover API Key

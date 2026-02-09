@@ -47,7 +47,16 @@
 		<h2 class="text-xl font-semibold">Notification Settings</h2>
 	</div>
 
-	<form method="POST" action="?/updateSettings" use:enhance class="space-y-4">
+	<form
+		method="POST"
+		action="?/updateSettings"
+		use:enhance={() => {
+			return async ({ update }) => {
+				await update({ reset: false });
+			};
+		}}
+		class="space-y-4"
+	>
 		<div>
 			<label for="discordWebhook" class="mb-2 block text-sm font-medium">
 				Discord Webhook URL
@@ -55,7 +64,7 @@
 			<Input
 				id="discordWebhook"
 				name="discordWebhook"
-				type="url"
+				type="text"
 				placeholder="https://discord.com/api/webhooks/..."
 				value={settings.discordWebhook || ''}
 				disabled={envOverrides.discordWebhook}

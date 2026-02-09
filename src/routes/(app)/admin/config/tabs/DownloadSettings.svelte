@@ -94,7 +94,16 @@
 					</div>
 				{/if}
 
-				<form method="POST" action="?/updateSettings" use:enhance class="space-y-4">
+				<form
+					method="POST"
+					action="?/updateSettings"
+					use:enhance={() => {
+						return async ({ update }) => {
+							await update({ reset: false });
+						};
+					}}
+					class="space-y-4"
+				>
 					<div>
 						<label for="annasArchiveDomain" class="mb-2 block text-sm font-medium">
 							Anna's Archive Domain
@@ -254,8 +263,18 @@
 					</p>
 				</div>
 
-				<form method="POST" action="?/updateSettings" use:enhance class="space-y-4">
+				<form
+					method="POST"
+					action="?/updateSettings"
+					use:enhance={() => {
+						return async ({ update }) => {
+							await update({ reset: false });
+						};
+					}}
+					class="space-y-4"
+				>
 					<div class="flex items-center gap-2">
+						<input type="hidden" name="prowlarrEnabled__present" value="1" />
 						<input
 							type="checkbox"
 							id="prowlarrEnabled"
@@ -383,7 +402,16 @@
 					</p>
 				</div>
 
-				<form method="POST" action="?/updateSettings" use:enhance class="space-y-4">
+				<form
+					method="POST"
+					action="?/updateSettings"
+					use:enhance={() => {
+						return async ({ update }) => {
+							await update({ reset: false });
+						};
+					}}
+					class="space-y-4"
+				>
 					<div>
 						<label for="sabnzbdUrl" class="mb-2 block text-sm font-medium"> SABnzbd URL </label>
 						<Input
@@ -495,8 +523,18 @@
 				</form>
 			{:else if activeSubTab === 'booklore'}
 				<!-- Booklore Integration -->
-				<form method="POST" action="?/updateSettings" use:enhance class="space-y-4">
+				<form
+					method="POST"
+					action="?/updateSettings"
+					use:enhance={() => {
+						return async ({ update }) => {
+							await update({ reset: false });
+						};
+					}}
+					class="space-y-4"
+				>
 					<div class="flex items-center gap-2">
+						<input type="hidden" name="bookloreEnabled__present" value="1" />
 						<input
 							type="checkbox"
 							id="bookloreEnabled"
@@ -582,6 +620,7 @@
 					</div>
 
 					<div class="flex items-center gap-2">
+						<input type="hidden" name="bookloreVerifyImports__present" value="1" />
 						<input
 							type="checkbox"
 							id="bookloreVerifyImports"
@@ -615,7 +654,16 @@
 				</form>
 
 				{#if settings.bookloreBookdropPath}
-					<form method="POST" action="?/testBookloreConnection" use:enhance class="mt-4">
+					<form
+						method="POST"
+						action="?/testBookloreConnection"
+						use:enhance={() => {
+							return async ({ update }) => {
+								await update({ reset: false });
+							};
+						}}
+						class="mt-4"
+					>
 						<Button type="submit" variant="outline">
 							<TestTube class="mr-2 h-4 w-4" />
 							Test Connection
@@ -624,7 +672,16 @@
 				{/if}
 			{:else if activeSubTab === 'general'}
 				<!-- General Download Settings -->
-				<form method="POST" action="?/updateSettings" use:enhance class="space-y-4">
+				<form
+					method="POST"
+					action="?/updateSettings"
+					use:enhance={() => {
+						return async ({ update }) => {
+							await update({ reset: false });
+						};
+					}}
+					class="space-y-4"
+				>
 					<div>
 						<label for="downloadSourcePriority" class="mb-2 block text-sm font-medium">
 							Download Source Priority
@@ -649,6 +706,7 @@
 					</div>
 
 					<div class="flex items-center gap-2">
+						<input type="hidden" name="downloadAutoSelect__present" value="1" />
 						<input
 							type="checkbox"
 							id="downloadAutoSelect"
@@ -685,6 +743,7 @@
 							<h3 class="text-sm font-semibold text-blue-600">Calibre-Web Automated Integration</h3>
 
 							<div class="flex items-center gap-2">
+								<input type="hidden" name="calibreCleanupEnabled__present" value="1" />
 								<input
 									type="checkbox"
 									id="calibreCleanupEnabled"
