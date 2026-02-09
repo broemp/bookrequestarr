@@ -5,7 +5,7 @@
 	import FilterBar from '$lib/components/FilterBar.svelte';
 	import Card from '$lib/components/ui/card.svelte';
 	import Button from '$lib/components/ui/button.svelte';
-	import { BookOpen } from 'lucide-svelte';
+	import { BookOpen, Plus } from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -159,9 +159,18 @@
 </svelte:head>
 
 <div class="space-y-6">
-	<div>
-		<h1 class="mb-2 text-3xl font-bold">My Requests</h1>
-		<p class="text-muted-foreground">Track the status of your book requests</p>
+	<div class="flex items-start justify-between">
+		<div>
+			<h1 class="mb-2 text-3xl font-bold">My Requests</h1>
+			<p class="text-muted-foreground">Track the status of your book requests</p>
+		</div>
+		<a
+			href={resolve('/browse')}
+			class="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center rounded-md px-4 py-2 text-sm font-medium transition-colors"
+		>
+			<Plus class="mr-2 h-4 w-4" />
+			Request a Book
+		</a>
 	</div>
 
 	<!-- Filter Bar -->
