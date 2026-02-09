@@ -1,14 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
-import {
-	requests,
-	books,
-	users,
-	bookAuthors,
-	authors,
-	downloads,
-	settings
-} from '$lib/server/db/schema';
+import { requests, books, users, downloads, settings } from '$lib/server/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { sendNotification, formatRequestUpdateNotification } from '$lib/server/notifications';

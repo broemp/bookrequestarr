@@ -9,7 +9,7 @@ import {
 	bookAuthors,
 	authors
 } from '$lib/server/db/schema';
-import { desc, eq, sql, and, gte } from 'drizzle-orm';
+import { desc, eq, sql, gte } from 'drizzle-orm';
 import { isCalibreEnabled, getCalibreBaseUrl } from '$lib/server/calibre';
 
 export const load: PageServerLoad = async () => {

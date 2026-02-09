@@ -98,7 +98,7 @@
 			style="{dropdownStyle} background-color: hsl(var(--card));"
 		>
 			<ul class="max-h-48 overflow-y-auto py-1">
-				{#each filteredLanguages as language}
+				{#each filteredLanguages as language (language)}
 					<li>
 						<button
 							type="button"

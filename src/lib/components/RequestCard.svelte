@@ -1,6 +1,5 @@
 <script lang="ts">
 	import ErrorDisplay from './ErrorDisplay.svelte';
-	import DownloadStatus from './DownloadStatus.svelte';
 
 	interface Request {
 		id: string;

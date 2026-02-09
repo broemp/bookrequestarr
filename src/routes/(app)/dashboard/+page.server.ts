@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { requests, books, bookAuthors, authors, downloads } from '$lib/server/db/schema';
+import { requests, books, downloads } from '$lib/server/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
 import { getTrendingBooks } from '$lib/server/hardcover';
 

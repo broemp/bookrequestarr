@@ -45,22 +45,6 @@
 		}
 	}
 
-	// Get status icon
-	function getStatusIcon(status: string) {
-		switch (status) {
-			case 'completed':
-				return CheckCircle;
-			case 'failed':
-				return XCircle;
-			case 'downloading':
-				return Download;
-			case 'pending':
-				return Clock;
-			default:
-				return Clock;
-		}
-	}
-
 	// Get search method label
 	function getSearchMethodLabel(method: string): string {
 		switch (method) {
@@ -194,7 +178,7 @@
 				By File Type
 			</h2>
 			<div class="space-y-3">
-				{#each data.downloadsByFileType as { fileType, count }}
+				{#each data.downloadsByFileType as { fileType, count } (fileType)}
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-2">
 							<File class="text-muted-foreground h-4 w-4" />
@@ -215,7 +199,7 @@
 				By Search Method
 			</h2>
 			<div class="space-y-3">
-				{#each data.downloadsBySearchMethod as { searchMethod, count }}
+				{#each data.downloadsBySearchMethod as { searchMethod, count } (searchMethod)}
 					<div class="flex items-center justify-between">
 						<span class="font-medium">{getSearchMethodLabel(searchMethod)}</span>
 						<Badge variant="secondary">{count}</Badge>
@@ -233,7 +217,7 @@
 				Top Users
 			</h2>
 			<div class="space-y-3">
-				{#each data.topUsers as user}
+				{#each data.topUsers as user (user.userId)}
 					<div class="flex items-center justify-between">
 						<div class="min-w-0 flex-1">
 							<p class="truncate text-sm font-medium">{user.userDisplayName}</p>
@@ -256,7 +240,7 @@
 				Daily Downloads (Last 30 Days)
 			</h2>
 			<div class="space-y-2">
-				{#each data.dailyStats.slice(0, 10) as stat}
+				{#each data.dailyStats.slice(0, 10) as stat (stat.date)}
 					<div class="flex items-center gap-4">
 						<div class="text-muted-foreground w-24 text-sm">{stat.date}</div>
 						<div class="flex-1">
@@ -324,7 +308,7 @@
 		</div>
 
 		<div class="space-y-4">
-			{#each filteredDownloads as download}
+			{#each filteredDownloads as download (download.id)}
 				<div class="border-border flex items-start gap-4 rounded-lg border p-4">
 					<!-- Book Cover -->
 					{#if download.bookCoverImage}
@@ -402,18 +386,18 @@
 										<CheckCircle class="mr-1 h-3 w-3" />
 										Delivered to Calibre-Web
 									</Badge>
+									<!-- eslint-disable svelte/no-navigation-without-resolve -->
 									{#if data.calibreBaseUrl}
 										<a
-											href="{data.calibreBaseUrl}/search?query={encodeURIComponent(
-												`${download.bookTitle} ${download.bookAuthors.join(' ')}`
-											)}"
+											href={`${data.calibreBaseUrl}/search?query=${encodeURIComponent(`${download.bookTitle} ${download.bookAuthors.join(' ')}`)}`}
 											target="_blank"
-											rel="noopener noreferrer"
+											rel="external noopener noreferrer"
 											class="text-xs text-blue-500 hover:underline"
 										>
 											Search in Calibre-Web →
 										</a>
 									{/if}
+									<!-- eslint-enable svelte/no-navigation-without-resolve -->
 								</div>
 								{#if download.filePath}
 									<div class="text-muted-foreground mt-1 text-xs">

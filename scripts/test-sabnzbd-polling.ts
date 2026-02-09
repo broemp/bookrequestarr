@@ -16,7 +16,6 @@ import {
 	getActiveSabnzbdDownloads
 } from '../src/lib/server/downloadOrchestrator';
 import { isSabnzbdConfigured, getQueue, getHistory } from '../src/lib/server/sabnzbd';
-import { logger } from '../src/lib/server/logger';
 
 async function main() {
 	console.log('=== SABnzbd Status Polling Test ===\n');

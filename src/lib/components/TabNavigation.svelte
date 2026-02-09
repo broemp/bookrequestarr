@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 
 	interface Tab {
 		id: string;
@@ -25,7 +25,7 @@
 		if (browser) {
 			const url = new URL(window.location.href);
 			url.searchParams.set('tab', tabId);
-			goto(url.toString(), { replaceState: true, noScroll: true });
+			goto(resolve(url.pathname + url.search), { replaceState: true, noScroll: true });
 		}
 	}
 
@@ -42,7 +42,7 @@
 
 <div class="border-border mb-6 border-b">
 	<nav class="flex space-x-8" aria-label="Tabs">
-		{#each tabs as tab}
+		{#each tabs as tab (tab.id)}
 			<button
 				type="button"
 				onclick={() => handleTabClick(tab.id)}

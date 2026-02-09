@@ -2,6 +2,7 @@
 	import Badge from '$lib/components/ui/badge.svelte';
 	import { Download, CheckCircle, AlertCircle, Loader2, ExternalLink } from 'lucide-svelte';
 	import type { DownloadStatus as DownloadStatusType } from '$lib/types/download';
+	import { resolve } from '$app/paths';
 
 	let {
 		status,
@@ -88,9 +89,9 @@
 
 	{#if status === 'completed' && calibreUrl}
 		<a
-			href={calibreUrl}
+			href={resolve(calibreUrl)}
 			target="_blank"
-			rel="noopener noreferrer"
+			rel="external noopener noreferrer"
 			class="text-primary hover:text-primary/80 flex items-center gap-1 text-xs"
 		>
 			<ExternalLink class="h-3 w-3" />

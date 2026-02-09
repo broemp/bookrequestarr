@@ -65,7 +65,7 @@
 				<div class="border-border/50 mt-3 border-t pt-3">
 					<p class="text-foreground mb-2 text-sm font-medium">Attempted:</p>
 					<ul class="space-y-1">
-						{#each attemptedSteps as step}
+						{#each attemptedSteps as step (step)}
 							<li class="text-muted-foreground flex items-start gap-2 text-sm">
 								<span class="mt-1">•</span>
 								<span>{step}</span>
@@ -78,7 +78,7 @@
 			<!-- Actions -->
 			{#if actions.length > 0}
 				<div class="mt-4 flex flex-wrap gap-2">
-					{#each actions as action}
+					{#each actions as action (action.label)}
 						<button
 							type="button"
 							onclick={action.onClick}

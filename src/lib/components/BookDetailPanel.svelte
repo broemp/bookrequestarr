@@ -3,7 +3,7 @@
 	import LanguageSelect from './LanguageSelect.svelte';
 	import { toast } from '$lib/stores/toast';
 	import { BookOpen } from 'lucide-svelte';
-	import Card from './ui/card.svelte';
+	import { resolve } from '$app/paths';
 
 	interface Book {
 		dbId?: string;
@@ -218,7 +218,7 @@
 							<!-- Series information -->
 							{#if book.book_series && book.book_series.length > 0}
 								<div class="mb-4 flex flex-col items-center gap-1.5">
-									{#each book.book_series as series}
+									{#each book.book_series as series (series.series.id)}
 										<button
 											type="button"
 											class="text-sm font-medium text-purple-400 transition-colors hover:text-purple-300"
@@ -285,9 +285,9 @@
 
 							<!-- Hardcover button -->
 							<a
-								href={createHardcoverUrl(book)}
+								href={resolve(createHardcoverUrl(book))}
 								target="_blank"
-								rel="noopener noreferrer"
+								rel="external noopener noreferrer"
 								class="mb-4 inline-flex items-center justify-center gap-2 rounded-md border border-purple-500/30 px-4 py-2 text-sm font-medium text-purple-400 transition-colors hover:border-purple-500/50 hover:text-purple-300"
 							>
 								<span>View on Hardcover</span>
@@ -306,7 +306,7 @@
 								<div class="w-full">
 									<h4 class="mb-2 text-center text-sm font-semibold">Genres</h4>
 									<div class="flex flex-wrap justify-center gap-2">
-										{#each book.taggings.slice(0, 6) as tagging}
+										{#each book.taggings.slice(0, 6) as tagging (tagging.tag.tag)}
 											<span
 												class="rounded-full border border-purple-600/30 bg-purple-600/20 px-3 py-1 text-xs font-medium text-purple-300"
 											>

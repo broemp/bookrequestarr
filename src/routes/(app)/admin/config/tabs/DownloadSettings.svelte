@@ -3,7 +3,7 @@
 	import Button from '$lib/components/ui/button.svelte';
 	import Input from '$lib/components/ui/input.svelte';
 	import VerticalTabs from '$lib/components/VerticalTabs.svelte';
-	import { Download, Search, Zap, BookOpen, TestTube } from 'lucide-svelte';
+	import { Download, TestTube } from 'lucide-svelte';
 	import { enhance } from '$app/forms';
 
 	interface Props {
@@ -46,7 +46,7 @@
 			bookloreBookdropPath: boolean;
 			bookloreApiKey: boolean;
 		};
-		form: any;
+		form: { success?: boolean; error?: string; message?: string } | null;
 	}
 
 	let { settings, envOverrides, form }: Props = $props();
@@ -366,7 +366,7 @@
 										} else {
 											alert(`Prowlarr connection failed: ${result.error}`);
 										}
-									} catch (error) {
+									} catch {
 										alert('Failed to test Prowlarr connection');
 									} finally {
 										isTesting = false;
@@ -495,7 +495,7 @@
 										} else {
 											alert(`SABnzbd connection failed: ${result.error}`);
 										}
-									} catch (error) {
+									} catch {
 										alert('Failed to test SABnzbd connection');
 									} finally {
 										isTesting = false;

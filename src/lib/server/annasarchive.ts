@@ -631,7 +631,6 @@ export async function downloadFile(downloadUrl: string, destinationPath: string)
 
 			// Stream the download to file
 			const fileStream = createWriteStream(destinationPath);
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			await pipeline(response.body as unknown as NodeJS.ReadableStream, fileStream);
 
 			logger.info('File download completed', { destinationPath });

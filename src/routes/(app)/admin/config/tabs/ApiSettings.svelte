@@ -13,7 +13,7 @@
 		envOverrides: {
 			hardcoverApiKey: boolean;
 		};
-		form: any;
+		form: { success?: boolean; error?: string } | null;
 	}
 
 	let { settings, envOverrides, form }: Props = $props();

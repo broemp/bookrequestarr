@@ -1,5 +1,4 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { json } from '@sveltejs/kit';
 import { checkRateLimit, type RateLimitConfig } from './rateLimit';
 import { env } from '$env/dynamic/private';
 import { dev } from '$app/environment';

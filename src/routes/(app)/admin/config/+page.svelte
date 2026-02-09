@@ -6,7 +6,11 @@
 	import NotificationSettings from './tabs/NotificationSettings.svelte';
 	import SystemSettings from './tabs/SystemSettings.svelte';
 
-	let { data, form }: { data: PageData; form: any } = $props();
+	let {
+		data,
+		form
+	}: { data: PageData; form: { success?: boolean; error?: string; message?: string } | null } =
+		$props();
 
 	let activeTab = $state('api');
 

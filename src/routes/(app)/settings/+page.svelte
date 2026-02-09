@@ -6,7 +6,8 @@
 	import { User, Save } from 'lucide-svelte';
 	import { enhance } from '$app/forms';
 
-	let { data, form }: { data: PageData; form: any } = $props();
+	let { data, form }: { data: PageData; form: { success?: boolean; error?: string } | null } =
+		$props();
 
 	let preferredLanguage = $state(data.user?.preferredLanguage || 'English');
 </script>

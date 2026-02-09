@@ -9,17 +9,31 @@
 	import BookDetailPanel from '$lib/components/BookDetailPanel.svelte';
 	import { toast } from '$lib/stores/toast';
 	import { Search, BookOpen, Loader2 } from 'lucide-svelte';
+	import type { BookSearchResult } from '$lib/types/book';
+
+	interface SearchBook extends BookSearchResult {
+		has_ebook?: boolean;
+		unreleased?: boolean;
+		release_date?: string;
+		rating?: number;
+		dbId?: string;
+		[key: string]: unknown;
+	}
 
 	let { data }: { data: PageData } = $props();
 
 	let searchQuery = $state('');
-	let allSearchResults = $state<any[]>([]); // All results from API
-	let displayedResults = $state<any[]>([]); // Results currently displayed
+	let allSearchResults = $state<SearchBook[]>([]);
+	let displayedResults = $state<SearchBook[]>([]);
 	let isSearching = $state(false);
 	let selectedBookId = $state<string | null>(null);
 	let bookDetailPanelOpen = $state(false);
-	let selectedSeries = $state<{ id: string; name: string; fromBook?: any } | null>(null);
-	let seriesBooks = $state<any[]>([]);
+	let selectedSeries = $state<{
+		id: string;
+		name: string;
+		fromBook?: { id: string; hardcoverId?: string };
+	} | null>(null);
+	let seriesBooks = $state<SearchBook[]>([]);
 	let isLoadingSeries = $state(false);
 	let filterUnwanted = $state(true);
 	let displayCount = $state(20);
@@ -62,7 +76,7 @@
 		}
 	}, 300);
 
-	async function checkRequestedBooks(books: any[]) {
+	async function checkRequestedBooks(books: SearchBook[]) {
 		try {
 			const hardcoverIds = books.map((b) => b.hardcoverId);
 			const response = await fetch('/api/requests/check', {
@@ -120,7 +134,7 @@
 	});
 
 	// Filter out unwanted books (collections, no ebook, unreleased, etc.)
-	function filterUnwantedBooks(books: any[]): any[] {
+	function filterUnwantedBooks(books: SearchBook[]): SearchBook[] {
 		return books.filter((book) => {
 			// Filter out books with unknown authors
 			const author = book.author?.toLowerCase() || '';
@@ -180,7 +194,7 @@
 		};
 	});
 
-	function openBookDetail(book: any) {
+	function openBookDetail(book: { id: string; hardcoverId?: string }) {
 		selectedBookId = book.hardcoverId || book.id;
 		bookDetailPanelOpen = true;
 		updateUrlWithBookId(selectedBookId);
@@ -202,7 +216,7 @@
 		updateUrlWithBookId(null);
 	}
 
-	async function handleQuickRequest(book: any) {
+	async function handleQuickRequest(book: SearchBook) {
 		const bookId = book.hardcoverId || book.id;
 		const language = data.user?.lastUsedLanguage || data.user?.preferredLanguage || 'English';
 		const format = data.user?.lastUsedFormat || 'ebook';
@@ -238,7 +252,11 @@
 		}
 	}
 
-	async function viewSeries(seriesId: string, seriesName: string, fromBook?: any) {
+	async function viewSeries(
+		seriesId: string,
+		seriesName: string,
+		fromBook?: { id: string; hardcoverId?: string }
+	) {
 		selectedSeries = { id: seriesId, name: seriesName, fromBook };
 		bookDetailPanelOpen = false;
 		isLoadingSeries = true;
@@ -342,7 +360,7 @@
 				<div
 					class="grid grid-cols-3 gap-6 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8"
 				>
-					{#each displayedResults as book}
+					{#each displayedResults as book (book.hardcoverId)}
 						<BookCard
 							book={{
 								id: book.hardcoverId,
@@ -456,7 +474,7 @@
 					<div
 						class="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
 					>
-						{#each sortedSeriesBooks as book}
+						{#each sortedSeriesBooks as book (book.hardcoverId || book.id)}
 							<div class="relative">
 								<!-- Position badge overlay -->
 								{#if book.position !== undefined && book.position !== null}

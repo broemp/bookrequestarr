@@ -16,7 +16,7 @@ export interface HardcoverBook {
 	pages?: number;
 	rating?: number;
 	ratings_count?: number;
-	cached_contributors?: any;
+	cached_contributors?: unknown;
 	default_physical_edition?: {
 		isbn_13?: string;
 		isbn_10?: string;

@@ -49,7 +49,7 @@
 
 	<!-- Users list -->
 	<div class="space-y-4">
-		{#each data.users as user}
+		{#each data.users as user (user.id)}
 			<Card class="p-4">
 				<div class="flex items-start justify-between gap-4">
 					<div class="flex min-w-0 flex-1 items-start gap-4">

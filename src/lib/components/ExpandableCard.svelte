@@ -1,16 +1,11 @@
 <script lang="ts">
 	interface Props {
 		expanded?: boolean;
-		title?: string;
 		children?: import('svelte').Snippet;
 		expandedContent?: import('svelte').Snippet;
 	}
 
-	let { expanded = $bindable(false), title, children, expandedContent }: Props = $props();
-
-	function toggle() {
-		expanded = !expanded;
-	}
+	let { expanded = $bindable(false), children, expandedContent }: Props = $props();
 </script>
 
 <div class="border-border overflow-hidden rounded-lg border transition-all">

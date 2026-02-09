@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	interface Filter {
 		id: string;
@@ -66,7 +67,7 @@
 		}
 		url.searchParams.set('sort', sortBy);
 
-		goto(url.toString(), { replaceState: true, noScroll: true });
+		goto(resolve(url.pathname + url.search), { replaceState: true, noScroll: true });
 	}
 
 	// Sync with URL on mount
@@ -93,7 +94,7 @@
 <div class="mb-6 flex flex-col gap-4">
 	<!-- Filter buttons -->
 	<div class="flex flex-wrap gap-2">
-		{#each filters as filter}
+		{#each filters as filter (filter.id)}
 			<button
 				type="button"
 				onclick={() => handleFilterClick(filter.id)}
@@ -130,7 +131,7 @@
 				onchange={handleSortChange}
 				class="bg-background border-border focus:ring-primary w-full rounded-lg border px-4 py-2 focus:ring-2 focus:outline-none"
 			>
-				{#each sortOptions as option}
+				{#each sortOptions as option (option.value)}
 					<option value={option.value}>{option.label}</option>
 				{/each}
 			</select>

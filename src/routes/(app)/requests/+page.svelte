@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { resolve } from '$app/paths';
 	import RequestCard from '$lib/components/RequestCard.svelte';
 	import FilterBar from '$lib/components/FilterBar.svelte';
 	import Card from '$lib/components/ui/card.svelte';
@@ -191,7 +192,7 @@
 			</p>
 			{#if !searchValue.trim() && activeFilter === 'all'}
 				<Button>
-					<a href="/browse">Search Books</a>
+					<a href={resolve('/browse')}>Search Books</a>
 				</Button>
 			{/if}
 		</Card>

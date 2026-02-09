@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
+	import type { Snippet } from 'svelte';
 	import type { LayoutData } from './$types';
 	import Button from '$lib/components/ui/button.svelte';
 	import Toast from '$lib/components/Toast.svelte';
@@ -16,24 +18,9 @@
 		Download
 	} from 'lucide-svelte';
 
-	let { data, children }: { data: LayoutData; children: any } = $props();
+	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
 	let sidebarOpen = $state(true);
-
-	const navigation = $derived([
-		{ name: 'Dashboard', href: '/dashboard', icon: Home },
-		{ name: 'Search Books', href: '/search', icon: Search },
-		{ name: 'My Requests', href: '/requests', icon: FileText },
-		{ name: 'Settings', href: '/settings', icon: Settings },
-		...(data.user?.role === 'admin'
-			? [
-					{ name: 'Admin: Requests', href: '/admin/requests', icon: FileText },
-					{ name: 'Admin: Downloads', href: '/admin/downloads', icon: Download },
-					{ name: 'Admin: Users', href: '/admin/users', icon: Users },
-					{ name: 'Admin: Settings', href: '/admin/settings', icon: Settings }
-				]
-			: [])
-	]);
 
 	async function handleLogout() {
 		await fetch('/api/auth/logout', { method: 'POST' });
@@ -74,7 +61,7 @@
 					</div>
 					<div class="space-y-1">
 						<a
-							href="/dashboard"
+							href={resolve('/dashboard')}
 							class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 								.url.pathname === '/dashboard'
 								? 'bg-accent text-accent-foreground border-primary border-l-2'
@@ -84,7 +71,7 @@
 							Dashboard
 						</a>
 						<a
-							href="/browse"
+							href={resolve('/browse')}
 							class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 								.url.pathname === '/browse'
 								? 'bg-accent text-accent-foreground border-primary border-l-2'
@@ -94,7 +81,7 @@
 							Browse Books
 						</a>
 						<a
-							href="/requests"
+							href={resolve('/requests')}
 							class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 								.url.pathname === '/requests'
 								? 'bg-accent text-accent-foreground border-primary border-l-2'
@@ -114,7 +101,7 @@
 					</div>
 					<div class="space-y-1">
 						<a
-							href="/settings"
+							href={resolve('/settings')}
 							class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 								.url.pathname === '/settings'
 								? 'bg-accent text-accent-foreground border-primary border-l-2'
@@ -137,7 +124,7 @@
 						</div>
 						<div class="space-y-1">
 							<a
-								href="/admin/requests"
+								href={resolve('/admin/requests')}
 								class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 									.url.pathname === '/admin/requests'
 									? 'bg-accent text-accent-foreground border-primary border-l-2'
@@ -147,7 +134,7 @@
 								Requests
 							</a>
 							<a
-								href="/admin/downloads"
+								href={resolve('/admin/downloads')}
 								class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 									.url.pathname === '/admin/downloads'
 									? 'bg-accent text-accent-foreground border-primary border-l-2'
@@ -157,7 +144,7 @@
 								Downloads
 							</a>
 							<a
-								href="/admin/users"
+								href={resolve('/admin/users')}
 								class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 									.url.pathname === '/admin/users'
 									? 'bg-accent text-accent-foreground border-primary border-l-2'
@@ -167,7 +154,7 @@
 								Users
 							</a>
 							<a
-								href="/admin/config"
+								href={resolve('/admin/config')}
 								class="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors {$page
 									.url.pathname === '/admin/config'
 									? 'bg-accent text-accent-foreground border-primary border-l-2'

@@ -540,12 +540,12 @@ export function parseReleaseTitle(title: string): {
 	// "Title - Author (Year)"
 	// "Author - Title"
 	// "Title by Author"
-	const byPattern = title.match(/(.+?)\s+by\s+(.+?)(?:\s*[\[(]|$)/i);
+	const byPattern = title.match(/(.+?)\s+by\s+(.+?)(?:\s*[[(]|$)/i);
 	if (byPattern) {
 		result.title = byPattern[1].trim();
 		result.author = byPattern[2].trim();
 	} else {
-		const dashPattern = title.match(/^(.+?)\s*[-–—]\s*(.+?)(?:\s*[\[(]|$)/);
+		const dashPattern = title.match(/^(.+?)\s*[-–—]\s*(.+?)(?:\s*[[(]|$)/);
 		if (dashPattern) {
 			// Could be "Author - Title" or "Title - Author"
 			// Heuristic: if first part has fewer words, it's likely the author
@@ -570,7 +570,7 @@ export function parseReleaseTitle(title: string): {
 		result.title = result.title
 			.replace(/\b(19|20)\d{2}\b/g, '')
 			.replace(/\b(EPUB|PDF|MOBI|AZW3|DJVU|TXT|FB2|CBR|CBZ|MP3|M4B|FLAC)\b/gi, '')
-			.replace(/\s*[\[(].*?[\])]\s*/g, '')
+			.replace(/\s*[[(].*?[\])]\s*/g, '')
 			.replace(/\s+/g, ' ')
 			.trim();
 	}
@@ -579,7 +579,7 @@ export function parseReleaseTitle(title: string): {
 		// Remove year and other metadata from author
 		result.author = result.author
 			.replace(/\b(19|20)\d{2}\b/g, '')
-			.replace(/\s*[\[(].*?[\])]\s*/g, '')
+			.replace(/\s*[[(].*?[\])]\s*/g, '')
 			.replace(/\s+/g, ' ')
 			.trim();
 	}

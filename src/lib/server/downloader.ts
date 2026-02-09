@@ -8,7 +8,7 @@
  */
 
 import { db } from './db';
-import { books, bookAuthors, authors } from './db/schema';
+import { bookAuthors, authors } from './db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { logger } from './logger';
 import type { Book } from '$lib/types/book';

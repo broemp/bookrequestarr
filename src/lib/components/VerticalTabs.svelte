@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	interface Tab {
 		id: string;
@@ -30,7 +31,7 @@
 		if (browser) {
 			const url = new URL(window.location.href);
 			url.searchParams.set(param, tabId);
-			goto(url.toString(), { replaceState: true, noScroll: true });
+			goto(resolve(url.pathname + url.search), { replaceState: true, noScroll: true });
 		}
 	}
 
@@ -46,7 +47,7 @@
 </script>
 
 <nav class="flex flex-col space-y-1" aria-label="Vertical tabs">
-	{#each tabs as tab}
+	{#each tabs as tab (tab.id)}
 		<button
 			type="button"
 			onclick={() => handleTabClick(tab.id)}

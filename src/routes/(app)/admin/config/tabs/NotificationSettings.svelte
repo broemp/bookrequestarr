@@ -16,7 +16,7 @@
 			telegramBotToken: boolean;
 			telegramChatId: boolean;
 		};
-		form: any;
+		form: { success?: boolean; error?: string } | null;
 	}
 
 	let { settings, envOverrides, form }: Props = $props();
@@ -149,7 +149,7 @@
 	{#if testResults.length > 0}
 		<div class="mt-6 space-y-2">
 			<h3 class="font-medium">Test Results:</h3>
-			{#each testResults as result}
+			{#each testResults as result (result.backend)}
 				<div class="flex items-center gap-2">
 					{#if result.success}
 						<CheckCircle class="h-5 w-5 text-green-500" />

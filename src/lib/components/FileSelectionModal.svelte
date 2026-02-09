@@ -78,7 +78,7 @@
 					<p class="text-muted-foreground py-8 text-center">No files found</p>
 				{:else}
 					<div class="space-y-3">
-						{#each results as result}
+						{#each results as result (result.md5)}
 							<Card
 								class="hover:bg-accent/50 cursor-pointer p-4 transition-colors"
 								onclick={() => handleSelect(result)}

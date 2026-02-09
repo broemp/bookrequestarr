@@ -3,10 +3,8 @@
 	import RequestCard from '$lib/components/RequestCard.svelte';
 	import FilterBar from '$lib/components/FilterBar.svelte';
 	import Card from '$lib/components/ui/card.svelte';
-	import Button from '$lib/components/ui/button.svelte';
 	import FileSelectionModal from '$lib/components/FileSelectionModal.svelte';
 	import { BookOpen } from 'lucide-svelte';
-	import { enhance } from '$app/forms';
 	import type { AnnasArchiveSearchResult } from '$lib/types/download';
 
 	let { data }: { data: PageData } = $props();
@@ -132,7 +130,7 @@
 	});
 
 	// Action handlers
-	async function handleApprove(request: any) {
+	async function handleApprove(request: { id: string }) {
 		processingRequests.add(request.id);
 		processingRequests = processingRequests;
 
@@ -160,7 +158,7 @@
 		}
 	}
 
-	async function handleReject(request: any) {
+	async function handleReject(request: { id: string; bookTitle: string }) {
 		if (!confirm(`Reject request for "${request.bookTitle}"?`)) {
 			return;
 		}
@@ -192,7 +190,7 @@
 		}
 	}
 
-	async function handleDownload(request: any) {
+	async function handleDownload(request: { id: string }) {
 		processingRequests.add(request.id);
 		processingRequests = processingRequests;
 
@@ -225,7 +223,7 @@
 		}
 	}
 
-	async function handleRetry(request: any) {
+	async function handleRetry(request: { id: string; download?: { id: string } }) {
 		if (!request.download?.id) return;
 
 		processingRequests.add(request.id);

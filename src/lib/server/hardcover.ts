@@ -55,7 +55,7 @@ export async function searchBooks(searchQuery: string, limit = 20): Promise<Book
 	`;
 
 	try {
-		const data = await graphqlQuery<{ search: { ids: number[]; results: any } }>(query, {
+		const data = await graphqlQuery<{ search: { ids: number[]; results: unknown } }>(query, {
 			query: searchQuery
 		});
 
@@ -400,7 +400,7 @@ export async function cacheBook(book: HardcoverBook): Promise<string> {
 /**
  * Cache authors for a book
  */
-async function cacheBookAuthors(bookId: string, contributions: any[] | undefined) {
+async function cacheBookAuthors(bookId: string, contributions: unknown[] | undefined) {
 	if (!contributions || contributions.length === 0) {
 		return;
 	}
@@ -452,7 +452,7 @@ async function cacheBookAuthors(bookId: string, contributions: any[] | undefined
 /**
  * Cache tags for a book
  */
-async function cacheBookTags(bookId: string, taggings: any[] | undefined) {
+async function cacheBookTags(bookId: string, taggings: unknown[] | undefined) {
 	if (!taggings || taggings.length === 0) {
 		return;
 	}
