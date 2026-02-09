@@ -28,6 +28,7 @@
 		request: Request;
 		showActions?: boolean;
 		showUserInfo?: boolean;
+		isProcessing?: boolean;
 		onApprove?: (request: Request) => void;
 		onReject?: (request: Request) => void;
 		onRetry?: (request: Request) => void;
@@ -38,6 +39,7 @@
 		request,
 		showActions = false,
 		showUserInfo = false,
+		isProcessing = false,
 		onApprove,
 		onReject,
 		onRetry,
@@ -201,15 +203,24 @@
 					{#if request.status === 'pending' && onApprove && onReject}
 						<button
 							type="button"
+							disabled={isProcessing}
 							onclick={() => onApprove(request)}
-							class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
+							class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
 						>
-							Approve
+							{#if isProcessing}
+								<span class="inline-flex items-center gap-2">
+									<span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+									Processing...
+								</span>
+							{:else}
+								Approve
+							{/if}
 						</button>
 						<button
 							type="button"
+							disabled={isProcessing}
 							onclick={() => onReject(request)}
-							class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+							class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							Reject
 						</button>
@@ -218,20 +229,36 @@
 					{#if request.status === 'approved' && onDownload}
 						<button
 							type="button"
+							disabled={isProcessing}
 							onclick={() => onDownload(request)}
-							class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+							class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
 						>
-							Download
+							{#if isProcessing}
+								<span class="inline-flex items-center gap-2">
+									<span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+									Searching...
+								</span>
+							{:else}
+								Download
+							{/if}
 						</button>
 					{/if}
 
 					{#if request.status === 'download_problem' && onRetry}
 						<button
 							type="button"
+							disabled={isProcessing}
 							onclick={() => onRetry(request)}
-							class="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-700"
+							class="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
 						>
-							Retry Download
+							{#if isProcessing}
+								<span class="inline-flex items-center gap-2">
+									<span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+									Retrying...
+								</span>
+							{:else}
+								Retry Download
+							{/if}
 						</button>
 					{/if}
 				</div>

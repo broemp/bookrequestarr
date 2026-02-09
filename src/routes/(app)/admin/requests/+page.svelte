@@ -334,6 +334,7 @@
 					{request}
 					showActions={true}
 					showUserInfo={true}
+					isProcessing={processingRequests.has(request.id)}
 					onApprove={request.status === 'pending' ? handleApprove : undefined}
 					onReject={request.status === 'pending' ? handleReject : undefined}
 					onDownload={request.status === 'approved' && data.annasArchiveEnabled && !request.download

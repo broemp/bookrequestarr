@@ -537,11 +537,15 @@ async function downloadViaAnnasArchive(
 			processAnnasArchiveDownload(downloadId, md5, fileType, pathIndex, domainIndex),
 			timeoutPromise
 		]).catch(async (error) => {
+			const errorMsg = error instanceof Error ? error.message : 'Unknown error';
 			logger.error(
-				"Background Anna's Archive download failed or timed out",
+				"Background Anna's Archive download failed",
 				error instanceof Error ? error : undefined,
 				{
-					downloadId
+					downloadId,
+					md5,
+					fileType,
+					errorMessage: errorMsg
 				}
 			);
 
@@ -603,14 +607,14 @@ async function processAnnasArchiveDownload(
 	pathIndex?: number,
 	domainIndex?: number
 ): Promise<void> {
-	logger.info("Processing Anna's Archive download", { downloadId, md5 });
+	logger.info("Processing Anna's Archive download", { downloadId, md5, fileType });
 
 	try {
 		// Check if API key is configured
 		const hasApiKey = await annasArchive.isApiKeyConfigured();
 		if (!hasApiKey) {
 			throw new Error(
-				"Anna's Archive API key not configured. Please set ANNAS_ARCHIVE_API_KEY in your environment variables or configure it in the admin settings. Get an API key at: https://annas-archive.org/account"
+				"Anna's Archive API key not configured. Please set ANNAS_ARCHIVE_API_KEY in your environment variables or configure it in the admin settings."
 			);
 		}
 
@@ -622,12 +626,18 @@ async function processAnnasArchiveDownload(
 
 		// If path_index and domain_index not provided, fetch file details to get them
 		if (pathIndex === undefined || domainIndex === undefined) {
-			logger.info('Fetching file details to get download indices', { md5 });
+			logger.info('Fetching file details to get download indices', { downloadId, md5 });
 			const fileInfo = await annasArchive.getAvailableFiles(md5);
 
-			if (!fileInfo || !fileInfo.download_urls || fileInfo.download_urls.length === 0) {
+			if (!fileInfo) {
 				throw new Error(
-					'Could not find download options for this file. The file may not be available for fast download.'
+					`File not found on Anna's Archive (MD5: ${md5}). The file may have been removed.`
+				);
+			}
+
+			if (!fileInfo.download_urls || fileInfo.download_urls.length === 0) {
+				throw new Error(
+					`No fast download options available for "${fileInfo.title || md5}" (${fileType}). The file exists but fast download is not available for it.`
 				);
 			}
 
@@ -635,6 +645,7 @@ async function processAnnasArchiveDownload(
 			pathIndex = fileInfo.download_urls[0].path_index;
 			domainIndex = fileInfo.download_urls[0].domain_index;
 			logger.info('Using download indices from file details', {
+				downloadId,
 				md5,
 				pathIndex,
 				domainIndex,
@@ -643,17 +654,24 @@ async function processAnnasArchiveDownload(
 		}
 
 		// Get fast download URL
+		logger.info('Requesting fast download URL', { downloadId, md5, pathIndex, domainIndex });
 		const downloadResponse = await annasArchive.getFastDownloadUrl(md5, pathIndex, domainIndex);
 
 		if (!downloadResponse.download_url) {
-			const errorMsg = downloadResponse.error || 'Failed to get download URL';
+			const errorMsg = downloadResponse.error || 'Failed to get download URL (no URL returned)';
+
+			logger.error('Fast download URL request failed', undefined, {
+				downloadId,
+				md5,
+				pathIndex,
+				domainIndex,
+				apiError: errorMsg
+			});
 
 			// Provide more helpful error messages for common issues
 			if (errorMsg.toLowerCase().includes('invalid md5')) {
 				throw new Error(
-					`Invalid MD5 hash: The file with MD5 "${md5}" does not exist in Anna's Archive or is not available for fast download. ` +
-						`This may happen if the file was removed or if the search result is outdated. ` +
-						`Try searching for the book again or use a different edition.`
+					`Invalid MD5 hash "${md5}": file does not exist or is unavailable. Try searching again or use a different edition.`
 				);
 			}
 
@@ -662,12 +680,21 @@ async function processAnnasArchiveDownload(
 				errorMsg.toLowerCase().includes('account')
 			) {
 				throw new Error(
-					`Anna's Archive membership issue: ${errorMsg}. ` +
-						`Please verify your API key is valid and your account has an active membership at https://annas-archive.org/account`
+					`Anna's Archive account error: ${errorMsg}. Check your API key and membership status.`
 				);
 			}
 
-			throw new Error(errorMsg);
+			if (
+				errorMsg.toLowerCase().includes('rate') ||
+				errorMsg.toLowerCase().includes('limit') ||
+				errorMsg.toLowerCase().includes('too many')
+			) {
+				throw new Error(
+					`Anna's Archive rate limit hit: ${errorMsg}. Try again later.`
+				);
+			}
+
+			throw new Error(`Anna's Archive download failed: ${errorMsg}`);
 		}
 
 		// Ensure both directories exist
@@ -680,7 +707,12 @@ async function processAnnasArchiveDownload(
 		const finalFilePath = join(downloadDir, filename);
 
 		// Download file to temp directory
-		logger.info('Downloading file to temp directory', { tempFilePath });
+		logger.info('Downloading file to temp directory', {
+			downloadId,
+			md5,
+			tempFilePath,
+			downloadUrl: downloadResponse.download_url.substring(0, 80) + '...'
+		});
 		await annasArchive.downloadFile(downloadResponse.download_url, tempFilePath);
 
 		// Get file size
@@ -845,13 +877,47 @@ async function updateDownloadStats(date: Date = new Date()): Promise<void> {
  *    a. Fall back to Anna's Archive
  * 4. Create download record and track status
  */
+/** Track in-flight download requests to prevent duplicates */
+const inFlightDownloads = new Set<string>();
+
 export async function initiateDownload(
 	requestId: string,
 	options: InitiateDownloadOptions = {}
 ): Promise<DownloadOrchestrationResult> {
 	logger.info('Initiating download via orchestrator', { requestId, options });
 
+	// Prevent duplicate concurrent downloads for the same request
+	if (inFlightDownloads.has(requestId)) {
+		logger.warn('Duplicate download request rejected - already in progress', { requestId });
+		return { success: false, error: 'A download is already in progress for this request' };
+	}
+
+	inFlightDownloads.add(requestId);
+
 	try {
+		// Also check DB for existing active downloads
+		const [existingDownload] = await db
+			.select()
+			.from(downloads)
+			.where(eq(downloads.requestId, requestId))
+			.limit(1);
+
+		if (
+			existingDownload &&
+			(existingDownload.downloadStatus === 'pending' ||
+				existingDownload.downloadStatus === 'downloading')
+		) {
+			logger.warn('Download already exists in database', {
+				requestId,
+				existingDownloadId: existingDownload.id,
+				status: existingDownload.downloadStatus
+			});
+			return {
+				success: false,
+				error: `A download is already ${existingDownload.downloadStatus} for this request`
+			};
+		}
+
 		// Get request and book details
 		const requestWithBook = await getRequestWithBook(requestId);
 
@@ -914,6 +980,8 @@ export async function initiateDownload(
 			success: false,
 			error: error instanceof Error ? error.message : 'Unknown error'
 		};
+	} finally {
+		inFlightDownloads.delete(requestId);
 	}
 }
 
@@ -1117,18 +1185,45 @@ async function tryAnnasArchiveDownload(
 	const searchResult = await searchAnnasArchive(book, authorName);
 
 	if (searchResult.results.length === 0) {
+		const errorMsg = `Book not found on Anna's Archive. Searched by: ${
+			book.isbn13 || book.isbn10
+				? `ISBN (${book.isbn13 || book.isbn10}) and title/author ("${book.title}" by "${authorName}")`
+				: `title/author ("${book.title}" by "${authorName}")`
+		}`;
+
+		logger.warn("Anna's Archive search returned no results", {
+			requestId,
+			bookTitle: book.title,
+			author: authorName,
+			isbn13: book.isbn13,
+			isbn10: book.isbn10,
+			searchMethod: searchResult.method
+		});
+
 		// Update request status to download_problem
 		await db
 			.update(requests)
 			.set({ status: 'download_problem', updatedAt: new Date() })
 			.where(eq(requests.id, requestId));
 
-		return { success: false, error: "Book not found on Anna's Archive" };
+		return { success: false, error: errorMsg };
 	}
+
+	logger.info("Anna's Archive search found results", {
+		requestId,
+		bookTitle: book.title,
+		resultsCount: searchResult.results.length,
+		searchMethod: searchResult.method,
+		formats: searchResult.results.map((r) => r.extension).filter(Boolean)
+	});
 
 	const autoSelect = await getAutoSelectSetting();
 
 	if (!autoSelect && searchResult.results.length > 1) {
+		logger.info('Auto-select disabled, returning results for manual selection', {
+			requestId,
+			resultsCount: searchResult.results.length
+		});
 		// Return results for manual selection
 		return {
 			success: false,
@@ -1141,8 +1236,23 @@ async function tryAnnasArchiveDownload(
 	const selectedFile = selectBestAnnasArchiveFile(searchResult.results, preferredLanguage);
 
 	if (!selectedFile) {
-		return { success: false, error: 'No suitable file found' };
+		const errorMsg = `No suitable file format found among ${searchResult.results.length} results. Available formats: ${searchResult.results.map((r) => r.extension || 'unknown').join(', ')}`;
+		logger.warn('No suitable file found in search results', {
+			requestId,
+			resultsCount: searchResult.results.length,
+			availableFormats: searchResult.results.map((r) => r.extension)
+		});
+		return { success: false, error: errorMsg };
 	}
+
+	logger.info('Auto-selected file for download', {
+		requestId,
+		md5: selectedFile.md5,
+		title: selectedFile.title,
+		format: selectedFile.extension,
+		filesize: selectedFile.filesize,
+		author: selectedFile.author
+	});
 
 	return handleAnnasArchiveDownload(
 		requestId,

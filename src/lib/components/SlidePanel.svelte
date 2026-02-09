@@ -12,7 +12,7 @@
 
 	let {
 		open = $bindable(false),
-		width = '40%',
+		width = '35%',
 		position = 'right',
 		onClose,
 		children

@@ -180,190 +180,116 @@
 			</div>
 		</div>
 	{:else if book}
-		<div class="h-full overflow-y-auto p-8">
-			<!-- Two column layout -->
-			<div class="flex flex-col gap-8 lg:flex-row">
-				<!-- Left side: Book information -->
-				<div class="min-w-0 flex-1">
-					<!-- Header with cover and main info -->
-					<div class="mb-6 flex gap-6">
+		<div class="h-full overflow-y-auto p-6">
+			<div class="flex flex-col gap-6">
+				<!-- Top section: stacked on mobile, side-by-side on desktop -->
+				<div class="flex flex-col gap-6 md:flex-row">
+					<!-- Book info: cover centered, then info stacked below -->
+					<div class="flex min-w-0 flex-1 flex-col items-center text-center">
 						{#if book.image?.url || book.coverImage}
 							<img
 								src={book.image?.url || book.coverImage}
 								alt={book.title}
-								class="h-80 w-56 flex-shrink-0 rounded-lg object-cover shadow-xl"
+								class="mb-4 h-52 w-36 rounded-lg object-cover shadow-xl md:h-56 md:w-40"
 							/>
 						{:else}
 							<div
-								class="flex h-80 w-56 flex-shrink-0 items-center justify-center rounded-lg bg-muted"
+								class="mb-4 flex h-52 w-36 items-center justify-center rounded-lg bg-muted md:h-56 md:w-40"
 							>
-								<BookOpen class="h-20 w-20 text-muted-foreground" />
+								<BookOpen class="h-12 w-12 text-muted-foreground md:h-14 md:w-14" />
 							</div>
 						{/if}
 
-						<div class="flex min-w-0 flex-1 flex-col items-center text-center">
-							<h2 class="mb-2 text-3xl leading-tight font-bold">{book.title}</h2>
-							{#if book.subtitle}
-								<p class="mb-3 text-lg text-muted-foreground">{book.subtitle}</p>
-							{/if}
+						<h2 class="mb-1 text-xl leading-tight font-bold">{book.title}</h2>
+						{#if book.subtitle}
+							<p class="mb-2 text-sm text-muted-foreground">{book.subtitle}</p>
+						{/if}
 
-							{#if book.contributions && book.contributions.length > 0}
-								<p class="mb-4 text-base text-muted-foreground">
-									by {book.contributions.map((c) => c.author.name).join(', ')}
-								</p>
-							{:else if book.author}
-								<p class="mb-4 text-base text-muted-foreground">by {book.author}</p>
-							{/if}
+						{#if book.contributions && book.contributions.length > 0}
+							<p class="mb-3 text-sm text-muted-foreground">
+								by {book.contributions.map((c) => c.author.name).join(', ')}
+							</p>
+						{:else if book.author}
+							<p class="mb-3 text-sm text-muted-foreground">by {book.author}</p>
+						{/if}
 
-							<!-- Series information -->
-							{#if book.book_series && book.book_series.length > 0}
-								<div class="mb-4 flex flex-col items-center gap-1.5">
-									{#each book.book_series as series (series.series.id)}
-										<button
-											type="button"
-											class="text-sm font-medium text-purple-400 transition-colors hover:text-purple-300"
-											onclick={() =>
-												book && onViewSeries?.(series.series.id, series.series.name, book)}
-										>
-											{series.series.name}
-											{#if series.position}
-												<span class="text-muted-foreground">• Book {series.position}</span>
-											{/if}
-										</button>
-									{/each}
-								</div>
-							{/if}
-
-							<!-- Book details -->
-							<div
-								class="mb-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground"
-							>
-								{#if book.rating}
-									<div class="flex items-center gap-1.5">
-										<span class="font-medium">Rating:</span>
-										<span>⭐ {Number(book.rating).toFixed(1)}</span>
-										{#if book.ratings_count}
-											<span class="text-xs">({book.ratings_count.toLocaleString()} ratings)</span>
+						{#if book.book_series && book.book_series.length > 0}
+							<div class="mb-3 flex flex-col items-center gap-1">
+								{#each book.book_series as series (series.series.id)}
+									<button
+										type="button"
+										class="text-sm font-medium text-purple-400 transition-colors hover:text-purple-300"
+										onclick={() =>
+											book && onViewSeries?.(series.series.id, series.series.name, book)}
+									>
+										{series.series.name}
+										{#if series.position}
+											<span class="text-muted-foreground">• Book {series.position}</span>
 										{/if}
-									</div>
-								{/if}
-								{#if book.release_date || book.publishDate}
-									<div class="flex items-center gap-1.5">
-										<span class="font-medium">Published:</span>
-										<span
-											>{new Date(
-												(book.release_date || book.publishDate) as string
-											).getFullYear()}</span
-										>
-									</div>
-								{/if}
-								{#if book.pages}
-									<div class="flex items-center gap-1.5">
-										<span class="font-medium">Pages:</span>
-										<span>{book.pages}</span>
-									</div>
-								{/if}
-								{#if book.language}
-									<div class="flex items-center gap-1.5">
-										<span class="font-medium">Language:</span>
-										<span>{book.language}</span>
-									</div>
-								{/if}
-								{#if book.publisher}
-									<div class="flex items-center gap-1.5">
-										<span class="font-medium">Publisher:</span>
-										<span>{book.publisher}</span>
-									</div>
-								{/if}
-								{#if book.isbn}
-									<div class="flex items-center gap-1.5">
-										<span class="font-medium">ISBN:</span>
-										<span>{book.isbn}</span>
-									</div>
-								{/if}
+									</button>
+								{/each}
 							</div>
+						{/if}
 
-							<!-- Hardcover button -->
-							<a
-								href={resolve(createHardcoverUrl(book))}
-								target="_blank"
-								rel="external noopener noreferrer"
-								class="mb-4 inline-flex items-center justify-center gap-2 rounded-md border border-purple-500/30 px-4 py-2 text-sm font-medium text-purple-400 transition-colors hover:border-purple-500/50 hover:text-purple-300"
-							>
-								<span>View on Hardcover</span>
-								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-									/>
-								</svg>
-							</a>
-
-							<!-- Genres -->
-							{#if book.taggings && book.taggings.length > 0}
-								<div class="w-full">
-									<h4 class="mb-2 text-center text-sm font-semibold">Genres</h4>
-									<div class="flex flex-wrap justify-center gap-2">
-										{#each book.taggings.slice(0, 6) as tagging (tagging.tag.tag)}
-											<span
-												class="rounded-full border border-purple-600/30 bg-purple-600/20 px-3 py-1 text-xs font-medium text-purple-300"
-											>
-												{tagging.tag.tag}
-											</span>
-										{/each}
-										{#if book.taggings.length > 6}
-											<span
-												class="rounded-full border border-purple-600/20 bg-purple-600/10 px-3 py-1 text-xs font-medium text-purple-400/60 italic"
-											>
-												+{book.taggings.length - 6} more
-											</span>
-										{/if}
-									</div>
-								</div>
+						<!-- Metadata -->
+						<div class="mb-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+							{#if book.rating}
+								<span>⭐ {Number(book.rating).toFixed(1)}{#if book.ratings_count} ({book.ratings_count.toLocaleString()}){/if}</span>
+							{/if}
+							{#if book.release_date || book.publishDate}
+								<span>{new Date((book.release_date || book.publishDate) as string).getFullYear()}</span>
+							{/if}
+							{#if book.pages}
+								<span>{book.pages} pages</span>
+							{/if}
+							{#if book.language}
+								<span>{book.language}</span>
 							{/if}
 						</div>
+
+						<!-- Hardcover link -->
+						<a
+							href={resolve(createHardcoverUrl(book))}
+							target="_blank"
+							rel="external noopener noreferrer"
+							class="inline-flex items-center gap-1.5 text-sm font-medium text-purple-400 transition-colors hover:text-purple-300"
+						>
+							<span>View on Hardcover</span>
+							<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+								/>
+							</svg>
+						</a>
 					</div>
 
-					<!-- Summary section -->
-					{#if book.description}
-						<div class="border-t border-border pt-6">
-							<h3 class="mb-3 text-lg font-semibold">Summary</h3>
-							<p class="text-sm leading-relaxed text-muted-foreground">
-								{book.description}
-							</p>
-						</div>
-					{/if}
-				</div>
+					<!-- Request form: full width on mobile, sidebar on desktop -->
+					<div class="flex flex-col border-t border-border pt-4 md:w-48 md:flex-shrink-0 md:border-t-0 md:border-l md:pt-0 md:pl-5">
+						<h3 class="mb-3 text-lg font-semibold md:text-sm">Request This Book</h3>
 
-				<!-- Right side: Request form -->
-				<div
-					class="flex w-full flex-shrink-0 flex-col border-border lg:w-[420px] lg:border-l lg:pl-8"
-				>
-					<h3 class="mb-4 text-xl font-semibold">Request This Book</h3>
-
-					<form onsubmit={handleSubmit} class="flex flex-1 flex-col">
-						<div class="flex-1 space-y-4">
+						<form onsubmit={handleSubmit} class="flex flex-1 flex-col gap-3">
 							<div>
-								<label for="language" class="mb-2 block text-sm font-medium">
-									Preferred Language
+								<label for="language" class="mb-1 block text-sm font-medium md:text-xs">
+									Language
 								</label>
 								<LanguageSelect
 									id="language"
 									name="language"
 									bind:value={selectedLanguage}
-									placeholder="Select or type a language..."
+									placeholder="Language..."
 								/>
 							</div>
 
 							<div>
-								<label for="formatType" class="mb-2 block text-sm font-medium"> Format </label>
+								<label for="formatType" class="mb-1 block text-sm font-medium md:text-xs">Format</label>
 								<select
 									id="formatType"
 									name="formatType"
 									bind:value={selectedFormat}
-									class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+									class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none md:h-9 md:px-2.5 md:py-1.5"
 									style="background-color: hsl(var(--input));"
 								>
 									<option value="ebook">Ebook</option>
@@ -373,37 +299,67 @@
 							</div>
 
 							<div>
-								<label for="specialNotes" class="mb-2 block text-sm font-medium">
-									Special Notes
+								<label for="specialNotes" class="mb-1 block text-sm font-medium md:text-xs">
+									Notes
 								</label>
 								<textarea
 									id="specialNotes"
 									name="specialNotes"
-									rows="4"
-									class="flex w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+									rows="2"
+									class="flex w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none md:px-2.5 md:py-1.5"
 									style="background-color: hsl(var(--input));"
-									placeholder="Any special requests or notes..."
+									placeholder="Special notes..."
 								></textarea>
 							</div>
-						</div>
 
-						<div class="mt-6 flex gap-3">
-							<button
-								type="button"
-								onclick={handleClose}
-								class="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
-							>
-								Cancel
-							</button>
-							<button
-								type="submit"
-								class="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-							>
-								Submit Request
-							</button>
-						</div>
-					</form>
+							<div class="flex gap-3 pt-2 md:mt-auto md:flex-col md:gap-2">
+								<button
+									type="submit"
+									class="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 md:flex-none md:w-full"
+								>
+									Submit Request
+								</button>
+								<button
+									type="button"
+									onclick={handleClose}
+									class="flex-1 rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted md:flex-none md:w-full"
+								>
+									Cancel
+								</button>
+							</div>
+						</form>
+					</div>
 				</div>
+
+				<!-- Genres (full width below) -->
+				{#if book.taggings && book.taggings.length > 0}
+					<div class="flex flex-wrap gap-1.5">
+						{#each book.taggings.slice(0, 6) as tagging, i (i)}
+							<span
+								class="rounded-full border border-purple-600/30 bg-purple-600/20 px-2.5 py-0.5 text-xs font-medium text-purple-300"
+							>
+								{tagging.tag.tag}
+							</span>
+						{/each}
+						{#if book.taggings.length > 6}
+							<span
+								class="rounded-full border border-purple-600/20 bg-purple-600/10 px-2.5 py-0.5 text-xs font-medium text-purple-400/60 italic"
+							>
+								+{book.taggings.length - 6} more
+							</span>
+						{/if}
+					</div>
+				{/if}
+
+				<!-- Summary -->
+				{#if book.description}
+					<div class="border-t border-border pt-4">
+						<h3 class="mb-2 text-sm font-semibold">Summary</h3>
+						<p class="text-sm leading-relaxed text-muted-foreground">
+							{book.description}
+						</p>
+					</div>
+				{/if}
 			</div>
 		</div>
 	{/if}

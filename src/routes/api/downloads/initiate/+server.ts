@@ -42,6 +42,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		if (!result.success) {
 			if (result.requiresSelection) {
+				logger.info('Download requires manual file selection', {
+					requestId,
+					annasArchiveCount: result.annasArchiveResults?.length ?? 0,
+					prowlarrCount: result.prowlarrResults?.length ?? 0
+				});
 				return json({
 					requiresSelection: true,
 					annasArchiveResults: result.annasArchiveResults,
@@ -49,18 +54,28 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				});
 			}
 
+			logger.warn('Download initiation failed', {
+				requestId,
+				error: result.error
+			});
 			return json({ error: result.error }, { status: 400 });
 		}
+
+		logger.info('Download initiated successfully', {
+			requestId,
+			downloadId: result.downloadId,
+			source: result.source
+		});
 
 		return json({
 			success: true,
 			downloadId: result.downloadId
 		});
 	} catch (error) {
-		logger.error('Error initiating download', error instanceof Error ? error : undefined);
-		return json(
-			{ error: error instanceof Error ? error.message : 'Failed to initiate download' },
-			{ status: 500 }
-		);
+		const errorMsg = error instanceof Error ? error.message : 'Failed to initiate download';
+		logger.error('Error initiating download', error instanceof Error ? error : undefined, {
+			errorMessage: errorMsg
+		});
+		return json({ error: errorMsg }, { status: 500 });
 	}
 };

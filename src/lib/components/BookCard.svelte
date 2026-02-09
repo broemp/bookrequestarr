@@ -101,23 +101,15 @@
 			{/if}
 		</div>
 
-		<!-- Book info -->
-		<div class="p-3">
-			<h3 class="mb-1 line-clamp-2 text-sm font-semibold text-foreground">
+		<!-- Book info - fixed height so all cards in a row match -->
+		<div class="p-2">
+			<h3 class="mb-0.5 line-clamp-2 h-8 text-xs leading-4 font-semibold text-foreground">
 				{book.title}
 			</h3>
 
-			{#if book.authors && book.authors.length > 0}
-				<p class="mb-1 line-clamp-1 text-xs text-muted-foreground">
-					{book.authors.join(', ')}
-				</p>
-			{/if}
-
-			{#if book.releaseYear}
-				<p class="text-xs text-muted-foreground">
-					{book.releaseYear}
-				</p>
-			{/if}
+			<p class="line-clamp-1 text-[11px] leading-4 text-muted-foreground">
+				{book.authors && book.authors.length > 0 ? book.authors.join(', ') : '\u00A0'}
+			</p>
 		</div>
 	</div>
 </div>

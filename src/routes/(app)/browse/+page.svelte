@@ -358,7 +358,7 @@
 		{:else}
 			<div class="space-y-6">
 				<div
-					class="grid grid-cols-3 gap-6 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8"
+					class="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-10"
 				>
 					{#each displayedResults as book (book.hardcoverId)}
 						<BookCard
@@ -472,7 +472,7 @@
 					</div>
 				{:else}
 					<div
-						class="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+						class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
 					>
 						{#each sortedSeriesBooks as book (book.hardcoverId || book.id)}
 							<div class="relative">
