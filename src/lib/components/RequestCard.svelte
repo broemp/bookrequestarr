@@ -6,6 +6,7 @@
 		bookTitle: string;
 		bookAuthor?: string;
 		bookCoverUrl?: string;
+		hardcoverId?: string;
 		language: string;
 		formatType: 'ebook' | 'audiobook';
 		status: string;
@@ -33,6 +34,7 @@
 		onReject?: (request: Request) => void;
 		onRetry?: (request: Request) => void;
 		onDownload?: (request: Request) => void;
+		onBookClick?: (hardcoverId: string) => void;
 	}
 
 	let {
@@ -43,7 +45,8 @@
 		onApprove,
 		onReject,
 		onRetry,
-		onDownload
+		onDownload,
+		onBookClick
 	}: Props = $props();
 
 	const statusColors = {
@@ -84,37 +87,79 @@
 <div class="rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/50">
 	<div class="flex gap-4">
 		<!-- Book Cover -->
-		<div class="flex-shrink-0">
-			{#if request.bookCoverUrl}
-				<img
-					src={request.bookCoverUrl}
-					alt={request.bookTitle}
-					class="h-28 w-20 rounded-md object-cover shadow-sm"
-				/>
-			{:else}
-				<div class="flex h-28 w-20 items-center justify-center rounded-md bg-muted">
-					<svg
-						class="h-8 w-8 text-muted-foreground"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-						/>
-					</svg>
-				</div>
-			{/if}
-		</div>
+		{#if onBookClick && request.hardcoverId}
+			<button
+				type="button"
+				class="flex-shrink-0 cursor-pointer"
+				onclick={() => onBookClick(request.hardcoverId!)}
+			>
+				{#if request.bookCoverUrl}
+					<img
+						src={request.bookCoverUrl}
+						alt={request.bookTitle}
+						class="h-28 w-20 rounded-md object-cover shadow-sm transition-opacity hover:opacity-80"
+					/>
+				{:else}
+					<div class="flex h-28 w-20 items-center justify-center rounded-md bg-muted transition-opacity hover:opacity-80">
+						<svg
+							class="h-8 w-8 text-muted-foreground"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+							/>
+						</svg>
+					</div>
+				{/if}
+			</button>
+		{:else}
+			<div class="flex-shrink-0">
+				{#if request.bookCoverUrl}
+					<img
+						src={request.bookCoverUrl}
+						alt={request.bookTitle}
+						class="h-28 w-20 rounded-md object-cover shadow-sm"
+					/>
+				{:else}
+					<div class="flex h-28 w-20 items-center justify-center rounded-md bg-muted">
+						<svg
+							class="h-8 w-8 text-muted-foreground"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+							/>
+						</svg>
+					</div>
+				{/if}
+			</div>
+		{/if}
 
 		<!-- Request Details -->
 		<div class="min-w-0 flex-1">
 			<!-- Title and Author -->
 			<h3 class="mb-1 line-clamp-2 text-lg font-semibold text-foreground">
-				{request.bookTitle}
+				{#if onBookClick && request.hardcoverId}
+					<button
+						type="button"
+						class="cursor-pointer text-left transition-colors hover:text-purple-400"
+						onclick={() => onBookClick(request.hardcoverId!)}
+					>
+						{request.bookTitle}
+					</button>
+				{:else}
+					{request.bookTitle}
+				{/if}
 			</h3>
 			{#if request.bookAuthor}
 				<p class="mb-2 text-sm text-muted-foreground">by {request.bookAuthor}</p>
@@ -209,7 +254,9 @@
 						>
 							{#if isProcessing}
 								<span class="inline-flex items-center gap-2">
-									<span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+									<span
+										class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+									></span>
 									Processing...
 								</span>
 							{:else}
@@ -235,7 +282,9 @@
 						>
 							{#if isProcessing}
 								<span class="inline-flex items-center gap-2">
-									<span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+									<span
+										class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+									></span>
 									Searching...
 								</span>
 							{:else}
@@ -253,7 +302,9 @@
 						>
 							{#if isProcessing}
 								<span class="inline-flex items-center gap-2">
-									<span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+									<span
+										class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+									></span>
 									Retrying...
 								</span>
 							{:else}

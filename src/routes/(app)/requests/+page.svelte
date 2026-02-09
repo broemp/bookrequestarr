@@ -2,12 +2,36 @@
 	import type { PageData } from './$types';
 	import { resolve } from '$app/paths';
 	import RequestCard from '$lib/components/RequestCard.svelte';
+	import BookDetailPanel from '$lib/components/BookDetailPanel.svelte';
+	import BookCard from '$lib/components/BookCard.svelte';
 	import FilterBar from '$lib/components/FilterBar.svelte';
 	import Card from '$lib/components/ui/card.svelte';
 	import Button from '$lib/components/ui/button.svelte';
-	import { BookOpen, Plus } from 'lucide-svelte';
+	import { BookOpen, Plus, Loader2 } from 'lucide-svelte';
+
+	interface SeriesBook {
+		id: string;
+		hardcoverId?: string;
+		title: string;
+		coverImage?: string;
+		publishDate?: string;
+		author?: string;
+		rating?: number;
+		position?: number;
+		[key: string]: unknown;
+	}
 
 	let { data }: { data: PageData } = $props();
+
+	let selectedBookId = $state<string | null>(null);
+	let bookDetailPanelOpen = $state(false);
+	let selectedSeries = $state<{
+		id: string;
+		name: string;
+		fromBook?: { id: string; hardcoverId?: string };
+	} | null>(null);
+	let seriesBooks = $state<SeriesBook[]>([]);
+	let isLoadingSeries = $state(false);
 
 	// State for filtering and sorting
 	let activeFilter = $state('all');
@@ -21,6 +45,7 @@
 			bookTitle: req.book.title,
 			bookAuthor: req.book.author || undefined,
 			bookCoverUrl: req.book.coverImage || undefined,
+			hardcoverId: req.book.hardcoverId || undefined,
 			language: req.language || 'Unknown',
 			formatType: req.formatType,
 			status: req.status,
@@ -110,6 +135,67 @@
 		}
 
 		return result;
+	});
+
+	function openBookDetail(hardcoverId: string) {
+		selectedBookId = hardcoverId;
+		bookDetailPanelOpen = true;
+	}
+
+	function handleBookDetailClose() {
+		bookDetailPanelOpen = false;
+		selectedBookId = null;
+	}
+
+	async function viewSeries(
+		seriesId: string,
+		seriesName: string,
+		fromBook?: { id: string; hardcoverId?: string }
+	) {
+		selectedSeries = { id: seriesId, name: seriesName, fromBook };
+		bookDetailPanelOpen = false;
+		isLoadingSeries = true;
+
+		try {
+			const response = await fetch(`/api/books/series/${seriesId}`);
+			if (response.ok) {
+				seriesBooks = await response.json();
+			} else {
+				seriesBooks = [];
+			}
+		} catch {
+			seriesBooks = [];
+		} finally {
+			isLoadingSeries = false;
+		}
+	}
+
+	function backToBook() {
+		if (selectedSeries?.fromBook) {
+			openBookDetail(selectedSeries.fromBook.hardcoverId || selectedSeries.fromBook.id);
+		}
+		selectedSeries = null;
+		seriesBooks = [];
+	}
+
+	const sortedSeriesBooks = $derived.by(() => {
+		return [...seriesBooks].sort((a, b) => {
+			if (a.position === undefined || a.position === null) return 1;
+			if (b.position === undefined || b.position === null) return -1;
+			return Number(a.position) - Number(b.position);
+		});
+	});
+
+	// Prevent body scroll when series modal is open
+	$effect(() => {
+		if (selectedSeries) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
+		}
+		return () => {
+			document.body.style.overflow = '';
+		};
 	});
 
 	// User-friendly error messages
@@ -208,8 +294,119 @@
 	{:else}
 		<div class="space-y-4">
 			{#each filteredRequests() as request (request.id)}
-				<RequestCard {request} showActions={false} showUserInfo={false} />
+				<RequestCard
+				{request}
+				showActions={false}
+				showUserInfo={false}
+				onBookClick={openBookDetail}
+			/>
 			{/each}
 		</div>
 	{/if}
 </div>
+
+<!-- Book detail panel -->
+{#if selectedBookId}
+	<BookDetailPanel
+		bookId={selectedBookId}
+		bind:open={bookDetailPanelOpen}
+		onClose={handleBookDetailClose}
+		onViewSeries={viewSeries}
+	/>
+{/if}
+
+<!-- Series modal -->
+{#if selectedSeries}
+	<button
+		class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+		style="background-color: rgba(0, 0, 0, 0.5);"
+		onclick={() => {
+			selectedSeries = null;
+			seriesBooks = [];
+		}}
+		aria-label="Close series modal"
+	>
+		<div
+			class="max-h-[90vh] w-full max-w-7xl overflow-y-auto"
+			onclick={(e: MouseEvent) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
+			<Card class="p-6">
+				<div class="mb-6 flex items-center justify-between">
+					<div>
+						<h2 class="text-2xl font-bold">{selectedSeries.name}</h2>
+						<p class="text-sm text-muted-foreground">
+							{sortedSeriesBooks.length}
+							{sortedSeriesBooks.length === 1 ? 'book' : 'books'} in this series
+						</p>
+					</div>
+					<div class="flex gap-2">
+						{#if selectedSeries.fromBook}
+							<Button
+								variant="outline"
+								onclick={() => {
+									backToBook();
+								}}
+							>
+								&#8592; Back to Book
+							</Button>
+						{/if}
+						<Button
+							variant="outline"
+							onclick={() => {
+								selectedSeries = null;
+								seriesBooks = [];
+							}}
+						>
+							Close
+						</Button>
+					</div>
+				</div>
+
+				{#if isLoadingSeries}
+					<div class="flex items-center justify-center py-12">
+						<Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
+					</div>
+				{:else if sortedSeriesBooks.length === 0}
+					<div class="py-12 text-center">
+						<BookOpen class="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
+						<p class="text-muted-foreground">No books found in this series.</p>
+					</div>
+				{:else}
+					<div
+						class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+					>
+						{#each sortedSeriesBooks as book (book.hardcoverId || book.id)}
+							<div class="relative">
+								{#if book.position !== undefined && book.position !== null}
+									<div
+										class="absolute top-2 left-2 z-10 rounded-md bg-purple-600 px-2 py-1 text-xs font-bold text-white shadow-md"
+									>
+										#{book.position}
+									</div>
+								{/if}
+								<BookCard
+									book={{
+										id: book.hardcoverId || book.id,
+										title: book.title,
+										coverImageUrl: book.coverImage,
+										releaseYear: book.publishDate ? new Date(book.publishDate).getFullYear() : null,
+										authors: book.author ? [book.author] : [],
+										averageRating: book.rating
+									}}
+									onClick={() => {
+										selectedSeries = null;
+										seriesBooks = [];
+										openBookDetail(book.hardcoverId || book.id);
+									}}
+								/>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</Card>
+		</div>
+	</button>
+{/if}

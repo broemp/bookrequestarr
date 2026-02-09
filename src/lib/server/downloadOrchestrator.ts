@@ -689,9 +689,7 @@ async function processAnnasArchiveDownload(
 				errorMsg.toLowerCase().includes('limit') ||
 				errorMsg.toLowerCase().includes('too many')
 			) {
-				throw new Error(
-					`Anna's Archive rate limit hit: ${errorMsg}. Try again later.`
-				);
+				throw new Error(`Anna's Archive rate limit hit: ${errorMsg}. Try again later.`);
 			}
 
 			throw new Error(`Anna's Archive download failed: ${errorMsg}`);

@@ -3,7 +3,6 @@
 	import LanguageSelect from './LanguageSelect.svelte';
 	import { toast } from '$lib/stores/toast';
 	import { BookOpen } from 'lucide-svelte';
-	import { resolve } from '$app/paths';
 
 	interface Book {
 		dbId?: string;
@@ -149,23 +148,14 @@
 		}
 	}
 
-	function createHardcoverUrl(book: Book): string {
-		if (!book.id) return 'https://hardcover.app';
+	function createHardcoverSlug(book: Book): string {
+		if (book.slug) return book.slug;
+		if (!book.title) return '';
 
-		// If the API provides a slug, use it directly
-		if (book.slug) {
-			return `https://hardcover.app/books/${book.slug}`;
-		}
-
-		// Otherwise, create slug from title
-		if (!book.title) return 'https://hardcover.app';
-
-		const slug = book.title
+		return book.title
 			.toLowerCase()
 			.replace(/[^a-z0-9]+/g, '-')
 			.replace(/^-+|-+$/g, '');
-
-		return `https://hardcover.app/books/${slug}`;
 	}
 </script>
 
@@ -232,12 +222,19 @@
 						{/if}
 
 						<!-- Metadata -->
-						<div class="mb-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground">
+						<div
+							class="mb-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground"
+						>
 							{#if book.rating}
-								<span>⭐ {Number(book.rating).toFixed(1)}{#if book.ratings_count} ({book.ratings_count.toLocaleString()}){/if}</span>
+								<span
+									>⭐ {Number(book.rating).toFixed(1)}{#if book.ratings_count}
+										({book.ratings_count.toLocaleString()}){/if}</span
+								>
 							{/if}
 							{#if book.release_date || book.publishDate}
-								<span>{new Date((book.release_date || book.publishDate) as string).getFullYear()}</span>
+								<span
+									>{new Date((book.release_date || book.publishDate) as string).getFullYear()}</span
+								>
 							{/if}
 							{#if book.pages}
 								<span>{book.pages} pages</span>
@@ -249,7 +246,7 @@
 
 						<!-- Hardcover link -->
 						<a
-							href={resolve(createHardcoverUrl(book))}
+							href={`https://hardcover.app/books/${createHardcoverSlug(book)}`}
 							target="_blank"
 							rel="external noopener noreferrer"
 							class="inline-flex items-center gap-1.5 text-sm font-medium text-purple-400 transition-colors hover:text-purple-300"
@@ -267,7 +264,9 @@
 					</div>
 
 					<!-- Request form: full width on mobile, sidebar on desktop -->
-					<div class="flex flex-col border-t border-border pt-4 md:w-48 md:flex-shrink-0 md:border-t-0 md:border-l md:pt-0 md:pl-5">
+					<div
+						class="flex flex-col border-t border-border pt-4 md:w-48 md:flex-shrink-0 md:border-t-0 md:border-l md:pt-0 md:pl-5"
+					>
 						<h3 class="mb-3 text-lg font-semibold md:text-sm">Request This Book</h3>
 
 						<form onsubmit={handleSubmit} class="flex flex-1 flex-col gap-3">
@@ -284,7 +283,9 @@
 							</div>
 
 							<div>
-								<label for="formatType" class="mb-1 block text-sm font-medium md:text-xs">Format</label>
+								<label for="formatType" class="mb-1 block text-sm font-medium md:text-xs"
+									>Format</label
+								>
 								<select
 									id="formatType"
 									name="formatType"
@@ -315,14 +316,14 @@
 							<div class="flex gap-3 pt-2 md:mt-auto md:flex-col md:gap-2">
 								<button
 									type="submit"
-									class="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 md:flex-none md:w-full"
+									class="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 md:w-full md:flex-none"
 								>
 									Submit Request
 								</button>
 								<button
 									type="button"
 									onclick={handleClose}
-									class="flex-1 rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted md:flex-none md:w-full"
+									class="flex-1 rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted md:w-full md:flex-none"
 								>
 									Cancel
 								</button>
